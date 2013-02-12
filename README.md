@@ -1,4 +1,3 @@
-discussion-disentanglement-cs224u
+Stanford CS224U Final Project - Discussion Disentanglement
 =================================
-
-CS224U (Natural Language Understanding) Final Project - reconstruction of comment threads.
+Julius Cheng, Thomas Dimson, Milind Ganjoo

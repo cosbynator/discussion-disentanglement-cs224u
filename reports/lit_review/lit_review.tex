@@ -320,7 +320,7 @@ could potentially succeed in both settings.
 
 \section{Conclusion}
 
-We have surveyed nine studies on discourse in multi-party entangled online 
+We have surveyed nine studies on dialogue in multi-party entangled online 
 chat or forum settings. We reviewed several experiments that directly address
 the problem of disentangling conversation threads, either in long-form forum
 or newsgroup messages or in short-form chat or Twitter conversations. These
@@ -328,19 +328,20 @@ invariably involve deconstructing messages into feature vectors and running a
 well-known machine learning algorithm such as HMM, CRF, and SVM over them.
 There is some variety in how threads are constructed. \cite{Aumayr2011a}
 a binary classification on whether two messages have a parent-child
-relationship, while \cite{Mayfield2012a} and \cite{Wang2008a} cluster messages
-into threads with some cosine similarity metric. Our initial approach to the project will be to start with a model that emulates some of the above.
+relationship, while \cite{Mayfield2012a} cluster messages into threads with 
+some cosine similarity metric. Our initial approach to the project will be to 
+start with a model that emulates some of the above.
 
-Beyond disentanglement, we reviewed two papers that discuss annotating speech 
-acts. \cite{Ritter2010a} use unsupervised clustering to discover speech acts,
-while \cite{Kim2012} use supervised learning on a set of pre-fabricated labels 
-based on linguistic theory. Based on the findings of \cite{Kim2012}, we expect
-speech acts to be beneficial features, and we hope to discover a novel way
-to manually create or even learn rules for sequencing utterances of various
-combinations of speech acts. Based on the findings of \cite{Ritter2010a}, we
-realize that it is possible to induce a set of speech acts during learning
-as to avoid using artificial categories and requiring additional human 
-annotation.
+Beyond disentanglement, we reviewed three papers that discuss annotating 
+speech acts. \cite{Ritter2010a} and \cite{Paula} use unsupervised clustering 
+to discover speech acts, while \cite{Kim2012} use supervised learning on a set 
+of pre-fabricated labels based on linguistic theory. Based on the findings of 
+\cite{Kim2012}, we expect speech acts to be beneficial features, and we hope 
+to discover a novel way to manually create or learn rules for sequencing 
+utterances of various combinations of speech acts. Based on the findings of
+\cite{Ritter2010a} and \cite{Paula}, we realize that it is possible to induce 
+a set of speech acts during learning as to avoid using artificial categories 
+and requiring additional human annotation.
 
 We have found each of these papers to be relevant, useful, and inspirational
 for our project on multi-party dialogue disentanglement.

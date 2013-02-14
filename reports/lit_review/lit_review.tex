@@ -36,14 +36,14 @@ matrix, which they augment by limiting the column-distance (window size), and di
 the matrix by the time lag between elements. The authors use a grid search to
 determine right value for the threshold and discount parameters.
 
-\cite{Wang2008a}'s dataset, \texttt{LegSim}, is consists of 28 topics with over 
+\cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 topics with over 
 478 messages . Each topic is a discussion about a hypothetical legislative bill, 
 and the messages are written by students discussing the bill in a political science class. 
 The data itself is flat, but  the authors manually create directed links representing
 parent-child relationships. 
 
 Their evaluation process was standard precision/recall based on the predicted
-and ground truth graph edges between messages. The authors' report the best
+and ground truth graph edges between messages. The authors report the best
 results with thresholding and a time-based discount with a seemingly-poor result of 0.40 
 F1-score. The baseline system achieves an F1-score of 0.28 on their
 dataset. It is unlikely that higher scores could be achieved without reaching
@@ -51,6 +51,15 @@ beyond text similarity. That said, the work may provide a good baseline system f
 At the very least, we will consider a learning system instead of a rule-based system 
 and utilizing features besides post similarity.
 If nothing else, we need to use a dramatically larger corpus.
+
+\subsection{Learning online discussion structures by conditional random fields}
+The graph-based similarity detection method described previously by \cite{Wang2008a} utilizes both content similarity and temporal information to predict reply relationships. However, the threshold parameters of the model are manually tuned. \cite{Wang2011} describe an approach based on conditional random fields, which are able to utilize relevant features for predicting the sequence without having to model the distributions of those dependent features.
+
+The \cite{Wang2011} paper defines a conditional distribution over the reply relationship given a post sequence and formulates it as a Maximum a Posteriori (MAP) problem. A crucial component of this task is to define a set of features that capture dependencies between posts. The paper describes two categories of features. The first type of features depend only on attriutes drawn from a pair of posts, sunch as content similarity score, recency, author name reference, and indicator variables that give special importance to posts made last or first in a given thread. The second kind of features also take the parent assignments of the posts into account, which allows scoring of characteristics like the similarity between a post and the \emph{parent} of another post to determine content propagation, or accord importance to posts that reply to the same author and are also written by the same author (which is indicative of friends carrying out a back-and-forth conversation in a thread). The weights for the full set of 13 features is then trained through a supervised classifier that maximses the conditional likelihood for the reply sequence.
+
+The classifier-based conditional random fields approach is novel for the number of interesting features it introduces, and it also opens up the possibility of extending the existing framework by adding more features.
+
+The paper also introduces the novel \emph{path accuracy} metric, which calculates the proportion of correct paths from each node to the root in a conversation tree. This approach, however, would work best for a threaded conversation that begins from a single topic or node, and would probably not be extendable to a flatter IRC-style conversation where multiple root topics might be ongoing in parallel, which is another type of threaded conversation we would like to analyze. Still, we imagine it possible to usefully average the path accuracy for paths to multiple such nodes.
 
 \subsection{Reconstruction of threaded conversations in online discussion forums}
 \cite{Aumayr2011a}'s approach most closely resembles our own. The
@@ -91,16 +100,16 @@ respectively.
 \cite{Ritter2010a} considers conversation from the perspective of 
 \textit{dialogue acts}, such as ``question'', ``answer'' or ``statement''. Unlike our other papers,
 \cite{Ritter2010a}'s focus is on acts and not disentanglement. The paper describes
-an unsupervised LDA-like approach to act tagging and utilizes twitter \textit{conversations} for
+an unsupervised LDA-like approach to act tagging and utilizes Twitter \textit{conversations} for
 training purposes. The model was evaluated extrinsically by reconstructing 
 the original order of a scrambled conversation. The author's describe their motivation as
 generalizing act tagging to remove the human required in supervised approaches. 
 
-The authors constructed a dataset of 1.3 million twitter \textit{conversations}, 
+The authors constructed a dataset of 1.3 million Twitter \textit{conversations}, 
 where conversations are alternating series of reply-tweets between users. After filtering out shorter 
 and longer conversations, the dataset was used for unsupervised training and evaluation.
 
-The paper tells a generative story of twitter conversations where a sequence of dialogue
+The paper tells a generative story of Twitter conversations where a sequence of dialogue
 acts are chosen for each post, with words filled in by an act-specific language model.
 Because is biased to model \textit{topics}
 instead of \textit{acts}, the model is refined to include a topic 

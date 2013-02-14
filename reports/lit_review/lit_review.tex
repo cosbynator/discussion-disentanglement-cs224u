@@ -187,11 +187,49 @@ our planned supervised learning model. These features include pause length
 between utterances and word repetitions bucketed according to unigram
 probability to indicate an ongoing conversation about something.
 
-In \titlecite{Hierarchical conversation structure prediction in multi-party
-chat}{Mayfield2012a}, the authors present a model for chat disentanglement that annotates three types of
-information: 1) Negotiation labels, or whether an utterance is providing or
-receiving information, 2) sequences, or exchanges of information, and 3)
-threads, the outcome of the standard disentanglement problem.
+\titlecite{Context-based message expansion for disentanglement of interleaved 
+text conversations}{Wang2009b} expands on the above study by distinguishing
+\textit{context-free} and \textit{context-sensitive} message models, where the 
+former refers to using data in the message alone, including word features and 
+time-stamp. Most of the other papers we review do not explicitly make this 
+distinction, as it seems that correlating messages with previous messages is 
+natural idea, but it appears that at this study was among the first of its 
+kind to use context-sensitive data at the date of publishing.
+
+This study augments a basic set of word features with author context, 
+conversational context, and temporal context of a message. Author context 
+refers to all other messages written by the author, and conversational context 
+intuitively refers to all messages by participants in a sub-conversation, 
+where the participants are determined by all other people referred to by name 
+by the author of a message. Temporal context includes the entire message 
+history. Each of these contexts are assigned a probabilility based on a normal 
+distribution over time-distance. Each author and temporal context message is 
+scaled by the distance between the time of the message of interest, and the 
+context message. Conversational context is scaled by the time since the 
+context message author was mentioned.
+
+These contexts are used to ``expand'' a message by including all other 
+conversational messages directly in the analysis, scaled by the time-distance 
+probability, so context expansion can be thought of as adding fractions of 
+word frequency to a message.
+
+Finally, thread detection is done by clustering. The algorithm iterates 
+through the messages, starting with one cluster containing the root message, 
+using cosine similarity to determine whether a new message reaches a distance 
+threshold to join a cluster, or whether it should start a new cluster. The 
+experiment result shows that context features outperform \cite{Elsner2008a} and
+are within 88\% of the human annotation performance.
+
+This paper provides insights into additional features that our project could 
+use. The idea of expanding a message with probabilistic context is 
+interesting, one that we will likely explore.
+
+A very different approach is seen in \titlecite{Hierarchical conversation
+structure prediction in multi-party chat}{Mayfield2012a}, the authors present
+a model for chat disentanglement that annotates three types of information: 1) 
+Negotiation labels, or whether an utterance is providing or receiving 
+information, 2) sequences, or exchanges of information, and 3) threads, the 
+outcome of the standard disentanglement problem.
 
 The learning model is modularized accordibngly to predict these classes of
 annotation. The three classifiers mainly use n-gram features, including simple
@@ -212,7 +250,7 @@ break domain rules. Interestingly, the human annotators of the data set are
 expected to conform to these rules, guaranteeing that these rules are
 “correct.”
 
-The dataset used were weekly chat meetings for a cancer support group, with 45
+The dataset used was weekly chat meetings for a cancer support group, with 45
 conversations bucketed equally between 2 participants, 3-4, and at least 5. The
 results were compared against baselines such as treating every message against
 a new sequence. It also compared against results in negotiation labeling,
@@ -224,9 +262,9 @@ consider. One is the idea of using knowledge exchange as a feature of
 consideration in disentangling threads. The second is the two-pass model of
 first constructing sequences and merging them into threads in the second pass.
 In modeling what a thread is, it can be useful to define its components,
-finding them, and merging them to produce threads. However, we find that the
+find them, and merge them to produce threads. However, we find that the
 data collection methodology requires significant expertise, given the task of
-understanding deep linguistic concepts while adhering to logical domain
+understanding deep linguistic concepts while adhering to logic-based domain
 constraints.
 
 \subsection{Speech/Dialogue Acts}
@@ -310,7 +348,7 @@ previous utterances by the author.
 
 Their experiment uses Naive Bayes, SVM, and Conditional Random Fields on two
 datasets, one topic-specific forum and one casual live chat. The best
-performance in both datasets approaches 100% on a model using bag-of-words,
+performance in both datasets approaches 100\% on a model using bag-of-words,
 keywords, and previous utterances, but not structural information. The error
 analysis shows that most errors pertain to ambiguity between pairs of dialogue
 acts, like statements versus respsonses, and over certain words that appear

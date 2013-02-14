@@ -9,15 +9,100 @@
 \section{Introduction}
 Our project is focused on reconstructing threaded conversation trees
 from a flattened representation. Intuitively, one could think of 
-taking a site like reddit's comment tree, flattening it, sorting by time, performing
-hierarchical clustering using linguistic phenomena and measuring performance against the original comment trees. As we have
+taking a post's comment tree (e.g. Reddit), flattening it, sorting by time, performing
+hierarchical clustering using linguistic phenomena and measuring performance 
+against the original comment trees. As we have
 discovered, this project treads into the territory of \textit{discourse disentanglement}.
-Although our approach appears to be unique, there has been a reasonable
-amount of prior work in constructing a sane flow of conversation within internet chat.
+While our particular problem does not appear to have been tackled in the past,
+there is a good amount of literature about disentangling flows of conversation
+in traditional internet forums, IRC chats, Twitter and beyond.
 
-\section{Literature Review}
+\section{Literature Overview}
 \subsection{Reconstruction of threaded conversations in online discussion forums}
-In \cite{Aumayr2011a}, we found the closest paper to our project goal.
+\cite{Aumayr2011a}'s approach most closely resembles our own. The
+authors consider the problem of reconstructing conversation trees in threads
+of a traditional vBulletin-powered online forum. The forum consists of a
+\textit{board}, which contains many \textit{threads},
+each of which contains a series of \textit{posts} by users. The motivation for
+their work comes from reconstructing reply structure even after it has been lost
+in the source database.
+
+The authors use a learned classifier to classify pairs of posts as (parent,
+reply) or other. Their features are a mix of shallow textual and post
+metadata features: TF-IDF weighted text distance, presence of quotes and a
+user's name, post-distance and time difference. 
+They spend a lot of time discussing SVMs and decision trees but report the best
+results using C4.5 decision trees. Since the classification is binary, it 
+is unclear how the authors  cope with ambiguity (e.g $(p1, r)$ and $(p2,r)$ both 
+classified as reply pairs).
+From their results, the post distance feature is the highest contributing feature
+in their results. It seems unlikely that this feature will generalize to more
+sophisticated reply models like reddit. 
+
+The authors collected data from two years of forum posts on
+\url{boards.ie}. When browsing a \textit{thread}, users have a choice of either
+pressing ``quote'' (i.e. replying to a post) or pressing ``reply'' (i.e.
+replying to a thread). The choice is retained in the dataset and used in a
+tree form as ground truth data. Without much justification, the authors eliminate
+threads with too few or too many replies, and then split their data 50/50 into 
+test and training to make 213,800 posts in total.
+
+Their results are evaluated using precision and recall of individual
+(post, reply) pairs. They report impressive results - an F1-score of 0.925 using their best
+classifier. The results are contrasted to a baseline classifier that always
+identifies the previous post as the parent of a reply, achieving 80\% F1-score. 
+They also contrast their results with implementations from two other papers we later discuss,
+\cite{Elsner2008a} and \cite{Wang2008a}, achieving 88\% F1 and 44.4\% F1-score
+respectively. 
+
+\subsection{Unsupervised modeling of Twitter conversations}
+\cite{Ritter2010a} considers conversation from the perspective of 
+\textit{dialogue acts}, such as ``question'', ``answer'' or ``statement''. There
+are a number of aspects that make the paper relevant to our project: it defines 
+an unsupervised LDA-like approach to act tagging, it uses twitter \textit{conversations} for
+training purposes and it evaluates the success based on the
+ability to correctly order the sequences of tweets in a conversation. The
+authors' justification for their work is that traditional supervised methods of
+act tagging do not work across domains and do not scale to large corpora. For
+us, it isn't hard to imagine dialogue acts as a significant feature in our
+classifier.
+
+The authors of the paper constructed a publicly dataset
+available dataset of 1.3 million twitter \textit{conversations}, where conversations are
+alternating series of reply-tweets between users. They note that twitter
+conversations are a kind of middle ground between blog comments and IRC-like
+chats. After filtering out shorter and longer conversations, they used this
+dataset for all their unsupervised training. 
+
+Their proposed model 
+draws similarities to document summarization models. The authors begin by
+telling a generative story of twitter conversations where a sequence of dialogue
+acts are chosen according and then each post is
+generated using an act-specific language model. Since this 
+results in topic-heavy acts, they refine their model to include a
+topic for the entire conversation. They then model the language of each word in a reply
+as coming from the conversation topic, the dialog act of the tweet, or
+from general English. The authors define this model graphically and identify it
+as a slightly modified variant of LDA. Much of the paper is dedicated to
+filling out the details of this model.
+
+Most relevant to us are the two forms of evaluation they propose. For
+qualitative evaluation they create a probabilistic finite automaton with
+transitions between speech acts through a conversation. The speech acts
+themselves are hand-labelled using the top-40 words in each act cluster. The 
+authors admit this is a very subjective and domain-specific evaluation. As such,
+they propose a quantitative evaluation method that quantifies the ability of
+the model to predict the ordering of posts in a conversation. Here, they took
+1,000 randomly samples conversations in their dataset, computed all permutations
+of each conversation and then chose the ordering that had the maximum
+probability according to the model. They compared this ordering to the gold
+ordering using Kendell $\tau$ distance. For a baseline they chose a bigram
+model, the details of which are omitted from the paper. Still, they show an
+improvement from 0.0358 $\tau$-correlation for the bigram model to about 0.3 for
+the best variant of their algorithm.
+
+
+
 
 
 \section{Conclusion}

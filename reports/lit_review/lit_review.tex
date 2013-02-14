@@ -221,9 +221,90 @@ over the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
 that conversations appear to have a \textit{role} structure. We believe we can get a lot of mileage
 by adding in additional features like \cite{Wang2008a}'s post-similarity.
 
+\subsection{Classifying Dialogue Acts in Multi-party Live Chats}
+
+This paper focuses not on chat disentanglement, but on classifying utterances
+in multi-party chat scenarios. Like many other studies on chats, the basic unit
+of analysis here is the contiguous message written by an individual. The
+experiment classifies messages into discourse acts such as a greeting, yes/no
+question, request for information, or 11 other categories defined in previous
+works, with two new ones introduced here.
+
+The paper defines several classes of features, then runs various classifiers on
+combinations of them. The features include TD-IDF and boolean unigrams, with
+and without stemming and lemmatization. They also learn on a special subset of
+keywords that indicate various discourse acts, defined in previous works. Other
+features are 1) structural attributes, such as length of message, location of
+message within the dialogue, and user ID of the speaker, and 2) utterance
+interactions, like the classification and content of previous messages, and
+previous utterances by the author.
+
+The experiment uses Naive Bayes, SVM, and Conditional Random Fields on two
+datasets, one topic-specific forum and one casual live chat. The best
+performance in both datasets approaches 100% on a model using bag-of-words,
+keywords, and previous utterances, but not structural information. The error
+analysis shows that most errors pertain to ambiguity between pairs of dialogue
+acts, like statements versus respsonses, and over certain words that appear
+frequently in multiple dialogue acts. Finally, the authors conclude that the
+failure of structural information compared to previous works is likely due to
+entanglement.
+
+While this work is not directly about entanglement, it produces good results in
+datasets that are entangled. While the authors conclude that work on
+disentanglement is needed to improve their results, we suggest that their
+results show promise in the problem of disentanglement, that if we can classify
+dialogue acts without structural information, this could be a useful feature
+for us. Some dialogue acts naturally follow other dialogue acts, so training a
+model on which dialogue acts follow others could yield good results.
+Additionally, this study shows that techniques applied to forums can work well
+in live chat scenarios, and vice versa, which indicates that our future model
+could potentially succeed in both settings.
+
+\subsection{Hierarchical Conversation Structure Prediction in Multi-Party Chat}
+
+This paper presents a model for disentanglement that annotates three types of
+information: 1) Negotiation labels, or whether an utterance is providing or
+receiving information, 2) sequences, or exchanges of information, and 3)
+threads, the outcome of the standard disentanglement problem.
+
+The learning model is modularized along these lines to predict these classes of
+annotation. The three classifiers mainly use n-gram features, including simple
+term frequency and TF-IDF. Not much discussion is given on the choice of these
+features, and why each used different ones. For example, the Negotiation
+classifier uses unigrams and bigrams frequencies and part-of-speech tags, while
+the Previous Cluster classifier, which predicts sequences, uses TF-IDF. 
+
+The algorithm performs two passes over the data, one in which negotations and
+sequences are generated, and the second in which sequences are grouped to form
+threads. For sequence prediction, the model has five hard rules regarding the
+structure of the Negotiation labels. For example, within the same sequence, the
+provider of the information cannot be the same as the receiver. Also, in a
+sequence, at most one continuous series of utterances may be made by the
+information provider. These constraints are defined as an integer linear
+programming problem and are used by the model to prevent classifications that
+break domain rules. Interestingly, the human annotators of the data set are
+expected to conform to these rules, guaranteeing that these rules are
+“correct.”
+
+The dataset used were weekly chat meetings for a cancer support group, with 45
+conversations bucketed equally between 2 participants, 3-4, and at least 5. The
+results were compared against baselines such as treating every message against
+a new sequence. It also compared against results in negotiation labeling,
+sequence labeling, and thread detection from a second set of human annotators,
+performing better in some cases.
+
+This study is very relevant to our project and introduces two major ideas to
+consider. One is the idea of using knowledge exchange as a feature of
+consideration in disentangling threads. The second is the two-pass model of
+first constructing sequences and merging them into threads in the second pass.
+In modeling what a thread is, it can be useful to define its components,
+finding them, and merging them to produce threads. However, we find that the
+data collection methodology requires significant expertise, given the task of
+understanding deep linguistic concepts while adhering to logical domain
+constraints.
+
 \section{Conclusion}
 
-\bibliography{lit_review}{}
-\bibliographystyle{alpha}
+\bibliography{lit_review}{} \bibliographystyle{alpha}
 
 \end{document}

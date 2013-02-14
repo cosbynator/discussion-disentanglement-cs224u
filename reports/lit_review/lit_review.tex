@@ -1,9 +1,25 @@
-\documentclass{article}
+\documentclass[11pt]{article}
+\usepackage{acl2012}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{multirow}
 \usepackage{url}
-\usepackage[margin=1.25in]{geometry}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\setlength\titlebox{6.5cm}    % Expanding the titlebox
 
-\title{CS224U Final Project \\Literature Review}
-\author{Julius Cheng\\ Thomas Dimson \\ Milind Ganjoo}
+\title{{\small CS224U Final Project} \\ Discourse Disentanglement \\Literature Review}
+\author{Julius Cheng \\
+  {\tt juliusc@stanford.edu}
+  \\\And
+  Thomas Dimson  \\
+  {\tt tdimson@cs.stanford.edu}
+  \\\AND
+  Milind Ganjoo \\
+  {\tt mganjoo@stanford.edu}
+}
+\date{}
+
 \begin{document}
 \maketitle
 
@@ -23,11 +39,11 @@ Related work to conversation disentanglement varies between the datasets used, t
 sub-problem addressed and the method of evaluation. We have grouped the literature into
 three broad categories described below.
 
-\subsection{Threaded Disentanglement}
+\subsection{Forum-style Disentanglement}
 \label{sec:threaded}
-We define ``threaded disentanglement'' as work that deals creates arbitrary
+We define ``forum-style disentanglement'' as work that deals creates arbitrary
 graphical links between posts under a related topic. The primary characteristic of the problem 
-longer, relatively well formed posts linked by relatively unsubjective ground truth links.
+is longer, relatively well formed posts linked by relatively unsubjective ground truth links.
 
 In \cite{Wang2008a}, address reconstructing thread structure using using 
 message similarity alone. They take a flat
@@ -304,6 +320,6 @@ could potentially succeed in both settings.
 
 \section{Conclusion}
 
-\bibliography{lit_review}{} \bibliographystyle{alpha}
+\bibliography{lit_review}{} \bibliographystyle{acl2012}
 
 \end{document}

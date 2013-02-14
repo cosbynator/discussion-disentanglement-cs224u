@@ -7,70 +7,101 @@
 \maketitle
 
 \section{Introduction}
-Our project is focused on reconstructing threaded conversation trees
-from a flattened representation. Intuitively, one could think of 
-taking a post's comment tree (e.g. Reddit), flattening it, sorting by time, performing
-hierarchical clustering using linguistic phenomena and measuring performance 
-against the original comment trees. As we have
-discovered, this project treads into the territory of \textit{discourse disentanglement}.
-While our particular problem does not appear to have been tackled in the past,
-there is a good amount of literature about disentangling flows of conversation
-in traditional internet forums, IRC chats, Twitter and beyond.
+Our project is focused on reconstructing threaded conversation trees from a
+flattened representation. Intuitively, one could think of taking a post's
+comment tree (e.g. Reddit), flattening it, sorting by time, performing
+hierarchical clustering using linguistic phenomena and measuring performance
+against the original comment trees. As we have discovered, this project treads
+into the territory of \textit{discourse disentanglement}. While our particular
+problem does not appear to have been tackled in the past, there is a good
+amount of literature about disentangling flows of conversation in traditional
+internet forums, IRC chats, Twitter and beyond.
 
 \section{Literature Overview}
 \subsection{Recovering implicit thread structure in newsgroup style
-conversations}
-In \cite{Wang2008a}, the authors tackle the problem of reconstructing thread
-structure using message similarity. They take a flat
-time-ordered conversation and use a similarity matrix to add graphical
-links between messages. They claim that flat conversation structure
-limits further data analysis, such as identification of significant
-contributions. 
+conversations} In \cite{Wang2008a}, the authors tackle the problem of
+reconstructing thread structure using message similarity. They take a flat
+time-ordered conversation and use a similarity matrix to add graphical links
+between messages. They claim that flat conversation structure limits further
+data analysis, such as identification of significant contributions.
 
-The paper calls the task \textit{thread recovery},
-adding graphical links to message collections with a known root.
-The basis of their algorithm is message similarity through TF-IDF: they
-construct a lower triangular cosine-distance matrix of posts and use rules 
-for conversion into a graph adjacency matrix. Their baseline is thresholding the
-matrix, which they augment by limiting the column-distance (window size), and discounting
-the matrix by the time lag between elements. The authors use a grid search to
-determine right value for the threshold and discount parameters.
+The paper calls the task \textit{thread recovery}, adding graphical links to
+message collections with a known root. The basis of their algorithm is message
+similarity through TF-IDF: they construct a lower triangular cosine-distance
+matrix of posts and use rules for conversion into a graph adjacency matrix.
+Their baseline is thresholding the matrix, which they augment by limiting the
+column-distance (window size), and discounting the matrix by the time lag
+between elements. The authors use a grid search to determine right value for
+the threshold and discount parameters.
 
 \cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 topics with over 
-478 messages . Each topic is a discussion about a hypothetical legislative bill, 
-and the messages are written by students discussing the bill in a political science class. 
-The data itself is flat, but  the authors manually create directed links representing
-parent-child relationships. 
+478 messages . Each topic is a discussion about a hypothetical legislative 
+bill, and the messages are written by students discussing the bill in a 
+political science class. The data itself is flat, but  the authors manually 
+create directed links representing parent-child relationships.
 
 Their evaluation process was standard precision/recall based on the predicted
 and ground truth graph edges between messages. The authors report the best
-results with thresholding and a time-based discount with a seemingly-poor result of 0.40 
-F1-score. The baseline system achieves an F1-score of 0.28 on their
-dataset. It is unlikely that higher scores could be achieved without reaching
-beyond text similarity. That said, the work may provide a good baseline system for us to evaluate against. 
-At the very least, we will consider a learning system instead of a rule-based system 
-and utilizing features besides post similarity.
-If nothing else, we need to use a dramatically larger corpus.
+results with thresholding and a time-based discount with a seemingly-poor
+result of 0.40 F1-score. The baseline system achieves an F1-score of 0.28 on
+their dataset. It is unlikely that higher scores could be achieved without
+reaching beyond text similarity. That said, the work may provide a good
+baseline system for us to evaluate against. At the very least, we will
+consider a learning system instead of a rule-based system and utilizing
+features besides post similarity. If nothing else, we need to use a
+dramatically larger corpus.
 
 \subsection{Learning online discussion structures by conditional random fields}
-The graph-based similarity detection method described previously by \cite{Wang2008a} utilizes both content similarity and temporal information to predict reply relationships. However, the threshold parameters of the model are manually tuned. \cite{Wang2011} describe an approach based on conditional random fields, which are able to utilize relevant features for predicting the sequence without having to model the distributions of those dependent features.
+The graph-based similarity detection method described previously by
+\cite{Wang2008a} utilizes both content similarity and temporal information to
+predict reply relationships. However, the threshold parameters of the model
+are manually tuned. \cite{Wang2011} describe an approach based on conditional
+random fields, which are able to utilize relevant features for predicting the
+sequence without having to model the distributions of those dependent
+features.
 
-The \cite{Wang2011} paper defines a conditional distribution over the reply relationship given a post sequence and formulates it as a Maximum a Posteriori (MAP) problem. A crucial component of this task is to define a set of features that capture dependencies between posts. The paper describes two categories of features. The first type of features depend only on attriutes drawn from a pair of posts, sunch as content similarity score, recency, author name reference, and indicator variables that give special importance to posts made last or first in a given thread. The second kind of features also take the parent assignments of the posts into account, which allows scoring of characteristics like the similarity between a post and the \emph{parent} of another post to determine content propagation, or accord importance to posts that reply to the same author and are also written by the same author (which is indicative of friends carrying out a back-and-forth conversation in a thread). The weights for the full set of 13 features is then trained through a supervised classifier that maximses the conditional likelihood for the reply sequence.
+The \cite{Wang2011} paper defines a conditional distribution over the reply
+relationship given a post sequence and formulates it as a Maximum a Posteriori
+(MAP) problem. A crucial component of this task is to define a set of features
+that capture dependencies between posts. The paper describes two categories of
+features. The first type of features depend only on attriutes drawn from a
+pair of posts, sunch as content similarity score, recency, author name
+reference, and indicator variables that give special importance to posts made
+last or first in a given thread. The second kind of features also take the
+parent assignments of the posts into account, which allows scoring of
+characteristics like the similarity between a post and the \emph{parent} of
+another post to determine content propagation, or accord importance to posts
+that reply to the same author and are also written by the same author (which
+is indicative of friends carrying out a back-and-forth conversation in a
+thread). The weights for the full set of 13 features is then trained through a
+supervised classifier that maximses the conditional likelihood for the reply
+sequence.
 
-The classifier-based conditional random fields approach is novel for the number of interesting features it introduces, and it also opens up the possibility of extending the existing framework by adding more features.
+The classifier-based conditional random fields approach is novel for the
+number of interesting features it introduces, and it also opens up the
+possibility of extending the existing framework by adding more features.
 
-The paper also introduces the novel \emph{path accuracy} metric, which calculates the proportion of correct paths from each node to the root in a conversation tree. This approach, however, would work best for a threaded conversation that begins from a single topic or node, and would probably not be extendable to a flatter IRC-style conversation where multiple root topics might be ongoing in parallel, which is another type of threaded conversation we would like to analyze. Still, we imagine it possible to usefully average the path accuracy for paths to multiple such nodes.
+The paper also introduces the novel \emph{path accuracy} metric, which
+calculates the proportion of correct paths from each node to the root in a
+conversation tree. This approach, however, would work best for a threaded
+conversation that begins from a single topic or node, and would probably not
+be extendable to a flatter IRC-style conversation where multiple root topics
+might be ongoing in parallel, which is another type of threaded conversation
+we would like to analyze. Still, we imagine it possible to usefully average
+the path accuracy for paths to multiple such nodes.
 
 \subsection{Reconstruction of threaded conversations in online discussion forums}
-%% What is "our own" approach? Hasn't been described anywhere. For the literature review,
-%% it might just suffice to say that this is the approach we're most likely to try
-\cite{Aumayr2011a}'s approach most closely resembles our own. The
-authors consider the problem of reconstructing conversation trees in
-a traditional vBulletin-powered online forum. The forum consists of a
+% What is "our own" approach? Hasn't been described anywhere. For the
+% literature review, it might just suffice to say that this is the approach
+% we're most likely to try
+\cite{Aumayr2011a}'s approach most closely resembles our own. The authors
+consider the problem of reconstructing conversation trees in a traditional
+vBulletin-powered online forum. The forum consists of a
 \textit{board}, which contains many \textit{threads},
-each of which contains a series of \textit{posts} by users. Unlike \cite{Wang2008a}, the motivation for their work comes from reconstructing reply structure even after it has been lost
-in the source database. This assumes that there was thread-structure in the original
-data.
+each of which contains a series of \textit{posts} by users. Unlike
+\cite{Wang2008a}, the motivation for their work comes from reconstructing
+reply structure even after it has been lost in the source database. This
+assumes that there was thread-structure in the original data.
 
 The authors use a learned classifier to classify pairs of posts as (parent,
 reply) or other. Their features are a mix of shallow textual and post
@@ -97,58 +128,100 @@ They also contrast their results with implementations from two other papers we l
 \cite{Elsner2008a} and \cite{Wang2008a}, achieving 88\% F1 and 44.4\% F1-score
 respectively.
 
-\subsection{You talking to me? A Corpus and Algorithm for Conversation Disentanglement}
-\cite{Elsner2008a} deals with disentangling flat conversations (such as those in IRC rooms), as opposed to threaded conversations in discussion forums. This paper treats disentanglement as a clustering problem between utterances rather than speakers as is done by many approaches. The speaker-based clustering is problematic when conversation topics change, as the disentanglement fails in that case.
+\subsection{You talking to me? A Corpus and Algorithm for Conversation
+Disentanglement}
+\cite{Elsner2008a} deals with disentangling flat conversations (such as those
+in IRC rooms), as opposed to threaded conversations in discussion forums. This
+paper treats disentanglement as a clustering problem between utterances rather
+than speakers as is done by many approaches. The speaker-based clustering is
+problematic when conversation topics change, as the disentanglement fails in
+that case.
 
-The data for this problem is the manually labeled \#\#Linux corpus from the IRC chat room. The annotation for each sentence places it in a certain conversation. The corpus also contains information about schisms (change of topic) or minor digressions. It is worth investigating whether this manual annotation scheme can be applied to a different corpus, which is less topical and where the demarcations between conversations may not be so clear. We anticipate the choice of a more topical corpus would yield better classification accuracy.
+The data for this problem is the manually labeled \#\#Linux corpus from the
+IRC chat room. The annotation for each sentence places it in a certain
+conversation. The corpus also contains information about schisms (change of
+topic) or minor digressions. It is worth investigating whether this manual
+annotation scheme can be applied to a different corpus, which is less topical
+and where the demarcations between conversations may not be so clear. We
+anticipate the choice of a more topical corpus would yield better
+classification accuracy.
 
-The model first uses a MaxEnt classifier to decide whether a given pair of utterances belongs to thesame conversation. In general, the more likely case is for them to be of different conversations. It then attempts to cluster the utterances to maximize the weighted accuracy of the classifier. However, since this is a correlation clustering problem (which is NP-complete), the paper uses a greey search approximation to the clustering process. This yields reasonable results; however, we anticipate using this approach and its associated methods as a baseline only.
+The model first uses a MaxEnt classifier to decide whether a given pair of
+utterances belongs to thesame conversation. In general, the more likely case
+is for them to be of different conversations. It then attempts to cluster the
+utterances to maximize the weighted accuracy of the classifier. However, since
+this is a correlation clustering problem (which is NP-complete), the paper
+uses a greey search approximation to the clustering process. This yields
+reasonable results; however, we anticipate using this approach and its
+associated methods as a baseline only.
 
-The model for this paper also describes more features that could be applied to our planned supervised learning model. These features include pause length between utterances and word repetitions bucketed according to unigram probability to indicate an ongoing conversation aobut something.
+The model for this paper also describes more features that could be applied to
+our planned supervised learning model. These features include pause length
+between utterances and word repetitions bucketed according to unigram
+probability to indicate an ongoing conversation aobut something.
 
-\subsection{Mixed membership Markov models for unsupervised conversation modeling}
-Due to the lack of conversational and structural annotations for most chat corpora derived from the web, there is an interest in performing disentanglement tasks in an unsupervised manner. One paper that attempts to do this is \cite{Paul2012}, where they build an unsupervised Hidden Markov Model that maps speech "acts" to hidden states. The idea is that the words of a message in a conversation are generated according to language models associated with a state or speech act. 
+\subsection{Mixed membership Markov models for unsupervised conversation
+modeling} Due to the lack of conversational and structural annotations for
+most chat corpora derived from the web, there is an interest in performing
+disentanglement tasks in an unsupervised manner. One paper that attempts to do
+this is \cite{Paul2012}, where they build an unsupervised Hidden Markov Model
+that maps speech "acts" to hidden states. The idea is that the words of a
+message in a conversation are generated according to language models
+associated with a state or speech act.
 
-While the use of Hidden Markov Models is not new, the model presented in this paper allows a message to be in a \emph{mixture} of states rather than exactly one class, as in most HMMs. In this sense it is similar to topic models such as LDA that assume a distribution over multiple classes (topics).
+While the use of Hidden Markov Models is not new, the model presented in this
+paper allows a message to be in a \emph{mixture} of states rather than exactly
+one class, as in most HMMs. In this sense it is similar to topic models such
+as LDA that assume a distribution over multiple classes (topics).
 
-The most exciting contribution of this paper is the discovery of hidden states that actually correspond to speech acts, for example, a collection of question-related pronouns and words corresponding to a speech act beginning a forum post about a technical question. The revelation of the hidden structure of a conversation motivates further investigation into clustering messages by the speech acts they convey, as investigated in the next paper on Twitter unsupervised modeling.
+The most exciting contribution of this paper is the discovery of hidden states
+that actually correspond to speech acts, for example, a collection of
+question-related pronouns and words corresponding to a speech act beginning a
+forum post about a technical question. The revelation of the hidden structure
+of a conversation motivates further investigation into clustering messages by
+the speech acts they convey, as investigated in the next paper on Twitter
+unsupervised modeling.
 
 \subsection{Unsupervised modeling of Twitter conversations}
-\cite{Ritter2010a} considers conversation from the perspective of 
+\cite{Ritter2010a} considers conversation from the perspective of
 \textit{dialogue acts}, such as ``question'', ``answer'' or ``statement''. Unlike our other papers,
 \cite{Ritter2010a}'s focus is on acts and not disentanglement. The paper describes
-an unsupervised LDA-like approach to act tagging and utilizes Twitter \textit{conversations} for
-training purposes. The model was evaluated extrinsically by reconstructing 
-the original order of a scrambled conversation. The author's describe their motivation as
-generalizing act tagging to remove the human required in supervised approaches. 
+an unsupervised LDA-like approach to act tagging and utilizes Twitter
+\textit{conversations} for training purposes. The model was evaluated
+extrinsically by reconstructing the original order of a scrambled
+conversation. The author's describe their motivation as generalizing act
+tagging to remove the human required in supervised approaches.
 
-The authors constructed a dataset of 1.3 million Twitter \textit{conversations}, 
-where conversations are alternating series of reply-tweets between users. After filtering out shorter 
-and longer conversations, the dataset was used for unsupervised training and evaluation.
+The authors constructed a dataset of 1.3 million Twitter
+\textit{conversations}, where conversations are alternating series of reply-
+tweets between users. After filtering out shorter and longer conversations,
+the dataset was used for unsupervised training and evaluation.
 
-The paper tells a generative story of Twitter conversations where a sequence of dialogue
-acts are chosen for each post, with words filled in by an act-specific language model.
-Because is biased to model \textit{topics}
-instead of \textit{acts}, the model is refined to include a topic 
-for the entire conversation. The language model is also refined to choose words from
-the conversation topic, the dialog act of the tweet, and from general English. The result
-is a variant of LDA and much of the paper is dedicated to filling out the details of the model.
+The paper tells a generative story of Twitter conversations where a sequence
+of dialogue acts are chosen for each post, with words filled in by an act-
+specific language model. Because is biased to model \textit{topics} instead of
+\textit{acts}, the model is refined to include a topic for the entire
+conversation. The language model is also refined to choose words from the
+conversation topic, the dialog act of the tweet, and from general English. The
+result is a variant of LDA and much of the paper is dedicated to filling out
+the details of the model.
 
 Most relevant to us are the two forms of evaluation they propose. For
 qualitative evaluation they create a probabilistic finite automaton with
 transitions between speech acts through a conversation. The speech acts
-themselves are hand-labeled using the top-40 words in each act cluster. The 
-authors admit this is a very subjective and domain-specific evaluation. As such,
-they propose a quantitative evaluation method that quantifies the ability of
-the model to predict the ordering of posts in a conversation. They took
-1,000 randomly sampled conversations, computed all permutations
-of each conversation and then chose the ordering that had the maximum
-probability according to the model. They compared this ordering to the gold
-ordering using Kendell $\tau$ distance. For a baseline they chose a bigram
-model, the details of which are omitted from the paper. They report a ten-fold improvement
-over the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
-that conversations appear to have a \textit{role} structure. We believe we can get a lot of mileage
-by adding in additional features like \cite{Wang2008a}'s post-similarity.
+themselves are hand-labeled using the top-40 words in each act cluster. The
+authors admit this is a very subjective and domain-specific evaluation. As
+such, they propose a quantitative evaluation method that quantifies the
+ability of the model to predict the ordering of posts in a conversation. They
+took 1,000 randomly sampled conversations, computed all permutations of each
+conversation and then chose the ordering that had the maximum probability
+according to the model. They compared this ordering to the gold ordering using
+Kendell $\tau$ distance. For a baseline they chose a bigram model, the details
+of which are omitted from the paper. They report a ten-fold improvement over
+the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
+that conversations appear to have a \textit{role} structure. We believe we can
+get a lot of mileage by adding in additional features like \cite{Wang2008a}'s
+post-similarity.
 
 \section{Conclusion}
 

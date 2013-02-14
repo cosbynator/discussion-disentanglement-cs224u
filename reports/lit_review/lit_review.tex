@@ -18,17 +18,22 @@ there is a good amount of literature about disentangling flows of conversation
 in traditional internet forums, IRC chats, Twitter and beyond.
 
 \section{Literature Overview}
-\subsection{Recovering implicit thread structure in newsgroup style
-conversations}
-In \cite{Wang2008a}, the authors tackle the problem of reconstructing thread
-structure using message similarity. They take a flat
+Related work to conversation disentanglement varies between the datasets used, the 
+sub-problem addressed and the method of evaluation. We have grouped the literature into
+three broad categories described below.
+
+\subsection{Threaded Disentanglement}
+We define ``threaded disentanglement'' as work that deals creates arbitrary
+graphical links between posts under a related topic. Work is sparse, but we have found
+two authors tackling with different methods.
+
+In \cite{Wang2008a}, address reconstructing thread structure using using 
+message similarity alone. They take a flat
 time-ordered conversation and use a similarity matrix to add graphical
 links between messages. They claim that flat conversation structure
 limits further data analysis, such as identification of significant
 contributions. 
 
-The paper calls the task \textit{thread recovery},
-adding graphical links to message collections with a known root.
 The basis of their algorithm is message similarity through TF-IDF: they
 construct a lower triangular cosine-distance matrix of posts and use rules 
 for conversion into a graph adjacency matrix. Their baseline is thresholding the
@@ -39,26 +44,26 @@ determine right value for the threshold and discount parameters.
 \cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 topics with over 
 478 messages . Each topic is a discussion about a hypothetical legislative bill, 
 and the messages are written by students discussing the bill in a political science class. 
-The data itself is flat, but  the authors manually create directed links representing
-parent-child relationships. 
+The data itself is flat, but the authors manually create directed links representing
+parent-child relationships. It struck us as peculiar that the authors chose to work
+with such a small corpus and rely on manually annotated ground truth instead of using
+threaded ground truth.
 
-Their evaluation process was standard precision/recall based on the predicted
-and ground truth graph edges between messages. The authors report the best
-results with thresholding and a time-based discount with a seemingly-poor result of 0.40 
-F1-score. The baseline system achieves an F1-score of 0.28 on their
-dataset. It is unlikely that higher scores could be achieved without reaching
+Accordingly, the authors evaluate their predicted annotations using precision/recall of
+their graph edges between messages. They identify their best results using
+thresholding and a time-based discount for a seemingly-poor result of 0.40 
+F1-score. It is unlikely that higher scores could be achieved without reaching
 beyond text similarity. That said, the work may provide a good baseline system
-for us to evaluate against.  At the very least, we will consider a learning
+for us to evaluate against. At the very least, we will consider a learning
 system instead of a rule-based system and utilizing features besides post
 similarity.  If nothing else, we need to use a dramatically larger corpus.
 
-\subsection{Learning online discussion structures by conditional random fields}
 The graph-based similarity detection method described previously by
 \cite{Wang2008a} utilizes both content similarity and temporal information to
 predict reply relationships. However, the threshold parameters of the model are
-manually tuned. \cite{Wang2011} describe an approach based on conditional random
-fields, which are able to utilize relevant features for predicting the sequence
-without having to model the distributions of those dependent features.
+manually tuned. In contrast, \cite{Wang2011}, describes an approach based on conditional random
+fields, which are able to utilize features for link prediction
+without having to model the dependent distributions of features.
 
 The \cite{Wang2011} paper defines a conditional distribution over the reply
 relationship given a post sequence and formulates it as a Maximum a Posteriori

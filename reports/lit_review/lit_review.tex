@@ -1,5 +1,6 @@
 \documentclass{article}
 \usepackage{url}
+\usepackage[margin=1.25in]{geometry}
 
 \title{CS224U Final Project \\Literature Review}
 \author{Julius Cheng\\ Thomas Dimson \\ Milind Ganjoo}
@@ -23,9 +24,10 @@ sub-problem addressed and the method of evaluation. We have grouped the literatu
 three broad categories described below.
 
 \subsection{Threaded Disentanglement}
+\label{sec:threaded}
 We define ``threaded disentanglement'' as work that deals creates arbitrary
-graphical links between posts under a related topic. Work is sparse, but we have found
-two authors tackling with different methods.
+graphical links between posts under a related topic. The primary characteristic of the problem 
+longer, relatively well formed posts linked by relatively unsubjective ground truth links.
 
 In \cite{Wang2008a}, address reconstructing thread structure using using 
 message similarity alone. They take a flat
@@ -61,11 +63,11 @@ similarity.  If nothing else, we need to use a dramatically larger corpus.
 The graph-based similarity detection method described previously by
 \cite{Wang2008a} utilizes both content similarity and temporal information to
 predict reply relationships. However, the threshold parameters of the model are
-manually tuned. In contrast, \cite{Wang2011}, describes an approach based on conditional random
+manually tuned. In contrast, \cite{Wang2011a}, describes an approach based on conditional random
 fields, which are able to utilize features for link prediction
 without having to model the dependent distributions of features.
 
-The \cite{Wang2011} paper defines a conditional distribution over the reply
+The \cite{Wang2011a} paper defines a conditional distribution over the reply
 relationship given a post sequence and formulates it as a Maximum a Posteriori
 (MAP) problem. A crucial component of this task is to define a set of features
 that capture dependencies between posts. The paper describes two categories of
@@ -85,7 +87,7 @@ The classifier-based conditional random fields approach is novel for the number
 of interesting features it introduces, and it also opens up the possibility of
 extending the existing framework by adding more features.
 
-The paper also introduces the novel \emph{path accuracy} metric, which
+\cite{Wang2011a} also introduces the novel \emph{path accuracy} metric, which
 calculates the proportion of correct paths from each node to the root in a
 conversation tree. This approach, however, would work best for a threaded
 conversation that begins from a single topic or node, and would probably not be
@@ -94,13 +96,9 @@ be ongoing in parallel, which is another type of threaded conversation we would
 like to analyze. Still, we imagine it possible to usefully average the path
 accuracy for paths to multiple such nodes.
 
-\subsection{Reconstruction of threaded conversations in online discussion
-forums}
-%% What is "our own" approach? Hasn't been described anywhere. For the literature review,
-%% it might just suffice to say that this is the approach we're most likely to try
-\cite{Aumayr2011a}'s approach most closely resembles our own. The authors
-consider the problem of reconstructing conversation trees in a traditional
-vBulletin-powered online forum. The forum consists of a \textit{board}, which
+Similar to \cite{Wang2011a}, \cite{Aumayr2011a}'s attempts machine learning to 
+tackle the problem of reconstructing conversation trees in a traditional
+vBulletin-powered online forum. Here, each forum consists of a \textit{board}, which
 contains many \textit{threads}, each of which contains a series of
 \textit{posts} by users. Unlike \cite{Wang2008a}, the motivation for their work
 comes from reconstructing reply structure even after it has been lost in the
@@ -132,15 +130,19 @@ They also contrast their results with implementations from two other papers we l
 \cite{Elsner2008a} and \cite{Wang2008a}, achieving 88\% F1 and 44.4\% F1-score
 respectively.
 
-\subsection{You talking to me? A Corpus and Algorithm for Conversation Disentanglement}
-\cite{Elsner2008a} deals with disentangling flat conversations (such as those in
-IRC rooms),  as opposed to threaded conversations in discussion forums. This
-paper treats disentanglement as a clustering problem between utterances rather
-than speakers as is done by many approaches. The speaker-based clustering is
-problematic when conversation topics change, as the disentanglement fails in
-that case.
+\subsection{Chat Disentanglement}
+\label{sec:chat}
+We identify the \textit{chat disentanglement} problem as attempting to group
+shorter conversational-style messages into coherent sub-conversations. Like 
+Section \ref{sec:threaded}, authors still create graphical links between messages. The major
+difference is that the length of each message in a conversation is shorter, and ground truth
+data is quite subjective (what constitutes a sub-conversation?).
 
-The data for this problem is the manually labeled \#\#Linux corpus from the IRC
+\cite{Elsner2008a}  paper treats disentanglement as a clustering problem between 
+utterances rather than considering speakers. The authors note that speaker-based clustering is
+particularly problematic when conversation topics change.
+
+The data for this problem is the manually labeled \#\#Linux corpus from an IRC
 chat room. The annotation for each sentence places it in a certain conversation.
 The corpus also contains information about schisms (change of topic) or minor
 digressions. It is worth investigating whether this manual annotation scheme can
@@ -162,107 +164,7 @@ our planned supervised learning model. These features include pause length
 between utterances and word repetitions bucketed according to unigram
 probability to indicate an ongoing conversation about something.
 
-\subsection{Mixed membership Markov models for unsupervised conversation
-modeling} Due to the lack of conversational and structural annotations for most
-chat corpora derived from the web, there is an interest in performing
-disentanglement tasks in an unsupervised manner. One paper that attempts to do
-this is \cite{Paul2012}, where they build an unsupervised Hidden Markov Model
-that maps speech "acts" to hidden states. The idea is that the words of a
-message in a conversation are generated according to language models associated
-with a state or speech act. 
-
-While the use of Hidden Markov Models is not new, the model presented in this
-paper allows a message to be in a \emph{mixture} of states rather than exactly
-one class, as in most HMMs. In this sense it is similar to topic models such as
-LDA that assume a distribution over multiple classes (topics).
-
-The most exciting contribution of this paper is the discovery of hidden states
-that actually correspond to speech acts, for example, a collection of
-question-related pronouns and words corresponding to a speech act beginning a
-forum post about a technical question. The revelation of the hidden structure of
-a conversation motivates further investigation into clustering messages by the
-speech acts they convey, as investigated in the next paper on Twitter
-unsupervised modeling.
-
-\subsection{Unsupervised modeling of Twitter conversations}
-\cite{Ritter2010a} considers conversation from the perspective of 
-\textit{dialogue acts}, such as ``question'', ``answer'' or ``statement''. Unlike our other papers,
-\cite{Ritter2010a}'s focus is on acts and not disentanglement. The paper describes
-an unsupervised LDA-like approach to act tagging and utilizes Twitter \textit{conversations} for
-training purposes. The model was evaluated extrinsically by reconstructing 
-the original order of a scrambled conversation. The author's describe their motivation as
-generalizing act tagging to remove the human required in supervised approaches. 
-
-The authors constructed a dataset of 1.3 million Twitter \textit{conversations}, 
-where conversations are alternating series of reply-tweets between users. After filtering out shorter 
-and longer conversations, the dataset was used for unsupervised training and evaluation.
-
-The paper tells a generative story of Twitter conversations where a sequence of dialogue
-acts are chosen for each post, with words filled in by an act-specific language model.
-Because is biased to model \textit{topics}
-instead of \textit{acts}, the model is refined to include a topic 
-for the entire conversation. The language model is also refined to choose words from
-the conversation topic, the dialog act of the tweet, and from general English. The result
-is a variant of LDA and much of the paper is dedicated to filling out the details of the model.
-
-Most relevant to us are the two forms of evaluation they propose. For
-qualitative evaluation they create a probabilistic finite automaton with
-transitions between speech acts through a conversation. The speech acts
-themselves are hand-labeled using the top-40 words in each act cluster. The 
-authors admit this is a very subjective and domain-specific evaluation. As such,
-they propose a quantitative evaluation method that quantifies the ability of
-the model to predict the ordering of posts in a conversation. They took
-1,000 randomly sampled conversations, computed all permutations
-of each conversation and then chose the ordering that had the maximum
-probability according to the model. They compared this ordering to the gold
-ordering using Kendell $\tau$ distance. For a baseline they chose a bigram
-model, the details of which are omitted from the paper. They report a ten-fold improvement
-over the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
-that conversations appear to have a \textit{role} structure. We believe we can get a lot of mileage
-by adding in additional features like \cite{Wang2008a}'s post-similarity.
-
-\subsection{Classifying Dialogue Acts in Multi-party Live Chats}
-
-This paper focuses not on chat disentanglement, but on classifying utterances
-in multi-party chat scenarios. Like many other studies on chats, the basic unit
-of analysis here is the contiguous message written by an individual. The
-experiment classifies messages into discourse acts such as a greeting, yes/no
-question, request for information, or 11 other categories defined in previous
-works, with two new ones introduced here.
-
-The paper defines several classes of features, then runs various classifiers on
-combinations of them. The features include TD-IDF and boolean unigrams, with
-and without stemming and lemmatization. They also learn on a special subset of
-keywords that indicate various discourse acts, defined in previous works. Other
-features are 1) structural attributes, such as length of message, location of
-message within the dialogue, and user ID of the speaker, and 2) utterance
-interactions, like the classification and content of previous messages, and
-previous utterances by the author.
-
-The experiment uses Naive Bayes, SVM, and Conditional Random Fields on two
-datasets, one topic-specific forum and one casual live chat. The best
-performance in both datasets approaches 100% on a model using bag-of-words,
-keywords, and previous utterances, but not structural information. The error
-analysis shows that most errors pertain to ambiguity between pairs of dialogue
-acts, like statements versus respsonses, and over certain words that appear
-frequently in multiple dialogue acts. Finally, the authors conclude that the
-failure of structural information compared to previous works is likely due to
-entanglement.
-
-While this work is not directly about entanglement, it produces good results in
-datasets that are entangled. While the authors conclude that work on
-disentanglement is needed to improve their results, we suggest that their
-results show promise in the problem of disentanglement, that if we can classify
-dialogue acts without structural information, this could be a useful feature
-for us. Some dialogue acts naturally follow other dialogue acts, so training a
-model on which dialogue acts follow others could yield good results.
-Additionally, this study shows that techniques applied to forums can work well
-in live chat scenarios, and vice versa, which indicates that our future model
-could potentially succeed in both settings.
-
-\subsection{Hierarchical Conversation Structure Prediction in Multi-Party Chat}
-
-This paper presents a model for disentanglement that annotates three types of
+\cite{Mayfield2012a} presents a model for chat disentanglement that annotates three types of
 information: 1) Negotiation labels, or whether an utterance is providing or
 receiving information, 2) sequences, or exchanges of information, and 3)
 threads, the outcome of the standard disentanglement problem.
@@ -302,6 +204,103 @@ finding them, and merging them to produce threads. However, we find that the
 data collection methodology requires significant expertise, given the task of
 understanding deep linguistic concepts while adhering to logical domain
 constraints.
+
+\subsection{Speech/Dialogue Acts}
+Some authors consider the problem of speech disentanglement as traversing 
+a finite state automoton between different \textit{speech acts}, such as
+``question'', ``answer'' or ``statement''. This is a classical problem in
+natural language processing, but many authors evaluate their success extrinsically 
+using discourse disentanglement.
+
+\cite{Paula}, builds an unsupervised Hidden Markov Model that 
+maps speech acts to hidden states. The idea is that the words of a message in a conversation are generated 
+according to language models associated
+with a state or speech act. 
+
+While the use of Hidden Markov Models is not new, the model presented in this
+paper allows a message to be in a \emph{mixture} of states rather than exactly
+one class, as in most HMMs. In this sense it is similar to topic models such as
+LDA that assume a distribution over multiple classes (topics).
+
+The most exciting contribution of this paper is the discovery of hidden states
+that actually correspond to speech acts, for example, a collection of
+question-related pronouns and words corresponding to a speech act beginning a
+forum post about a technical question. The revelation of the hidden structure of
+a conversation motivates further investigation into clustering messages by the
+speech acts they convey, as investigated in the next paper on Twitter
+unsupervised modeling.
+
+Like \cite{Paula}, \cite{Ritter2010a} considers unsupervised tragging of speech acts.
+The paper describes an unsupervised LDA-like approach to act tagging 
+and utilizes Twitter \textit{conversations} for
+training purposes. The model was evaluated extrinsically by reconstructing 
+the original order of a scrambled conversation. The author's describe their motivation as
+generalizing act tagging to remove the human required in supervised approaches. 
+
+The authors constructed a dataset of 1.3 million Twitter \textit{conversations}, 
+where conversations are alternating series of reply-tweets between users. After filtering out shorter 
+and longer conversations, the dataset was used for unsupervised training and evaluation.
+
+\cite{Ritter2010a} tells a generative story of Twitter conversations where a sequence of dialogue
+acts are chosen for each post, with words filled in by an act-specific language model.
+Because is biased to model \textit{topics}
+instead of \textit{acts}, the model is refined to include a topic 
+for the entire conversation. The language model is also refined to choose words from
+the conversation topic, the dialog act of the tweet, and from general English. The result
+is a variant of LDA and much of the paper is dedicated to filling out the details of the model.
+
+Most relevant to us are the two forms of evaluation they propose. For
+qualitative evaluation they create a probabilistic finite automaton with
+transitions between speech acts through a conversation. The speech acts
+themselves are hand-labeled using the top-40 words in each act cluster. The 
+authors admit this is a very subjective and domain-specific evaluation. As such,
+they propose a quantitative evaluation method that quantifies the ability of
+the model to predict the ordering of posts in a conversation. They took
+1,000 randomly sampled conversations, computed all permutations
+of each conversation and then chose the ordering that had the maximum
+probability according to the model. They compared this ordering to the gold
+ordering using Kendell $\tau$ distance. For a baseline they chose a bigram
+model, the details of which are omitted from the paper. They report a ten-fold improvement
+over the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
+that conversations appear to have a \textit{role} structure. We believe we can get a lot of mileage
+by adding in additional features like \cite{Wang2008a}'s post-similarity.
+
+Unlike other speech act papers, \cite{Kim2012} focuses on classifying utterances
+in multi-party chat scenarios. The basic unit
+of analysis here is the contiguous message written by an individual. The
+experiment classifies messages into discourse acts such as a greeting, yes/no
+question, request for information, or 11 other categories defined in previous
+works, with two new ones introduced here.
+
+\cite{Kim2012} defines several classes of features, then runs various classifiers on
+combinations of them. The features include TD-IDF and boolean unigrams, with
+and without stemming and lemmatization. They also learn on a special subset of
+keywords that indicate various discourse acts, defined in previous works. Other
+features are 1) structural attributes, such as length of message, location of
+message within the dialogue, and user ID of the speaker, and 2) utterance
+interactions, like the classification and content of previous messages, and
+previous utterances by the author.
+
+Their experiment uses Naive Bayes, SVM, and Conditional Random Fields on two
+datasets, one topic-specific forum and one casual live chat. The best
+performance in both datasets approaches 100% on a model using bag-of-words,
+keywords, and previous utterances, but not structural information. The error
+analysis shows that most errors pertain to ambiguity between pairs of dialogue
+acts, like statements versus respsonses, and over certain words that appear
+frequently in multiple dialogue acts. Finally, the authors conclude that the
+failure of structural information compared to previous works is likely due to
+entanglement.
+
+While this work is not directly about entanglement, it produces good results in
+datasets that are entangled. The authors conclude that work on
+disentanglement is needed to improve their results, but we suggest that their
+results show promise in the problem of disentanglement. If we can classify
+dialogue acts without structural information, this could be a useful feature
+for us. Some dialogue acts naturally follow other dialogue acts, so training a
+model on which dialogue acts follow others could yield good results.
+Additionally, this study shows that techniques applied to forums can work well
+in live chat scenarios, and vice versa, which indicates that our future model
+could potentially succeed in both settings.
 
 \section{Conclusion}
 

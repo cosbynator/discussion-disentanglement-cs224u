@@ -20,6 +20,8 @@
 }
 \date{}
 
+\newcommand{\titlecite}[2]{``#1''~\cite{#2}}
+
 \begin{document}
 \maketitle
 
@@ -45,7 +47,8 @@ We define ``forum-style disentanglement'' as work that deals creates arbitrary
 graphical links between posts under a related topic. The primary characteristic of the problem 
 is longer, relatively well formed posts linked by relatively unsubjective ground truth links.
 
-In \cite{Wang2008a}, address reconstructing thread structure using using 
+In \titlecite{Recovering implicit thread structure in newsgroup style conversations}{Wang2008a}, 
+the authors address reconstructing thread structure using using 
 message similarity alone. They take a flat
 time-ordered conversation and use a similarity matrix to add graphical
 links between messages. They claim that flat conversation structure
@@ -79,8 +82,10 @@ similarity.  If nothing else, we need to use a dramatically larger corpus.
 The graph-based similarity detection method described previously by
 \cite{Wang2008a} utilizes both content similarity and temporal information to
 predict reply relationships. However, the threshold parameters of the model are
-manually tuned. In contrast, \cite{Wang2011a}, describes an approach based on conditional random
-fields, which are able to utilize features for link prediction
+manually tuned. In contrast, in \titlecite{Learning online discussion structures
+by conditional random fields}{Wang2011a},
+the authors describe an approach based on conditional random
+fields. Notable, this classifier is able to utilize features for link prediction
 without having to model the dependent distributions of features.
 
 The \cite{Wang2011a} paper defines a conditional distribution over the reply
@@ -112,7 +117,8 @@ be ongoing in parallel, which is another type of threaded conversation we would
 like to analyze. Still, we imagine it possible to usefully average the path
 accuracy for paths to multiple such nodes.
 
-Similar to \cite{Wang2011a}, \cite{Aumayr2011a}'s attempts machine learning to 
+Similar to \cite{Wang2011a}, in \titlecite{Reconstruction of threaded
+conversations in online discussion forums}{Aumayr2011a}, the authors attempt machine learning to 
 tackle the problem of reconstructing conversation trees in a traditional
 vBulletin-powered online forum. Here, each forum consists of a \textit{board}, which
 contains many \textit{threads}, each of which contains a series of
@@ -154,7 +160,8 @@ Section \ref{sec:threaded}, authors still create graphical links between message
 difference is that the length of each message in a conversation is shorter, and ground truth
 data is quite subjective (what constitutes a sub-conversation?).
 
-\cite{Elsner2008a}  paper treats disentanglement as a clustering problem between 
+In \titlecite{You talking to me? a corpus and algorithm for conversation
+disentanglement}{Elsner2008a}, the authors treat disentanglement as a clustering problem between 
 utterances rather than considering speakers. The authors note that speaker-based clustering is
 particularly problematic when conversation topics change.
 
@@ -180,12 +187,13 @@ our planned supervised learning model. These features include pause length
 between utterances and word repetitions bucketed according to unigram
 probability to indicate an ongoing conversation about something.
 
-\cite{Mayfield2012a} presents a model for chat disentanglement that annotates three types of
+In \titlecite{Hierarchical conversation structure prediction in multi-party
+chat}{Mayfield2012a}, the authors present a model for chat disentanglement that annotates three types of
 information: 1) Negotiation labels, or whether an utterance is providing or
 receiving information, 2) sequences, or exchanges of information, and 3)
 threads, the outcome of the standard disentanglement problem.
 
-The learning model is modularized along these lines to predict these classes of
+The learning model is modularized accordibngly to predict these classes of
 annotation. The three classifiers mainly use n-gram features, including simple
 term frequency and TF-IDF. Not much discussion is given on the choice of these
 features, and why each used different ones. For example, the Negotiation
@@ -228,7 +236,8 @@ a finite state automoton between different \textit{speech acts}, such as
 natural language processing, but many authors evaluate their success extrinsically 
 using discourse disentanglement.
 
-\cite{Paula}, builds an unsupervised Hidden Markov Model that 
+The authors of \titlecite{Mixed Membership Markov Models for Unsupervised
+Conversation Modeling}{Paula} build an unsupervised Hidden Markov Model that 
 maps speech acts to hidden states. The idea is that the words of a message in a conversation are generated 
 according to language models associated
 with a state or speech act. 
@@ -246,7 +255,8 @@ a conversation motivates further investigation into clustering messages by the
 speech acts they convey, as investigated in the next paper on Twitter
 unsupervised modeling.
 
-Like \cite{Paula}, \cite{Ritter2010a} considers unsupervised tragging of speech acts.
+Like \cite{Paula}, the authors of \titlecite{Unsupervised modeling of Twitter
+conversations}{Ritter2010a} consider unsupervised tragging of speech acts.
 The paper describes an unsupervised LDA-like approach to act tagging 
 and utilizes Twitter \textit{conversations} for
 training purposes. The model was evaluated extrinsically by reconstructing 
@@ -288,7 +298,8 @@ experiment classifies messages into discourse acts such as a greeting, yes/no
 question, request for information, or 11 other categories defined in previous
 works, with two new ones introduced here.
 
-\cite{Kim2012} defines several classes of features, then runs various classifiers on
+In \titlecite{Classifying Dialogue Acts in Multi-party Live Chats}{Kim2012}, the
+authors define several classes of features, then runs various classifiers on
 combinations of them. The features include TD-IDF and boolean unigrams, with
 and without stemming and lemmatization. They also learn on a special subset of
 keywords that indicate various discourse acts, defined in previous works. Other

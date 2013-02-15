@@ -33,19 +33,20 @@ hierarchical clustering using linguistic phenomena and measuring performance
 against the original comment trees. As we have
 discovered, this project treads into the territory of \textit{discourse disentanglement}.
 While our particular problem does not appear to have been tackled in the past,
-there is a good amount of literature about disentangling flows of conversation
+there is a reasonable amount of literature about disentangling flows of conversation
 in traditional internet forums, IRC chats, Twitter and beyond.
 
-\section{Literature Overview}
-Related work to conversation disentanglement varies between the datasets used, the 
-sub-problem addressed and the method of evaluation. We have grouped the literature into
-three broad categories described below.
+\section{Related Work}
+The approach to conversation disentanglement varies with the datasets used, the 
+sub-problems addressed and the method of evaluation. We have grouped the literature into
+three broad categories which will be described below.
 
 \subsection{Forum-style Disentanglement}
 \label{sec:threaded}
-We define \textit{forum-style disentanglement} as creating 
-graphical parent-child links between posts under a related topic. The primary characteristic of the problem 
-is longer, relatively well formed posts linked by relatively unsubjective ground truth links.
+We define \textit{forum-style disentanglement} as the task of creating 
+graphical parent-child links between posts under a related topic. The primary characteristic 
+of \textit{forum-style} problems are longer, well formed posts 
+linked by relatively unsubjective ground truth links.
 
 In \titlecite{Recovering implicit thread structure in newsgroup style conversations}{Wang2008a}, 
 the authors address reconstructing thread structure using using 
@@ -53,18 +54,18 @@ message similarity alone. They take a flat
 time-ordered conversation and use a similarity matrix to add graphical
 links between messages. They claim that flat conversation structure
 limits further data analysis, such as identification of significant
-contributions. 
+contributions under a topic. 
 
-The basis of their algorithm is message similarity through TF-IDF: they
+The basis of their similarity algorithm is TF-IDF: they
 construct a lower triangular cosine-distance matrix of posts and use rules 
 for conversion into a graph adjacency matrix. Their baseline is thresholding the
-matrix, which they augment by limiting the column-distance (window size), and discounting
+matrix, which they improve by limiting the column-distance (window size), and discounting
 the matrix by the time lag between elements. The authors use a grid search to
 determine right value for the threshold and discount parameters.
 
-\cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 topics with over 
-478 messages . Each topic is a discussion about a hypothetical legislative bill, 
-and the messages are written by students discussing the bill in a political science class. 
+\cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 \textit{topics} and a total of
+478 \textit{messages}. Each topic is a discussion about a hypothetical legislative bill, 
+and the messages are reactions written by students in a political science class. 
 The data itself is flat, but the authors manually create directed links representing
 parent-child relationships. It struck us as peculiar that the authors chose to work
 with such a small corpus and rely on manually annotated ground truth instead of using
@@ -77,44 +78,41 @@ F1-score. It is unlikely that higher scores could be achieved without reaching
 beyond text similarity. That said, the work may provide a good baseline system
 for us to evaluate against. At the very least, we will consider a learning
 system instead of a rule-based system and utilizing features besides post
-similarity.  If nothing else, we need to use a dramatically larger corpus.
+similarity.  Furthermore, we need to use a dramatically larger corpus and without manually
+annotated links.
 
-The graph-based similarity detection method described previously by
-\cite{Wang2008a} utilizes both content similarity and temporal information to
-predict reply relationships. However, the threshold parameters of the model are
-manually tuned. In contrast, in \titlecite{Learning online discussion structures
-by conditional random fields}{Wang2011a},
-the authors describe an approach based on conditional random
-fields. Notable, this classifier is able to utilize features for link prediction
-without having to model the dependent distributions of features.
+Unlike \cite{Wang2008a}, the authors of in \titlecite{Learning online discussion structures
+by conditional random fields}{Wang2011a} take a machine learning approach using
+similar features. Their approach uses conditional random
+fields and is able to utilize features for link prediction
+without having to model their dependent distributions.
 
 The \cite{Wang2011a} paper defines a conditional distribution over the reply
 relationship given a post sequence and formulates it as a Maximum a Posteriori
 (MAP) problem. A crucial component of this task is to define a set of features
 that capture dependencies between posts. The paper describes two categories of
-features. The first type of features depend only on attributes drawn from a pair
+features. The first kind depend only on attributes drawn from a pair
 of posts, such as content similarity score, recency, author name reference, and
 indicator variables that give special importance to posts made last or first in
-a given thread. The second kind of features also take the parent assignments of
-the posts into account, which allows scoring of characteristics like the
-similarity between a post and the \emph{parent} of another post to determine
+a given thread. The second kind also consider the parent assignments of
+the posts, which allows scoring of characteristics like the
+similarity between  post and the \emph{parent} of another post to determine
 content propagation, or accord importance to posts that reply to the same author
 and are also written by the same author (which is indicative of friends carrying
-out a back-and-forth conversation in a thread). The weights for the full set of
-13 features is then trained through a supervised classifier that maximizes the
+out a back-and-forth conversation in a thread). The weights for their full set of
+13 features is trained through a supervised classifier that maximizes the
 conditional likelihood for the reply sequence.
 
-The classifier-based conditional random fields approach is novel for the number
+The conditional random field approach is novel for the number
 of interesting features it introduces, and it also opens up the possibility of
 extending the existing framework by adding more features.
 
 \cite{Wang2011a} also introduces the novel \emph{path accuracy} metric, which
 calculates the proportion of correct paths from each node to the root in a
 conversation tree. This approach, however, would work best for a threaded
-conversation that begins from a single topic or node, and would probably not be
-extensible to a flatter IRC-style conversation where multiple root topics might
-be ongoing in parallel, which is another type of threaded conversation we would
-like to analyze. Still, we imagine it possible to usefully average the path
+conversation that begins from a single topic or node, and seems difficult to extend
+to IRC-style conversation where multiple root topics might
+be ongoing in parallel. Still, we imagine it possible to usefully average the path
 accuracy for paths to multiple such nodes.
 
 Similar to \cite{Wang2011a}, in \titlecite{Reconstruction of threaded
@@ -127,16 +125,16 @@ comes from reconstructing reply structure even after it has been lost in the
 source database. This assumes that there was thread-structure in the original
 data.
 
-The authors use a learned classifier to classify pairs of posts as (parent,
-reply) or other. Their features are a mix of shallow textual and post
-metadata features: TF-IDF weighted text distance, presence of quotes and a
-user's name, post-distance and time difference. In the end, they report their 
-best results using a C4.5 decision tree. Since the classification is binary, it 
+The authors report their best results using a C4.5 decision tree to classify
+pairs of posts as in a (parent, reply) relationship or not. Their features are 
+a mix of shallow textual and post metadata features: TF-IDF weighted text distance, 
+presence of quotes and a user's name, post-distance and time difference. 
+Since the classification is binary, it 
 is unclear how the authors cope with ambiguity (e.g $(p1, r)$ and $(p2,r)$ both 
 classified as reply pairs). Although post distance is their best feature, we are skeptical
-that this will generalize to message boards that have a different ordering.
+that this will generalize to message boards that have voted or moderated posts.
 
-The authors collected data from two years of forum posts on
+The authors collected their data from two years of forum posts on
 \url{boards.ie}. When browsing a \textit{thread}, users have a choice of either
 pressing ``quote'' (i.e. replying to a post) or pressing ``reply'' (i.e.
 replying to a thread). The choice is retained in the dataset and used in a
@@ -150,40 +148,44 @@ classifier. The results are contrasted to a baseline classifier that always
 identifies the previous post as the parent of a reply, achieving 80\% F1-score. 
 They also contrast their results with implementations from two other papers we looked at,
 \cite{Elsner2008a} and \cite{Wang2008a}, achieving 88\% F1 and 44.4\% F1-score
-respectively.
+respectively. Although their results are better than the conditional random field approach 
+in \cite{Wang2011a}, the differences in datasets make a direct comparison difficult.
+It seems unlikely that their last-post baseline achieve reasonable results in 
+all the data we will examine.
 
 \subsection{Chat Disentanglement}
 \label{sec:chat}
-We identify the \textit{chat disentanglement} problem as attempting to group
+We identify the \textit{chat disentanglement} problem as groupiing
 shorter conversational-style messages into coherent sub-conversations. Like 
-Section \ref{sec:threaded}, authors still create graphical links between messages. The major
-difference is that the length of each message in a conversation is shorter, and ground truth
-data is quite subjective (what constitutes a sub-conversation?).
+Section \ref{sec:threaded}, authors create graphical links between messages. 
+In contrast, the length of each message in a \textit{chat-style} is shorter, 
+and ground truth data is quite subjective (what constitutes a sub-conversation?).
 
 In \titlecite{You talking to me? a corpus and algorithm for conversation
 disentanglement}{Elsner2008a}, the authors treat disentanglement as a clustering problem between 
-utterances rather than considering speakers. The authors note that speaker-based clustering is
+utterances rather than speakers. The authors note that speaker-based clustering is
 particularly problematic when conversation topics change.
 
-The data for this problem is the manually labeled \#\#Linux corpus from an IRC
-chat room. The annotation for each sentence places it in a certain conversation.
-The corpus also contains information about schisms (change of topic) or minor
-digressions. It is worth investigating whether this manual annotation scheme can
-be applied to a different corpus, which is less topical and where the
-demarcations between conversations may not be so clear. We anticipate the choice
+Their dataset consists of manually annotated conversations in the \#Linux channel of 
+the Freenode IRC network. The annotations consist of identifiers for each
+distinct conversation and also contains information about schisms (change of 
+topic) or minor digressions. It is worth investigating whether this 
+manual annotation scheme can be applied to a different corpus, 
+which is less topical and where the demarcations between conversations 
+may be less clear. We anticipate the choice
 of a more topical corpus would yield better classification accuracy.
 
-The model first uses a MaxEnt classifier to decide whether a given pair of
-utterances belongs to the same conversation. In general, the more likely case is
-for them to be of different conversations. It then attempts to cluster the
+\cite{Elsner2008a} first uses a MaxEnt classifier to decide whether a given pair of
+utterances belongs to the same conversation. In general, it is
+for messages to be of different conversations. It then attempts to cluster the
 utterances to maximize the weighted accuracy of the classifier. However, since
 this is a correlation clustering problem (which is NP-complete), the paper uses
 a greedy search approximation to the clustering process. This yields reasonable
 results; however, we anticipate using this approach and its associated methods
 as a baseline only.
 
-The model for this paper also describes more features that could be applied to
-our planned supervised learning model. These features include pause length
+The paper's model also uses more features that could transfer to
+our own supervised learning model. These features include pause length
 between utterances and word repetitions bucketed according to unigram
 probability to indicate an ongoing conversation about something.
 
@@ -213,7 +215,7 @@ conversational messages directly in the analysis, scaled by the time-distance
 probability, so context expansion can be thought of as adding fractions of 
 word frequency to a message.
 
-Finally, thread detection is done by clustering. The algorithm iterates 
+Finally, thread detection is performed using clustering. The algorithm iterates 
 through the messages, starting with one cluster containing the root message, 
 using cosine similarity to determine whether a new message reaches a distance 
 threshold to join a cluster, or whether it should start a new cluster. The 
@@ -231,16 +233,17 @@ Negotiation labels, or whether an utterance is providing or receiving
 information, 2) sequences, or exchanges of information, and 3) threads, the 
 outcome of the standard disentanglement problem.
 
-The learning model is modularized accordibngly to predict these classes of
+The learning model is modularized accordingly to predict these classes of
 annotation. The three classifiers mainly use n-gram features, including simple
 term frequency and TF-IDF. Not much discussion is given on the choice of these
 features, and why each used different ones. For example, the Negotiation
 classifier uses unigrams and bigrams frequencies and part-of-speech tags, while
 the Previous Cluster classifier, which predicts sequences, uses TF-IDF. 
 
-The algorithm performs two passes over the data, one in which negotations and
-sequences are generated, and the second in which sequences are grouped to form
-threads. For sequence prediction, the model has five hard rules regarding the
+\cite{Mayfield2012a}'s algorithm performs two passes over the data, 
+one in which negotations and sequences are generated, followed by a pass
+that groups sequences together to form threads. For sequence prediction, 
+the model has five hard rules regarding the
 structure of the Negotiation labels. For example, within the same sequence, the
 provider of the information cannot be the same as the receiver. Also, in a
 sequence, at most one continuous series of utterances may be made by the

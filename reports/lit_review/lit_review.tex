@@ -155,7 +155,7 @@ all the data we will examine.
 
 \subsection{Chat Disentanglement}
 \label{sec:chat}
-We identify the \textit{chat disentanglement} problem as groupiing
+We identify the \textit{chat disentanglement} problem as grouping
 shorter conversational-style messages into coherent sub-conversations. Like 
 Section \ref{sec:threaded}, authors create graphical links between messages. 
 In contrast, the length of each message in a \textit{chat-style} is shorter, 
@@ -163,12 +163,12 @@ and ground truth data is quite subjective (what constitutes a sub-conversation?)
 
 In \titlecite{You talking to me? a corpus and algorithm for conversation
 disentanglement}{Elsner2008a}, the authors treat disentanglement as a clustering problem between 
-utterances rather than speakers. The authors note that speaker-based clustering is
+utterances rather than speakers. They note that speaker-based clustering is
 particularly problematic when conversation topics change.
 
 Their dataset consists of manually annotated conversations in the \#Linux channel of 
-the Freenode IRC network. The annotations consist of identifiers for each
-distinct conversation and also contains information about schisms (change of 
+the Freenode IRC network. Each annotation is a mapping to conversion identifiers
+and contains information about schisms (change of 
 topic) or minor digressions. It is worth investigating whether this 
 manual annotation scheme can be applied to a different corpus, 
 which is less topical and where the demarcations between conversations 
@@ -176,13 +176,12 @@ may be less clear. We anticipate the choice
 of a more topical corpus would yield better classification accuracy.
 
 \cite{Elsner2008a} first uses a MaxEnt classifier to decide whether a given pair of
-utterances belongs to the same conversation. In general, it is
-for messages to be of different conversations. It then attempts to cluster the
+utterances belongs to the same conversation. It then attempts to cluster the
 utterances to maximize the weighted accuracy of the classifier. However, since
 this is a correlation clustering problem (which is NP-complete), the paper uses
-a greedy search approximation to the clustering process. This yields reasonable
-results; however, we anticipate using this approach and its associated methods
-as a baseline only.
+a greedy search approximation to clustering. This yields reasonable
+results (71\% F1-score for the classifier against a 57\% majority-class baseline); 
+however, we anticipate using the paper's approach as a starting point only.
 
 The paper's model also uses more features that could transfer to
 our own supervised learning model. These features include pause length
@@ -195,16 +194,16 @@ text conversations}{Wang2009b} expands on the above study by distinguishing
 former refers to using data in the message alone, including word features and 
 time-stamp. Most of the other papers we review do not explicitly make this 
 distinction, as it seems that correlating messages with previous messages is 
-natural idea, but it appears that at this study was among the first of its 
+natural idea. It appears that at this study was among the first of its 
 kind to use context-sensitive data at the date of publishing.
 
 This study augments a basic set of word features with author context, 
 conversational context, and temporal context of a message. Author context 
 refers to all other messages written by the author, and conversational context 
-intuitively refers to all messages by participants in a sub-conversation, 
+refers to all messages by participants in a sub-conversation, 
 where the participants are determined by all other people referred to by name 
 by the author of a message. Temporal context includes the entire message 
-history. Each of these contexts are assigned a probabilility based on a normal 
+history. Each of these contexts are assigned a probability based on a normal 
 distribution over time-distance. Each author and temporal context message is 
 scaled by the distance between the time of the message of interest, and the 
 context message. Conversational context is scaled by the time since the 
@@ -212,7 +211,7 @@ context message author was mentioned.
 
 These contexts are used to ``expand'' a message by including all other 
 conversational messages directly in the analysis, scaled by the time-distance 
-probability, so context expansion can be thought of as adding fractions of 
+probability. Thus, context expansion can be thought of as adding fractions of 
 word frequency to a message.
 
 Finally, thread detection is performed using clustering. The algorithm iterates 
@@ -233,7 +232,7 @@ Negotiation labels, or whether an utterance is providing or receiving
 information, 2) sequences, or exchanges of information, and 3) threads, the 
 outcome of the standard disentanglement problem.
 
-The learning model is modularized accordingly to predict these classes of
+The learning model is divided accordingly to predict these classes of
 annotation. The three classifiers mainly use n-gram features, including simple
 term frequency and TF-IDF. Not much discussion is given on the choice of these
 features, and why each used different ones. For example, the Negotiation
@@ -241,7 +240,7 @@ classifier uses unigrams and bigrams frequencies and part-of-speech tags, while
 the Previous Cluster classifier, which predicts sequences, uses TF-IDF. 
 
 \cite{Mayfield2012a}'s algorithm performs two passes over the data, 
-one in which negotations and sequences are generated, followed by a pass
+one in which negotiations and sequences are generated, followed by a pass
 that groups sequences together to form threads. For sequence prediction, 
 the model has five hard rules regarding the
 structure of the Negotiation labels. For example, within the same sequence, the
@@ -273,14 +272,14 @@ constraints.
 \subsection{Speech/Dialogue Acts}
 Some authors consider the problem of speech disentanglement as traversing 
 a finite state automaton between different \textit{speech acts}, such as
-``question'', ``answer'' or ``statement''. This is a classical problem in
-natural language processing, but many authors evaluate their success extrinsically 
+``question'', ``answer'' or ``statement''. Although this is a classic problem in
+natural language processing, many authors evaluate their success extrinsically 
 using discourse disentanglement.
 
 The authors of \titlecite{Mixed Membership Markov Models for Unsupervised
 Conversation Modeling}{Paula} build an unsupervised Hidden Markov Model that 
-maps speech acts to hidden states. The idea is that the words of a message in a conversation are generated 
-according to language models associated
+maps speech acts to hidden states. They believe that the words of a message 
+in a conversation are generated according to language models associated
 with a state or speech act. 
 
 While the use of Hidden Markov Models is not new, the model presented in this
@@ -297,18 +296,18 @@ speech acts they convey, as investigated in the next paper on Twitter
 unsupervised modeling.
 
 Like \cite{Paula}, the authors of \titlecite{Unsupervised modeling of Twitter
-conversations}{Ritter2010a} consider unsupervised tragging of speech acts.
+conversations}{Ritter2010a} consider unsupervised tagging of speech acts.
 The paper describes an unsupervised LDA-like approach to act tagging 
 and utilizes Twitter \textit{conversations} for
 training purposes. The model was evaluated extrinsically by reconstructing 
-the original order of a scrambled conversation. The author's describe their motivation as
+the original order of a scrambled conversation. The authors describe their motivation as
 generalizing act tagging to remove the human required in supervised approaches. 
 
 The authors constructed a dataset of 1.3 million Twitter \textit{conversations}, 
 where conversations are alternating series of reply-tweets between users. After filtering out shorter 
 and longer conversations, the dataset was used for unsupervised training and evaluation.
 
-\cite{Ritter2010a} tells a generative story of Twitter conversations where a sequence of dialogue
+The paper tells a generative story of Twitter conversations where a sequence of dialogue
 acts are chosen for each post, with words filled in by an act-specific language model.
 Because is biased to model \textit{topics}
 instead of \textit{acts}, the model is refined to include a topic 
@@ -332,18 +331,18 @@ over the baseline, or about a 0.3 $\tau$-correlation. It is encouraging to know
 that conversations appear to have a \textit{role} structure. We believe we can get a lot of mileage
 by adding in additional features like \cite{Wang2008a}'s post-similarity.
 
-Unlike other speech act papers, \cite{Kim2012} focuses on classifying utterances
+Unlike other speech act papers, \titlecite{Classifying Dialogue Acts in Multi-party Live Chats}{Kim2012} 
+focuses on classifying utterances
 in multi-party chat scenarios. The basic unit
-of analysis here is the contiguous message written by an individual. The
+of analysis is a contiguous message written by an individual. The
 experiment classifies messages into discourse acts such as a greeting, yes/no
 question, request for information, or 11 other categories defined in previous
 works, with two new ones introduced here.
 
-In \titlecite{Classifying Dialogue Acts in Multi-party Live Chats}{Kim2012}, the
-authors define several classes of features, then runs various classifiers on
-combinations of them. The features include TD-IDF and boolean unigrams, with
-and without stemming and lemmatization. They also learn on a special subset of
-keywords that indicate various discourse acts, defined in previous works. Other
+The authors define several classes of features, then runs various classifiers on
+combinations of them. The features include TF-IDF and boolean unigrams, with
+and without stemming and lemmatization. They also use special keywords 
+that indicate various discourse acts. Other
 features are 1) structural attributes, such as length of message, location of
 message within the dialogue, and user ID of the speaker, and 2) utterance
 interactions, like the classification and content of previous messages, and
@@ -354,19 +353,17 @@ datasets, one topic-specific forum and one casual live chat. The best
 performance in both datasets approaches 100\% on a model using bag-of-words,
 keywords, and previous utterances, but not structural information. The error
 analysis shows that most errors pertain to ambiguity between pairs of dialogue
-acts, like statements versus respsonses, and over certain words that appear
+acts, like statements versus responses, and over certain words that appear
 frequently in multiple dialogue acts. Finally, the authors conclude that the
 failure of structural information compared to previous works is likely due to
 entanglement.
 
 While this work is not directly about entanglement, it produces good results in
-datasets that are entangled. The authors conclude that work on
+two entangled datasets. The authors conclude that further work on
 disentanglement is needed to improve their results, but we suggest that their
-results show promise in the problem of disentanglement. If we can classify
-dialogue acts without structural information, this could be a useful feature
-for us. Some dialogue acts naturally follow other dialogue acts, so training a
-model on which dialogue acts follow others could yield good results.
-Additionally, this study shows that techniques applied to forums can work well
+results show promise in the problem. Using
+dialogue acts without structural information may be a useful feature
+for us. This study shows that techniques applied to forums can work well
 in live chat scenarios, and vice versa, which indicates that our future model
 could potentially succeed in both settings.
 
@@ -374,8 +371,8 @@ could potentially succeed in both settings.
 
 We have surveyed nine studies on dialogue in multi-party entangled online 
 chat or forum settings. We reviewed several experiments that directly address
-the problem of disentangling conversation threads, either in long-form forum
-or newsgroup messages or in short-form chat or Twitter conversations. These
+the problem of disentangling conversation threads in long-form forum/newsgroup messages,
+short-form chat or Twitter conversations. Most approaches
 invariably involve deconstructing messages into feature vectors and running a 
 well-known machine learning algorithm such as HMM, CRF, and SVM over them.
 There is some variety in how threads are constructed. \cite{Aumayr2011a}

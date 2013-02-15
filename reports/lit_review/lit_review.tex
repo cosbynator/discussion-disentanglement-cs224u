@@ -37,7 +37,7 @@ there is a reasonable amount of literature about disentangling flows of conversa
 in traditional internet forums, IRC chats, Twitter and beyond.
 
 \section{Related Work}
-The approach to conversation disentanglement varies with the datasets used, the 
+Approaches to conversation disentanglement vary with the datasets used, the 
 sub-problems addressed and the method of evaluation. We have grouped the literature into
 three broad categories which will be described below.
 
@@ -89,7 +89,7 @@ without having to model their dependent distributions.
 
 The \cite{Wang2011a} paper defines a conditional distribution over the reply
 relationship given a post sequence and formulates it as a Maximum a Posteriori
-(MAP) problem. A crucial component of this task is to define a set of features
+(MAP) problem. A crucial component of this task is defining a set of features
 that capture dependencies between posts. The paper describes two categories of
 features. The first kind depend only on attributes drawn from a pair
 of posts, such as content similarity score, recency, author name reference, and
@@ -111,8 +111,8 @@ extending the existing framework by adding more features.
 calculates the proportion of correct paths from each node to the root in a
 conversation tree. This approach, however, would work best for a threaded
 conversation that begins from a single topic or node, and seems difficult to extend
-to IRC-style conversation where multiple root topics might
-be ongoing in parallel. Still, we imagine it possible to usefully average the path
+to IRC-style conversation where multiple topics might
+be discussed in parallel. Still, we imagine it possible to usefully average the path
 accuracy for paths to multiple such nodes.
 
 Similar to \cite{Wang2011a}, in \titlecite{Reconstruction of threaded
@@ -150,8 +150,9 @@ They also contrast their results with implementations from two other papers we l
 \cite{Elsner2008a} and \cite{Wang2008a}, achieving 88\% F1 and 44.4\% F1-score
 respectively. Although their results are better than the conditional random field approach 
 in \cite{Wang2011a}, the differences in datasets make a direct comparison difficult.
-It seems unlikely that their last-post baseline achieve reasonable results in 
-all the data we will examine.
+The forums of \url{boards.ie} lend themselves to linear discussion and it seems
+unlikely that the authors last-post baseline will have as much success in 
+other types of forums or chat.
 
 \subsection{Chat Disentanglement}
 \label{sec:chat}
@@ -191,7 +192,7 @@ probability to indicate an ongoing conversation about something.
 \titlecite{Context-based message expansion for disentanglement of interleaved 
 text conversations}{Wang2009b} expands on the above study by distinguishing
 \textit{context-free} and \textit{context-sensitive} message models, where the 
-former refers to using data in the message alone, including word features and 
+former refers to using data in the message alone, including word features and the
 time-stamp. Most of the other papers we review do not explicitly make this 
 distinction, as it seems that correlating messages with previous messages is 
 natural idea. It appears that at this study was among the first of its 
@@ -218,7 +219,7 @@ Finally, thread detection is performed using clustering. The algorithm iterates
 through the messages, starting with one cluster containing the root message, 
 using cosine similarity to determine whether a new message reaches a distance 
 threshold to join a cluster, or whether it should start a new cluster. The 
-experiment result shows that context features outperform \cite{Elsner2008a} and
+result shows that context features outperform \cite{Elsner2008a} and
 are within 88\% of the human annotation performance.
 
 This paper provides insights into additional features that our project could 
@@ -309,7 +310,7 @@ and longer conversations, the dataset was used for unsupervised training and eva
 
 The paper tells a generative story of Twitter conversations where a sequence of dialogue
 acts are chosen for each post, with words filled in by an act-specific language model.
-Because is biased to model \textit{topics}
+Because this is biased to model \textit{topics}
 instead of \textit{acts}, the model is refined to include a topic 
 for the entire conversation. The language model is also refined to choose words from
 the conversation topic, the dialog act of the tweet, and from general English. The result
@@ -375,10 +376,10 @@ the problem of disentangling conversation threads in long-form forum/newsgroup m
 short-form chat or Twitter conversations. Most approaches
 invariably involve deconstructing messages into feature vectors and running a 
 well-known machine learning algorithm such as HMM, CRF, and SVM over them.
-There is some variety in how threads are constructed. \cite{Aumayr2011a}
+There is some variety in how threads are constructed: \cite{Aumayr2011a} uses
 a binary classification on whether two messages have a parent-child
 relationship, while \cite{Mayfield2012a} cluster messages into threads with 
-some cosine similarity metric. Our initial approach to the project will be to 
+a cosine similarity metric. Our initial approach to the project will be to 
 start with a model that emulates some of the above.
 
 Beyond disentanglement, we reviewed three papers that discuss annotating 

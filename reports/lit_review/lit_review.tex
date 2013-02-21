@@ -1,12 +1,14 @@
 \documentclass[11pt]{article}
 \usepackage{acl2012}
+\usepackage{geometry}
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{url}
+\newgeometry{margin=2.85cm}
 \DeclareMathOperator*{\argmax}{arg\,max}
-\setlength\titlebox{6.5cm}    % Expanding the titlebox
+\setlength\titlebox{6.8cm}    % Expanding the titlebox
 
 \title{{\small CS224U Final Project} \\ Discourse Disentanglement \\Literature Review}
 \author{Julius Cheng \\
@@ -26,15 +28,15 @@
 \maketitle
 
 \section{Introduction}
-Our project is focused on reconstructing threaded conversation trees
-from a flattened representation. Intuitively, one could think of 
-taking a post's comment tree (e.g. Reddit), flattening it, sorting by time, performing
-hierarchical clustering using linguistic phenomena and measuring performance 
-against the original comment trees. As we have
-discovered, this project treads into the territory of \textit{discourse disentanglement}.
-While our particular problem does not appear to have been tackled in the past,
-there is a reasonable amount of literature about disentangling flows of conversation
-in traditional internet forums, IRC chats, Twitter and beyond.
+Our project is focused on reconstructing conversational structure from a
+flattened representation. One example of this would be to, say, take a post's
+comment tree (e.g. Reddit), flatten it, sort by time, perform hierarchical
+clustering using linguistic phenomena and measure performance against the
+original comment trees. As we have discovered, this project treads into the
+territory of \textit{discourse disentanglement}. While our particular problem
+does not appear to have been tackled in the past, there is a reasonable amount
+of literature about disentangling flows of conversation in traditional
+internet forums, IRC chats, Twitter and beyond.
 
 \section{Related Work}
 Approaches to conversation disentanglement vary with the datasets used, the 
@@ -48,13 +50,12 @@ graphical parent-child links between posts under a related topic. The primary ch
 of \textit{forum-style} problems are longer, well formed posts 
 linked by relatively unsubjective ground truth links.
 
-In \titlecite{Recovering implicit thread structure in newsgroup style conversations}{Wang2008a}, 
-the authors address reconstructing thread structure using using 
-message similarity alone. They take a flat
-time-ordered conversation and use a similarity matrix to add graphical
-links between messages. They claim that flat conversation structure
-limits further data analysis, such as identification of significant
-contributions under a topic. 
+In \titlecite{Recovering implicit thread structure in newsgroup style
+conversations}{Wang2008a}, the authors address reconstructing thread structure
+using using message similarity alone. They take a flat time-ordered
+conversation and use a similarity matrix to add graphical links between
+messages. They claim that flat conversation structure limits further data
+analysis, such as identification of significant contributions under a topic.
 
 The basis of their similarity algorithm is TF-IDF: they
 construct a lower triangular cosine-distance matrix of posts and use rules 
@@ -63,13 +64,14 @@ matrix, which they improve by limiting the column-distance (window size), and di
 the matrix by the time lag between elements. The authors use a grid search to
 determine right value for the threshold and discount parameters.
 
-\cite{Wang2008a}'s dataset, \texttt{LegSim}, consists of 28 \textit{topics} and a total of
-478 \textit{messages}. Each topic is a discussion about a hypothetical legislative bill, 
-and the messages are reactions written by students in a political science class. 
-The data itself is flat, but the authors manually create directed links representing
-parent-child relationships. It struck us as peculiar that the authors chose to work
-with such a small corpus and rely on manually annotated ground truth instead of using
-threaded ground truth.
+The dataset used by \texttt{LegSim} \cite{Wang2008a}, consists of 28
+\textit{topics} and a total of 478 \textit{messages}. Each topic is a
+discussion about a hypothetical legislative bill, and the messages are
+reactions written by students in a political science class. The data itself is
+flat, but the authors manually create directed links representing parent-child
+relationships. It struck us as peculiar that the authors chose to work with
+such a small corpus and rely on manually annotated ground truth instead of
+using threaded ground truth.
 
 Accordingly, the authors evaluate their predicted annotations using precision/recall of
 their graph edges between messages. They identify their best results using
@@ -81,11 +83,11 @@ system instead of a rule-based system and utilizing features besides post
 similarity.  Furthermore, we need to use a dramatically larger corpus and without manually
 annotated links.
 
-Unlike \cite{Wang2008a}, the authors of in \titlecite{Learning online discussion structures
-by conditional random fields}{Wang2011a} take a machine learning approach using
-similar features. Their approach uses conditional random
-fields and is able to utilize features for link prediction
-without having to model their dependent distributions.
+Unlike \cite{Wang2008a}, the authors of in \titlecite{Learning online
+discussion structures by conditional random fields}{Wang2011a} take a machine
+learning approach using similar features. Their approach uses conditional
+random fields and is able to utilize features for link prediction without
+having to model their dependent distributions.
 
 The \cite{Wang2011a} paper defines a conditional distribution over the reply
 relationship given a post sequence and formulates it as a Maximum a Posteriori

@@ -43,15 +43,16 @@ papers and baselines using the blended F1-score.
 \section*{Extrinsic Evaluation}
 Extrinsic evaluation measures the performance of a system
 based on a task that the system does not directly address. For example,
-one might determine the success of their part of speech tagger
+one might determine the success of their part-of-speech tagger
 based on the relative performance of a parser that uses it.
 
 In our
-case, we could consider the task of identifying off-topic or 
-irrelevant posts. For example, if we create a classifier
-that is able to classify (parent, child) pairs in a discussion, we could consider
-using the confidence of the classifier to identify potential
-off-topic parent-child pairs in a comment tree. 
+case, an extrinsic evaluation of our system could mean using our
+thread-detecting system to identify off-topic or irrelevant posts. For example,
+if we create a classifier that is able to classify (parent, child) pairs in a
+discussion, we could consider using the confidence of the classifier to
+identify potential off-topic parent-child pairs in a comment tree. Then, our
+system is evaluated based on its performance in this \textit{extrinsic} task.
 
 \section*{Automatic Evaluation}
 Automatic evaluation is characterized by the lack of human

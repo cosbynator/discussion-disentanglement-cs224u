@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage{spverbatim}
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+
+\setlength{\parskip}{1ex}
+\setlength{\parindent}{0pt}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\title{CS224U Homework 11}
+\author{
+Julius Cheng\\
+Thomas Dimson\\
+Milind Ganjoo
+}
+\begin{document}
+\maketitle
+
+\section*{Intrinsic Evaluation}
+Intrinsic evaluation measures the performance of a system
+based on predefined criteria about the system itself. An example
+might be the accuracy of word sense disambiguation against
+a set of human-annotated ground truths. 
+
+In our project, we are dealing with the problem of reconstructing
+structure in data after it has been lost. Namely, we have threaded
+conversations where we throw away the threading and attempt to 
+reconstruct it using the content of the messages. We could evaluate
+our system \textit{intrinsically} based on precision/recall of the 
+(parent, child) links in each message.
+
+\cite{Aumayr2011a} uses a similar evaluation. In their case,
+they are dealing with constructing (parent, child) links in a traditional
+online forum. They calculate Precision/Recall based on the number of 
+links they correctly classify and compare their results against previous
+papers and baselines using the blended F1-score.
+
+\section*{}
+
+\bibliography{hw11}{} 
+\bibliographystyle{plain}
+
+\end{document}

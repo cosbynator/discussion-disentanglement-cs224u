@@ -14,8 +14,8 @@
 
 \title{CS224U Homework 11}
 \author{
-Julius Cheng\\
-Thomas Dimson\\
+Julius Cheng \and
+Thomas Dimson \and
 Milind Ganjoo
 }
 \begin{document}
@@ -31,7 +31,7 @@ In our project, we are dealing with the problem of reconstructing
 structure in data after it has been lost. Namely, we have threaded
 conversations where we throw away the threading and attempt to 
 reconstruct it using the content of the messages. We could evaluate
-our system \textit{intrinsically} based on precision/recall of the 
+our system \textit{intrinsically} by calculating the precision/recall of the 
 (parent, child) links in each message.
 
 \cite{Aumayr2011a} uses a similar evaluation. In their case,
@@ -40,7 +40,31 @@ online forum. They calculate Precision/Recall based on the number of
 links they correctly classify and compare their results against previous
 papers and baselines using the blended F1-score.
 
-\section*{}
+\section*{Extrinsic Evaluation}
+Extrinsic evaluation measures the performance of a system
+based on a task that the system does not directly address. For example,
+one might determine the success of their part of speech tagger
+based on the relative performance of a parser that uses it.
+
+In our
+case, we could consider the task of identifying off-topic or 
+irrelevant posts. For example, if we create a classifier
+that is able to classify (parent, child) pairs in a discussion, we could consider
+using the confidence of the classifier to identify potential
+off-topic parent-child pairs in a comment tree. 
+
+\section*{Automatic Evaluation}
+Automatic evaluation is characterized by the lack of human
+input in determining the quality of a system. For example, a computer
+is able to automatically calculate BLEU scores to evaluate machine
+translation systems.
+
+Following our extrinsic evaluation example, we could \textit{automatically}
+evaluate how well our system performs in the \textit{extrinsic} task 
+of off-topic post classification by computing precision/recall
+of ``below threshold'' (downvoted by moderators) posts in a discussion. This
+data is presumably available held alongside the comments in our datasets.
+
 
 \bibliography{hw11}{} 
 \bibliographystyle{plain}

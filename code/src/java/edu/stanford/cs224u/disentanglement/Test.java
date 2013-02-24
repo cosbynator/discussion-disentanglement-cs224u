@@ -1,3 +1,5 @@
+package edu.stanford.cs224u.disentanglement;
+
 import com.google.common.base.Joiner;
 
 public class Test {

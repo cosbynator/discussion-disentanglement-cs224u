@@ -1,12 +1,18 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 
 public class MessageTree implements Serializable {
+    private static final long serialVersionUID = -3368739921774391871L;
     private final MessageNode root;
     private final String title;
 
@@ -20,6 +26,24 @@ public class MessageTree implements Serializable {
 
     public void addMetadata(String name, Object value) {
         metadata.put(name, value);
+    }
+
+    public List<Message> linearize() {
+        final List<Message> ret = Lists.newArrayList();
+        this.root.walk(new Function<MessageNode, Void>() {
+            @Override
+            public Void apply(MessageNode messageNode) {
+                ret.add(messageNode.getMessage());
+                return null;
+            }
+        });
+        Collections.sort(ret, new Comparator<Message>() {
+            @Override
+            public int compare(Message o1, Message o2) {
+                return o1.getTimestamp().compareTo(o2.getTimestamp());
+            }
+        });
+        return ret;
     }
 
     public MessageNode getRoot() {

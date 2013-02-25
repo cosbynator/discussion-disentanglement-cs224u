@@ -1,5 +1,6 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
+import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 
@@ -7,6 +8,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class MessageNode implements Serializable {
+    private static final long serialVersionUID = -3910005688986138369L;
     private final Message message;
     private final List<MessageNode> children;
 
@@ -36,6 +38,13 @@ public class MessageNode implements Serializable {
 
     public List<MessageNode> getChildren() {
         return children;
+    }
+
+    public void walk(Function<MessageNode, Void> walker) {
+        walker.apply(this);
+        for(MessageNode n : children) {
+            n.walk(walker);
+        }
     }
 
     @Override

@@ -1,38 +1,45 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Objects;
+import com.google.common.collect.Maps;
 
-import java.util.List;
+import java.io.Serializable;
+import java.util.Map;
 
-public class MessageTree {
-    private final Message node;
-    private final List<Message> children;
+public class MessageTree implements Serializable {
+    private final MessageNode root;
+    private final String title;
 
-    public MessageTree(Message m) {
-        this.node = m;
-        this.children = Lists.newArrayList();
+    private final Map<String, Object> metadata;
+
+    public MessageTree(MessageNode root, String title) {
+        this.root = root;
+        this.title = title;
+        metadata = Maps.newHashMap();
     }
 
-    public MessageTree(Message m, List<Message> messages) {
-        this(m);
-        addChildren(messages);
+    public void addMetadata(String name, Object value) {
+        metadata.put(name, value);
     }
 
-    public void addChildren(List<Message> messages) {
-        this.children.addAll(messages);
+    public MessageNode getRoot() {
+        return root;
     }
 
-    public void addChildren(Message... messages) {
-        for (Message m : messages) {
-            children.add(m);
-        }
+    public String getTitle() {
+        return title;
     }
 
-    public Message getNode() {
-        return node;
+    public Map<String, Object> getMetadata() {
+        return metadata;
     }
 
-    public List<Message> getChildren() {
-        return children;
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("root", root)
+                .add("title", title)
+                .add("metadata", metadata)
+                .toString();
     }
 }

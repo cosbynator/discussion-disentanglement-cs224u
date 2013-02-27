@@ -63,10 +63,10 @@ public class MessageTree implements Serializable {
                 .add("metadata", metadata)
                 .toString();
     }
-    public static Set<MessagePair> extractEdges(MessageTree tree) {
+    public Set<MessagePair> extractEdges() {
         Stack<MessageNode> stack = new Stack<MessageNode>();
         Set<MessagePair> edges = new HashSet<MessagePair>();
-        stack.push(tree.getRoot());
+        stack.push(getRoot());
         while (!stack.empty()) {
             MessageNode parent = stack.pop();
             for (MessageNode child : parent.getChildren()) {

@@ -6,10 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class MessageTree implements Serializable {
     private static final long serialVersionUID = -3368739921774391871L;
@@ -66,4 +63,18 @@ public class MessageTree implements Serializable {
                 .add("metadata", metadata)
                 .toString();
     }
+    public static Set<MessagePair> extractEdges(MessageTree tree) {
+        Stack<MessageNode> stack = new Stack<MessageNode>();
+        Set<MessagePair> edges = new HashSet<MessagePair>();
+        stack.push(tree.getRoot());
+        while (!stack.empty()) {
+            MessageNode parent = stack.pop();
+            for (MessageNode child : parent.getChildren()) {
+                edges.add(new MessagePair(parent.getMessage(), child.getMessage()));
+                stack.push(child);
+            }
+        }
+        return edges;
+    }
+
 }

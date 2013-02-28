@@ -8,7 +8,6 @@ import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessagePair;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.core.Instances;
@@ -34,7 +33,7 @@ public class AdvancedBaseline {
 
         DataBuilder builder = new DataBuilder(MessagePairCategories.class, "AdvancedBaseline");
         builder.addFeature(new JaccardSimilarityFeature());
-        builder.addFeature(new BagOfWordsIntersectingFeature(sentences, 500));
+        builder.addFeature(new BagOfWordsIntersectingFeature(sentences, 5));
 
         // TODO: Add more features here...
 

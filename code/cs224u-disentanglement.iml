@@ -16,7 +16,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/java" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
-    <content url="file://$MODULE_DIR$/../data" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="jruby-1.7.3-p385 facet library" level="application" />

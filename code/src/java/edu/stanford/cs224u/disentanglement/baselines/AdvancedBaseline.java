@@ -39,7 +39,6 @@ public class AdvancedBaseline {
         // TODO: Add more features here...
 
         System.out.println("Generating training examples...");
-        int k = 0;
         for(MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
             for(MessagePair p : tree.extractEdges()) {
                 builder.addExample(p, MessagePairCategories.RELATED);
@@ -58,8 +57,6 @@ public class AdvancedBaseline {
                 randomReplacement = otherChoices.get(0).equals(p.getSecond()) ? otherChoices.get(1) : otherChoices.get(0);
                 pReplace = new MessagePair(p.getFirst(), randomReplacement);
                 builder.addExample(pReplace, MessagePairCategories.NOT_RELATED);
-
-                if (++k > 3) break;
             }
         }
 

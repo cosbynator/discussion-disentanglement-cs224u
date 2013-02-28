@@ -2,6 +2,7 @@ package edu.stanford.cs224u.disentanglement.structures;
 
 import com.google.common.base.Function;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -12,7 +13,6 @@ public class MessageTree implements Serializable {
     private static final long serialVersionUID = -3368739921774391871L;
     private final MessageNode root;
     private final String title;
-
     private final Map<String, Object> metadata;
 
     public MessageTree(MessageNode root, String title) {
@@ -21,10 +21,12 @@ public class MessageTree implements Serializable {
         metadata = Maps.newHashMap();
     }
 
+    // TODO: Do we need to make this immutable?
     public void addMetadata(String name, Object value) {
         metadata.put(name, value);
     }
 
+    // TODO: Consider renaming and immutifying
     public List<Message> linearize() {
         final List<Message> ret = Lists.newArrayList();
         this.root.walk(new Function<MessageNode, Void>() {
@@ -52,7 +54,7 @@ public class MessageTree implements Serializable {
     }
 
     public Map<String, Object> getMetadata() {
-        return metadata;
+        return Collections.unmodifiableMap(metadata);
     }
 
     @Override
@@ -63,18 +65,23 @@ public class MessageTree implements Serializable {
                 .add("metadata", metadata)
                 .toString();
     }
+
+    /**
+     * Extract an immutable set of edges from the tree. An edge is represented by a <code>MessagePair</code> object.
+     *
+     * @return an immutable set of edges from the tree
+     */
     public Set<MessagePair> extractEdges() {
         Stack<MessageNode> stack = new Stack<MessageNode>();
-        Set<MessagePair> edges = new HashSet<MessagePair>();
         stack.push(getRoot());
+        ImmutableSet.Builder<MessagePair> builder = new ImmutableSet.Builder<MessagePair>();
         while (!stack.empty()) {
             MessageNode parent = stack.pop();
             for (MessageNode child : parent.getChildren()) {
-                edges.add(new MessagePair(parent.getMessage(), child.getMessage()));
+                builder.add(new MessagePair(parent.getMessage(), child.getMessage()));
                 stack.push(child);
             }
         }
-        return edges;
+        return builder.build();
     }
-
 }

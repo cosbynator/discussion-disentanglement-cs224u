@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{spverbatim}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{color}
+
+\setlength{\parskip}{1ex}
+\setlength{\parindent}{0pt}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\title{CS224U Project Milestone}
+\author{
+Julius Cheng \and
+Thomas Dimson \and
+Milind Ganjoo
+}
+\begin{document}
+\maketitle
+
+\section*{Overview}
+
+Our project focuses on conversation disentanglement, which broadly refers to
+the problem of guessing the structure of a multi-party, asynchronous
+conversation. We are building a supervised learner for the specific domain
+of forum disentanglement, where the unit of analysis is, for any message, which
+message it is written in reply to, if any.
+
+\section*{Dataset}
+
+For this project, we extract data from Reddit, an online link-sharing and
+discussion site. We extract conversations from AskReddit, a popular subforum
+where no links are shared, but users initiate topics of conversation. We treat
+the initial post as the root of a conversation tree, and each top-level comment
+as a child of the root. Each message node is annotated with various data such
+as timestamp, username, and more.
+
+These trees are given to the learner as training data. One can say that
+pairs of messages where one is in reply to the other are positive training
+examples, and all other pairs are negative examples.
+
+At test time, the learner is given a conversation linearized by time, with all
+reply structure removed, and it outputs a predicted tree.
+
+\section*{Evaluation}
+
+For now, we are primarily considering F1 score as our evaluation metric, that
+is, we calculate precision and recall on how many predicted links were correct,
+and how many actual links were corrected predicted. We are considering two
+version of F1, one were precision and recall is calculated pairwise across all
+messages in all conversations, and the other were F1 is calculated
+per-conversation, and the scores are averaged in the end. We expect to have
+very poor performance in large conversations (AskReddit conversations often
+reach thousands of comments), so we expect the average F1 score metric to be
+more forgiving.
+
+We are considering, but haven't implemented tree edit distance as another form
+of evaluation.
+
+\section*{Baseline and preliminary results}
+
+{put baseline SVM results here}
+
+\section*{Work in progress}
+
+{put the things we plan to do here}
+
+\bibliography{hw11}{} 
+\bibliographystyle{plain}
+
+\end{document}

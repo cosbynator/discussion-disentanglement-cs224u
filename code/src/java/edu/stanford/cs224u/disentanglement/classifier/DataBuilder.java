@@ -6,7 +6,6 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import edu.stanford.cs224u.disentanglement.features.Feature;
 import edu.stanford.cs224u.disentanglement.structures.MessagePair;
-import weka.classifiers.AbstractClassifier;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;

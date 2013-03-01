@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import edu.stanford.cs224u.disentanglement.structures.MessagePair;
 import edu.stanford.cs224u.disentanglement.util.WordTokenizer;
 import weka.core.Attribute;
-import weka.core.Utils;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -7,7 +7,6 @@ import edu.stanford.cs224u.disentanglement.baselines.BasicBaseline;
 import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
-import org.apache.commons.lang.WordUtils;
 
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
@@ -15,11 +14,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public class Test {
-    static class CommandLineParser {
-        @Parameter(names = {"-exp", "-experiment"}, description = "Name of experiment to run")
-        private String experiment = "printData";
-    }
-
     public static void main(String[] args) throws FileNotFoundException, ScriptException {
         CommandLineParser parser = new CommandLineParser();
         new JCommander(parser, args);
@@ -31,14 +25,16 @@ public class Test {
             m.invoke(null);
         } catch (NoSuchMethodException e) {
             System.err.println("Could not find experiment named '" + experimentName + "'!");
-            e.printStackTrace();
             System.exit(1);
         } catch (InvocationTargetException e) {
-            System.err.println("Could not execute experiment named '" + experimentName + "'!");
-            e.printStackTrace();
+            if (e.getCause() != null) {
+                e.getCause().printStackTrace();
+            } else {
+                e.printStackTrace();
+            }
             System.exit(1);
         } catch (IllegalAccessException e) {
-            System.err.println("Could not execute experiment named '" + experimentName + "'!");
+            System.err.println("Insufficient access privileges while executing experiment named '" + experimentName + "'!");
             e.printStackTrace();
             System.exit(1);
         }
@@ -53,12 +49,17 @@ public class Test {
     }
 
     public static void testPrintData() {
-        for(MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
+        for (MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
             System.out.println("****");
             System.out.println(tree);
-            for(Message m : tree.linearize()) {
+            for (Message m : tree.linearize()) {
                 System.out.println("\t" + m);
             }
         }
+    }
+
+    static class CommandLineParser {
+        @Parameter(names = {"-exp", "-experiment"}, description = "Name of experiment to run")
+        private String experiment = "PrintData";
     }
 }

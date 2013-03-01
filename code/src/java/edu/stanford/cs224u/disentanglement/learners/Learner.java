@@ -1,7 +1,7 @@
 package edu.stanford.cs224u.disentanglement.learners;
 
 import edu.stanford.cs224u.disentanglement.structures.*;
-import edu.stanford.cs224u.disentanglement.util.*;
+
 import java.util.ArrayList;
 import java.util.List;
 

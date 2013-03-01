@@ -1,11 +1,9 @@
 package edu.stanford.cs224u.disentanglement.evaluation;
 
 import edu.stanford.cs224u.disentanglement.structures.*;
-import edu.stanford.cs224u.disentanglement.util.*;
-import java.util.HashSet;
+
 import java.util.Iterator;
 import java.util.Set;
-import java.util.Stack;
 
 
 public class AverageTreeF1Evaluator implements Evaluator {

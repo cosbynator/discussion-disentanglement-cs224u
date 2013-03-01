@@ -22,7 +22,7 @@ enum MessagePairCategories {
 }
 
 public class AdvancedBaseline {
-    public static void main(String[] args) throws Exception {
+    public static void runBaseline() {
         System.out.println("Generating vocabulary...");
         List<String> sentences = Lists.newArrayList();
         for(MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
@@ -62,12 +62,16 @@ public class AdvancedBaseline {
         System.out.println("Building classifier...");
         SMO classifier = new SMO();
         Instances trainData = builder.buildData();
-        classifier.buildClassifier(trainData);
-        System.out.println(classifier);
+        try {
+            classifier.buildClassifier(trainData);
+            System.out.println(classifier);
 
-        // TODO: Write advanced testing/evaluation code...
-        Evaluation eval = new Evaluation(trainData);
-        eval.crossValidateModel(classifier, trainData, 10, new Random(1));
-        System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+            // TODO: Write advanced testing/evaluation code...
+            Evaluation eval = new Evaluation(trainData);
+            eval.crossValidateModel(classifier, trainData, 10, new Random(1));
+            System.out.println(eval.toSummaryString("\nResults\n======\n", false));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -54,7 +54,7 @@ public class BagOfWordsIntersectingFeature extends AbstractFeature {
 
     @Override
     public Map<Integer, Double> processExample(MessagePair example) {
-        Map<Integer, Double> values = Maps.newHashMap();
+        Map<Integer, Double> values = Maps.newTreeMap();
         for (String token : example.getWordIntersection()) {
             int ind = Collections.binarySearch(vocabulary, token);
             if (ind >= 0) {

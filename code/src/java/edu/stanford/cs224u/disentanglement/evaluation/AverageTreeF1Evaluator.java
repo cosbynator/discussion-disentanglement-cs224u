@@ -1,39 +1,38 @@
 package edu.stanford.cs224u.disentanglement.evaluation;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import edu.stanford.cs224u.disentanglement.structures.*;
+import edu.stanford.cs224u.disentanglement.util.Pair;
 
 import java.util.Iterator;
 import java.util.Set;
 
 
 public class AverageTreeF1Evaluator implements Evaluator {
+    double totalF1 = 0.0;
+    int treeCount = 0;
 
-    public double evaluate(Iterable<MessageTree> targetTrees, Iterable<MessageTree> predictedTrees) {
-        Iterator<MessageTree> predictedIterator = predictedTrees.iterator();
-        double totalF1 = 0.0;
-        int treeCount = 0;
-        for (MessageTree target : targetTrees) {
-            double correctPredictions = 0.0;
-            double totalPredictions = 0.0;
-            double correctRetrievals = 0.0;
-            double totalRetrievals = 0.0;
-            Set<MessagePair> targetEdges = target.extractEdges();
-            // Assumes predictedTrees has the same number of elements as targetTrees
-            Set<MessagePair> predictedEdges = predictedIterator.next().extractEdges();
-            for (MessagePair predictedEdge : predictedEdges) {
-                if (targetEdges.contains(predictedEdge)) correctPredictions += 1.0;
-                totalPredictions += 1.0;
+    @Override
+    public void addPrediction(MessageTree gold, MessageTree guess) {
+        PairwiseF1Evaluator evaluator = new PairwiseF1Evaluator();
+        evaluator.addPrediction(gold,guess);
+        treeCount++;
+        totalF1 += evaluator.getEvaluation().f1;
+    }
+
+    @Override
+    public Evaluation getEvaluation() {
+        final double averageF1 = totalF1 / treeCount;
+        return new Evaluation() {
+            @Override
+            public String toString() {
+                return Objects.toStringHelper("AveragePairwiseF1")
+                        .add("averageF1", averageF1)
+                        .toString();
             }
-            for (MessagePair targetEdge : targetEdges) {
-                if (predictedEdges.contains(targetEdge)) correctRetrievals += 1.0;
-                totalRetrievals += 1.0;
-            }
-            double precision = correctPredictions / totalPredictions;
-            double recall = correctRetrievals / totalRetrievals;
-            totalF1 += 2 * precision * recall / (precision + recall);
-            treeCount++;
-        }
-        return totalF1 / treeCount;
+        };
     }
 
 }

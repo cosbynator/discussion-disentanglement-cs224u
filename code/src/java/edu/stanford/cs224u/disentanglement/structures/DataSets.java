@@ -13,13 +13,21 @@ import java.util.zip.GZIPInputStream;
 public enum DataSets {
     ASK_REDDIT_DEV("data/AskReddit/dev"),
     ASK_REDDIT_TRAIN("data/AskReddit/train"),
+    ASK_REDDIT_SMALL_TRAIN("data/AskReddit/train",1),
     ASK_REDDIT_TEST("data/AskReddit/test");
 
     private final File location;
+    private Integer sampleSize;
 
     private DataSets(String location) {
         this.location = new File(location);
     }
+
+    private DataSets(String location, Integer sampleSize) {
+        this.location = new File(location);
+        this.sampleSize = sampleSize;
+    }
+
 
     public Iterable<MessageTree> read() {
         List<MessageTree> ret = Lists.newArrayList();
@@ -33,6 +41,10 @@ public enum DataSets {
                 return pathname.toString().contains(".gz");
             }
         }));
+
+        if(sampleSize != null) {
+            files = files.subList(0,Math.min(sampleSize, files.size()));
+        }
 
         return Collections2.transform(files, new Function<File, MessageTree>() {
             @Override

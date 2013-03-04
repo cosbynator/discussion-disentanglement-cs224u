@@ -56,12 +56,17 @@ public class DataBuilder {
         data.put(example, exampleCategory.toString());
     }
 
+    public Instance buildClassificationInstance(MessagePair messagePair) {
+        return getMergedInstance(messagePair);
+    }
+
     public Instances buildData() {
         Instances instances = new Instances(datasetId, getMergedAttributes(), 0);
         instances.setClassIndex(0);
 
         for (MessagePair pair : data.keySet()) {
-            Instance instance = getMergedInstance(pair, instances);
+            Instance instance = getMergedInstance(pair);
+            instance.setDataset(instances);
             instance.setValue(0, data.get(pair));
             instances.add(instance);
         }
@@ -78,7 +83,7 @@ public class DataBuilder {
         return mergedList;
     }
 
-    private Instance getMergedInstance(MessagePair example, Instances instances) {
+    private Instance getMergedInstance(MessagePair example) {
         Instance mergedInstance = new SparseInstance(1);
         for (Feature f : features) {
             Map<Integer, Double> values = f.processExample(example);
@@ -86,7 +91,6 @@ public class DataBuilder {
                     Ints.toArray(values.keySet()), f.getMaxLength());
             mergedInstance = mergedInstance.mergeInstance(instance);
         }
-        mergedInstance.setDataset(instances);
         return mergedInstance;
     }
 }

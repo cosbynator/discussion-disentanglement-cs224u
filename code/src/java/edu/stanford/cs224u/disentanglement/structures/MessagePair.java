@@ -10,6 +10,10 @@ import java.util.Set;
  * Utility class for representing a pair of messages, and utility functions to act on it.
  */
 public class MessagePair extends Pair<Message, Message> {
+    public static MessagePair of(Message first, Message second) {
+        return new MessagePair(first, second);
+    }
+
     public MessagePair(Message first, Message second) {
         super(first, second);
     }

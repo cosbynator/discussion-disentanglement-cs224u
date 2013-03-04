@@ -2,8 +2,9 @@ package edu.stanford.cs224u.disentanglement;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import edu.stanford.cs224u.disentanglement.baselines.AdvancedBaseline;
-import edu.stanford.cs224u.disentanglement.baselines.BasicBaseline;
+import edu.stanford.cs224u.disentanglement.disentanglers.AllReplyToOpDisentangler;
+import edu.stanford.cs224u.disentanglement.disentanglers.LinearThreadDisentangler;
+import edu.stanford.cs224u.disentanglement.disentanglers.SVMDisentangler;
 import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
@@ -40,12 +41,28 @@ public class Test {
         }
     }
 
-    public static void testBaseline() {
-        BasicBaseline.runBaseline();
+    public static void testLinearThreadBaselineLearner() {
+        new DisentanglementPipeline()
+                .withLearner(new LinearThreadDisentangler())
+                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
+                .withTestData(DataSets.ASK_REDDIT_TEST)
+                .run();
     }
 
-    public static void testAdvancedBaseline() throws Exception {
-        AdvancedBaseline.runBaseline();
+    public static void testAllReplyBaseline() {
+        new DisentanglementPipeline()
+                .withLearner(new AllReplyToOpDisentangler())
+                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
+                .withTestData(DataSets.ASK_REDDIT_TEST)
+                .run();
+    }
+
+    public static void testSVMSanity() throws Exception {
+        new DisentanglementPipeline()
+                .withLearner(new SVMDisentangler())
+                .withTrainData(DataSets.ASK_REDDIT_SMALL_TRAIN)
+                .withTestData(DataSets.ASK_REDDIT_SMALL_TRAIN)
+                .run();
     }
 
     public static void testPrintData() {

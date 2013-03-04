@@ -1,29 +1,30 @@
-package edu.stanford.cs224u.disentanglement.learners;
+package edu.stanford.cs224u.disentanglement.disentanglers;
 
 import edu.stanford.cs224u.disentanglement.structures.*;
 
 import java.util.Iterator;
 import java.util.List;
 
-// For any test instance, guess that it's a single linear thread, where each
-// message is responding to the closest previous message.
+// For any test instance, guess that all messages are replies to the root.
 
-public class LinearThreadBaselineLearner extends Learner {
-    public LinearThreadBaselineLearner() {
+public class AllReplyToOpDisentangler implements Disentangler {
+    public AllReplyToOpDisentangler() {
         super();
     }
 
-    public void learn(Iterable<MessageTree> trainingData) {}
+    @Override
+    public void train (Iterable<MessageTree> trainingData) {
 
+    }
+
+    @Override
     public MessageTree predict(List<Message> testInstance) {
         // Assumes test instance has at least one message
         Iterator<Message> iter = testInstance.iterator();
         MessageTree prediction = new MessageTree(new MessageNode(iter.next()), "");
-        MessageNode current = prediction.getRoot();
         while (iter.hasNext()) {
             MessageNode nextNode = new MessageNode(iter.next());
-            current.addChildren(nextNode);
-            current = nextNode;
+            prediction.getRoot().addChildren(nextNode);
         }
         return prediction;
     }

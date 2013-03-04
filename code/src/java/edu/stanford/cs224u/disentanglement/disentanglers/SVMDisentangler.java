@@ -28,9 +28,11 @@ public class SVMDisentangler implements Disentangler {
     private SMO classifier;
     private final DataBuilder dataBuilder;
     private Instances trainData;
+    private final int numFalseExamples = 1;
+    private Random random;
 
     public SVMDisentangler() {
-
+        random = new Random(1); // fixed seed for now
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler");
     }
 
@@ -51,29 +53,28 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.pop();
 
         Benchmarker.push("Create data builder");
-        dataBuilder.addFeature(new JaccardSimilarityFeature());
+        //dataBuilder.addFeature(new JaccardSimilarityFeature());
         dataBuilder.addFeature(new BagOfWordsIntersectingFeature(sentences, 5));
         Benchmarker.pop();
 
         Benchmarker.push("Adding examples");
         for(MessageTree tree : trainingData) {
+            List<Message> linearized = tree.linearize();
             for(MessagePair p : tree.extractEdges()) {
                 dataBuilder.addExample(p, MessagePairCategories.RELATED);
+                int foundExamples = 0;
+                int iterations = 0;
+                while(iterations < 100 && foundExamples < numFalseExamples) {
+                    iterations++;
+                    Message example = linearized.get(random.nextInt(linearized.size()));
+                    if(example.equals(p.getSecond()) || example.equals(p.getFirst())) {
+                        continue;
+                    }
+                    MessagePair pReplace = new MessagePair(example, p.getSecond());
+                    dataBuilder.addExample(pReplace, MessagePairCategories.NOT_RELATED);
+                    foundExamples++;
+                }
 
-                // Pick a random other choice from the tree
-                List<Message> otherChoices = Lists.newArrayList(tree.linearize());
-
-                // Replace first for one bad example
-                Collections.shuffle(otherChoices);
-                Message randomReplacement = otherChoices.get(0).equals(p.getFirst()) ? otherChoices.get(1) : otherChoices.get(0);
-                MessagePair pReplace = new MessagePair(randomReplacement, p.getSecond());
-                dataBuilder.addExample(pReplace, MessagePairCategories.NOT_RELATED);
-
-                // Replace second for another bad example
-                Collections.shuffle(otherChoices);
-                randomReplacement = otherChoices.get(0).equals(p.getSecond()) ? otherChoices.get(1) : otherChoices.get(0);
-                pReplace = new MessagePair(p.getFirst(), randomReplacement);
-                dataBuilder.addExample(pReplace, MessagePairCategories.NOT_RELATED);
             }
         }
 
@@ -111,10 +112,12 @@ public class SVMDisentangler implements Disentangler {
                 double []classProbs;
                 try {
                      classProbs = classifier.distributionForInstance(instance);
+                    if(classifier.classifyInstance(instance) == 1) {
                      System.out.println("---");
                      System.out.println(classifier.classifyInstance(instance));
                      System.out.println(classProbs[0]);
                      System.out.println(classProbs[1]);
+                    }
                 } catch(Exception e) {
                     throw new RuntimeException(e);
                 }

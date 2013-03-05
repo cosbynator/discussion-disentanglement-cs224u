@@ -33,7 +33,8 @@ With that in mind, we wish to answer the following questions:
 \begin{itemize}
   \item To what degree does semantic knowledge allow a machine to understand the 
     flow of online forum discussions?
-  \item {Something else -- anyone}
+  \item How much does non-semantic information, such as timestamps and referencing
+  other speakers, aid the system?
   \item Does performance vary across domains? Do factors such as tree depth,
     length of messages, and similarity of messages affect our ability to
     reconstruct conversations? 
@@ -48,7 +49,7 @@ As discussed in our literature review, there has been some limited prior
 work in reconstructing threaded discussion in online conversions. 
 
 Work such as \cite{Elsner2008a} 
-used internet chat data and attempted to cluster messages into coherent 
+uses internet chat data and attempts to cluster messages into coherent 
 conversations using a MaxEnt classifier. In this case, data has to be hand annotated and
 the gold set is subjective.
 
@@ -56,8 +57,9 @@ Closer to our project was the work of \cite{Aumayr2011a}. Here, authors took
 internet forum posts from traditional \texttt{vBulletin} style message boards
 and attempted to reconstruct the reply structure from a linearized view. The authors
 use a decision tree with features such as TF-IDF distance and elapsed time. The biggest
-difference between them and us is that their dataset is quite flat: a baseline classifier
-that links to the previous thread achieves an F1 score of 80\%.
+difference between them and us is that they use a reply graph as an evaluation metric,
+where vertices are users and edges indicate existence of replies. We evaluate correctness
+per-message rather than per-user.
 
 Particularly interesting is the work of \cite{Wang2011a} which used a conditional random
 field to reconstruct newsgroup-style conversations. This work has a treasure trove of
@@ -96,7 +98,7 @@ initial post as the root of a conversation tree, and each top-level comment as a
 child of the root. Each message node is annotated with various data such as
 timestamp, username, and more.
 
-To grab the data, we wrote a quick jruby crawler and took a small sample (342) of the top
+To grab the data, we wrote a quick JRuby crawler and took a small sample (342) of the top
 AskReddit posts over the last month. The crawler was written to make data gathering easy
 and we anticipate creating a bigger dataset to report our final results. Table \ref{table:stats}
 shows some aggregated statistics of the preliminary crawl. In particular, we have an average
@@ -155,6 +157,27 @@ At test time, the learner is given a conversation linearized by time, with all
 reply structure removed, and it outputs a predicted tree.
 
 {Milind - baseline results go here}
+
+These results are a severe but unsatisfactory improvement over two trivial baseline
+systems: one guesses that all messages are made in reply to the root, and the
+other guesses that all messages are made in reply to most recent previous message.
+
+\begin{table}[h]\footnotesize
+ \begin{tabular}{| l | l | l |} 
+   \hline
+   \textbf{Statistic} & Pairwise F1 & Average-tree F1 \\
+   \hline
+    SVM baseline &  & \\
+    All-reply-to-root baseline & 0.278 & 0.278 \\
+    One-thread baseline & 0.021 & 0.021 \\
+   \hline
+  \end{tabular}
+  \caption{Data statistics of our preliminary conversation dataset}
+  \label{table:stats}
+\end{table}
+
+Since our crawled dataset currently contains conversations of similar size, our
+distinct evaluation metrics result in scores that are equal to the 4th decimal.
 
 \section{Next Steps}
 - Many many more features

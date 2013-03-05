@@ -41,7 +41,7 @@ public class Test {
         }
     }
 
-    public static void testLinearThreadBaselineLearner() {
+    public static void testLinearThreadBaseline() {
         new DisentanglementPipeline()
                 .withLearner(new LinearThreadDisentangler())
                 .withTrainData(DataSets.ASK_REDDIT_TRAIN)

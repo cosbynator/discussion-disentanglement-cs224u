@@ -1,42 +1,152 @@
-\documentclass{article}
-\usepackage{spverbatim}
+\documentclass[10pt]{article}
+\usepackage{acl2012}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{times}
+\usepackage{latexsym}
 \usepackage{amsmath}
-\usepackage{listings}
-\usepackage{color}
+\usepackage{multirow}
+\usepackage{url}
 
-\setlength{\parskip}{1ex}
-\setlength{\parindent}{0pt}
 
-\definecolor{dkgreen}{rgb}{0,0.6,0}
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\setlength\titlebox{3.5cm}    % Expanding the titlebox
 
-\title{CS224U Project Milestone}
-\author{
-Julius Cheng \and
-Thomas Dimson \and
-Milind Ganjoo
+\title{{\small CS224U Final Project} \\ Discourse Disentanglement \\{\small Project Milestone}}
+\author{Julius Cheng \\
+  \\\And
+  Thomas Dimson  \\
+  \\\And
+  Milind Ganjoo \\
 }
+\date{}
 \begin{document}
 \maketitle
 
-\section*{Overview}
-
+\section{Overview and Goals}
 Our project focuses on conversation disentanglement, which broadly refers to
 the problem of guessing the structure of a multi-party, asynchronous
-conversation. We are building a supervised learner for the specific domain
-of forum disentanglement, where the unit of analysis is, for any message, which
-message it is written in reply to, if any.
+conversation. In particular, we focus on the task of reconstructing conversation
+trees of modern internet forums like \textit{Reddit} from a linear view. Our unit of 
+analysis a time-ordered list of messages and our output in a candidate thread tree. 
+With that in mind, we wish to answer the following questions:
 
-\section*{Dataset}
+\begin{itemize}
+  \item To what degree does semantic knowledge allow a machine to understand the 
+    flow of online forum discussions?
+  \item {Something else -- anyone}
+  \item Does performance vary across domains? Do factors such as tree depth,
+    length of messages, and similarity of messages affect our ability to
+    reconstruct conversations? 
+\end{itemize}
 
-For this project, we extract data from Reddit, an online link-sharing and
-discussion site. We extract conversations from AskReddit, a popular subforum
-where no links are shared, but users initiate topics of conversation. We treat
-the initial post as the root of a conversation tree, and each top-level comment
-as a child of the root. Each message node is annotated with various data such
-as timestamp, username, and more.
+In the interests of academic honesty, we have made our git repository public at
+\url{https://github.com/cosbynator/discussion-disentanglement-cs224u}
 
+\section{Previous Approaches}
+\label{sec:approaches}
+As discussed in our literature review, there has been some limited prior 
+work in reconstructing threaded discussion in online conversions. 
+
+Work such as \cite{Elsner2008a} 
+used internet chat data and attempted to cluster messages into coherent 
+conversations using a MaxEnt classifier. In this case, data has to be hand annotated and
+the gold set is subjective.
+
+Closer to our project was the work of \cite{Aumayr2011a}. Here, authors took
+internet forum posts from traditional \texttt{vBulletin} style message boards
+and attempted to reconstruct the reply structure from a linearized view. The authors
+use a decision tree with features such as TF-IDF distance and elapsed time. The biggest
+difference between them and us is that their dataset is quite flat: a baseline classifier
+that links to the previous thread achieves an F1 score of 80\%.
+
+Particularly interesting is the work of \cite{Wang2011a} which used a conditional random
+field to reconstruct newsgroup-style conversations. This work has a treasure trove of
+interesting features, and we anticipate implementing many of them in the upcoming weeks.
+Furthermore, time permitting, we want to see if a conditional random field is a good way
+to model our problem and improve performance.
+
+{Milind - want to add anything here? What data did they use?}
+
+\section{Current Approach}
+\label{sec:approach}
+We are approaching conversation reconstruction as a \textit{classification} problem
+between parent and children messages. We take a threaded conversations from a modern internet forum 
+(described in Section~\ref{section:dataset}, flatten them into a time-sorted list, and them feed
+them into our reconstruction \textit{classifier} to make decisions on which posts are in reply
+to one another. The details our reconstruction algorithm are described in Section \ref{sec:classifier}.
+
+{Probably more here?}
+
+\section{Progress}
+Macroscopically, we have
+been successful in creating a pipeline to reconstruct conversation trees and
+evaluate our performance based on two metrics. The numbers leave something to be desired and
+we anticipate spending most of our remaining time on feature engineering and
+improvements to our classifier.
+
+\subsection{Dataset}
+\label{section:dataset}
+Our approach differs from most of those listed in Section \ref{sec:approaches}
+by the scale of our approach: we are trying to reconstruct complex coversations
+with large branching numbers.  In that vein, we extract data from Reddit, an
+online link-sharing and discussion site. To ensure all conversations have a root
+element, we extract conversations from AskReddit, a popular subforum where 
+users initiate topics of conversation with a post. We treat the
+initial post as the root of a conversation tree, and each top-level comment as a
+child of the root. Each message node is annotated with various data such as
+timestamp, username, and more.
+
+To grab the data, we wrote a quick jruby crawler and took a small sample (342) of the top
+AskReddit posts over the last month. The crawler was written to make data gathering easy
+and we anticipate creating a bigger dataset to report our final results. Table \ref{table:stats}
+shows some aggregated statistics of the preliminary crawl. In particular, we have an average
+of 200 messages per tree and a branching factor within a rounding error of 1.0. The root
+node has an average branching factor of 55.50, suggesting that discussions are wide while
+sub-discussions tend to be narrow. It is also important to note that standard
+deviation for many of our statistics are often quite large relative to the
+value, suggesting the wide variance in conversations on reddit.
+
+\begin{table}[h]\footnotesize
+ \begin{tabular}{| l | l | l |} 
+   \hline
+   \textbf{Statistic} & \textbf{$n / \mu$} & \textbf{$\sigma$} \\
+   \hline
+    \# Conversation Trees &  342 & \\
+    \# Conversation Nodes (Posts) & 68639 & \\
+    \# Nodes Per Tree &  200.70 & 200.20 \\
+    Mean Branching Factor & 1.00 & 4.20 \\
+    Mean Root Branching Factor &  55.50 & 57.91 \\
+    Mean Node Depth  & 3.56 & 3.40 \\
+    Mean Parent Lag & 7767.96s & 11331.07s \\
+    Mean Body Length & 200.43 c & 483.07 \\
+   \hline
+  \end{tabular}
+  \caption{Data statistics of our preliminary conversation dataset}
+  \label{table:stats}
+\end{table}
+
+We have divided the input data randomly into training / development / test sets
+at a 70\% / 10\% / 20\% split.
+
+\subsection{Evaluation}
+For now, we are primarily considering F1 score as our evaluation metric. We
+compute precision and recall based on how many of our guessed $(parent,child)$
+conversation edges match the gold tree. We are considering two
+versions of F1: one were precision and recall is calculated pairwise across all
+messages in all conversations, and another where F1 is calculated
+per-conversation, and the scores are averaged in the end. We expect to have
+very poor performance in large conversations, so we expect the average F1 score metric to be
+more forgiving. Both metrics have been implemented in our code.
+
+Noting that it can be more important to get lower-depth subtrees correct, we
+are also considering weighting a clustering metric such as $B^3$. Here, we can
+treat subtrees at a given depth as clusters, comparing against gold clusters at
+that depth. We could weight proportional to the inverse depth to reward us for
+capturing more of the general discourse with less sensitivity to individual placement.
+
+\subsection{Classifier and Preliminary Results}
+\label{sec:classifier}
+{Describe how we take highest confidence previous tree}
 These trees are given to the learner as training data. One can say that
 pairs of messages where one is in reply to the other are positive training
 examples, and all other pairs are negative examples.
@@ -44,30 +154,18 @@ examples, and all other pairs are negative examples.
 At test time, the learner is given a conversation linearized by time, with all
 reply structure removed, and it outputs a predicted tree.
 
-\section*{Evaluation}
+{Milind - baseline results go here}
 
-For now, we are primarily considering F1 score as our evaluation metric, that
-is, we calculate precision and recall on how many predicted links were correct,
-and how many actual links were corrected predicted. We are considering two
-version of F1, one were precision and recall is calculated pairwise across all
-messages in all conversations, and the other were F1 is calculated
-per-conversation, and the scores are averaged in the end. We expect to have
-very poor performance in large conversations (AskReddit conversations often
-reach thousands of comments), so we expect the average F1 score metric to be
-more forgiving.
+\section{Next Steps}
+- Many many more features
+- CRF models~\cite{Wang2011a}
 
-We are considering, but haven't implemented tree edit distance as another form
-of evaluation.
+In addition, have discussed trying a different data source (Hacker News) to
+see how our performance varies accross domains. We anticipate Hacker News
+to be a fairer representation of our classifier since discussions tend to be 
+smaller and more on-topic.
 
-\section*{Baseline and preliminary results}
-
-{put baseline SVM results here}
-
-\section*{Work in progress}
-
-{put the things we plan to do here}
-
-\bibliography{hw11}{} 
-\bibliographystyle{plain}
+\bibliography{milestone}{} 
+\bibliographystyle{acl2012}
 
 \end{document}

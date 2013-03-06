@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 /**
- * An interface for defining <code>MessagePair</code>-based features. The <code>AbstractFeature</code> class implements
+ * An interface for defining <code>MessagePair</code>-based features. The <code>AbstractFeatureFactory</code> class implements
  * this interface, and new feature classes should extend that class.
  */
 public interface Feature {
@@ -25,5 +25,5 @@ public interface Feature {
      * for <code>SparseInstance</code> implementations to determine the maximum number of attributes
      * to expect.
      */
-    int getMaxLength();
+    public int getMaxLength();
 }

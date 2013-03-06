@@ -5,16 +5,14 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
-import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeature;
-import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeature;
+import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
-import weka.classifiers.Evaluation;
 import weka.classifiers.functions.SMO;
 import weka.core.Instance;
-import weka.core.Instances;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -51,9 +49,10 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.pop();
 
         Benchmarker.push("Create data builder");
+
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            new JaccardSimilarityFeature(),
-            new BagOfWordsIntersectingFeature(sentences, 5)
+            new JaccardSimilarityFeatureFactory(),
+            new BagOfWordsIntersectingFeatureFactory(sentences, 5)
         );
         Benchmarker.pop();
 

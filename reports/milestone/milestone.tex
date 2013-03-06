@@ -154,9 +154,15 @@ pairs of messages where one is in reply to the other are positive training
 examples, and all other pairs are negative examples.
 
 At test time, the learner is given a conversation linearized by time, with all
-reply structure removed, and it outputs a predicted tree.
+reply structure removed, and it outputs a predicted tree. Our classifier does this
+by classifying, for each pair of messages, $M1$ and $M2$, whether $M2$ is in reply
+to $M1$. We deviate from a normal classification problem, because each message can
+be in reply to only one message, one that occurs at a previous time. Therefore, rather
+than classifying whether each pair of messages are linked, for each message, we estimate
+probabilities that it is linked to each message previous in time. We predict the
+message with the highest probability to be the parent.
 
-{Milind - baseline results go here}
+{add explanation of classifier and features}
 
 These results are a severe but unsatisfactory improvement over two trivial baseline
 systems: one guesses that all messages are made in reply to the root, and the

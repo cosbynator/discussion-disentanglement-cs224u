@@ -11,13 +11,6 @@ import java.util.Map;
  * this interface, and new feature classes should extend that class.
  */
 public interface Feature {
-    /**
-     * Return the list of Weka attributes defined for this feature. Note that this
-     * must be an <code>ArrayList</code>, as that is the format required for Weka.
-     *
-     * @return an <code>ArrayList</code> of features
-     */
-    ArrayList<Attribute> getAttributeList();
 
     /**
      * Extract feature-related information from a single training example.

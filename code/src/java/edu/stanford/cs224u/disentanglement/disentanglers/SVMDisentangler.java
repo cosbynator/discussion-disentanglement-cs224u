@@ -26,14 +26,12 @@ enum MessagePairCategories {
 
 public class SVMDisentangler implements Disentangler {
     private SMO classifier;
-    private final DataBuilder dataBuilder;
-    private Instances trainData;
+    private DataBuilder dataBuilder;
     private final int numFalseExamples = 1;
     private Random random;
 
     public SVMDisentangler() {
         random = new Random(1); // fixed seed for now
-        dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler");
     }
 
     @Override
@@ -53,15 +51,18 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.pop();
 
         Benchmarker.push("Create data builder");
-        //dataBuilder.addFeature(new JaccardSimilarityFeature());
-        dataBuilder.addFeature(new BagOfWordsIntersectingFeature(sentences, 5));
+        dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
+            new JaccardSimilarityFeature(),
+            new BagOfWordsIntersectingFeature(sentences, 5)
+        );
         Benchmarker.pop();
 
         Benchmarker.push("Adding examples");
         for(MessageTree tree : trainingData) {
             List<Message> linearized = tree.linearize();
+            DataBuilder.TreeData td = dataBuilder.createTreeData(linearized);
             for(MessagePair p : tree.extractEdges()) {
-                dataBuilder.addExample(p, MessagePairCategories.RELATED);
+                td.addExample(p, MessagePairCategories.RELATED);
                 int foundExamples = 0;
                 int iterations = 0;
                 while(iterations < 100 && foundExamples < numFalseExamples) {
@@ -71,7 +72,7 @@ public class SVMDisentangler implements Disentangler {
                         continue;
                     }
                     MessagePair pReplace = new MessagePair(example, p.getSecond());
-                    dataBuilder.addExample(pReplace, MessagePairCategories.NOT_RELATED);
+                    td.addExample(pReplace, MessagePairCategories.NOT_RELATED);
                     foundExamples++;
                 }
 
@@ -80,10 +81,10 @@ public class SVMDisentangler implements Disentangler {
 
         classifier = new SMO();
         classifier.setBuildLogisticModels(true);
-        trainData = dataBuilder.buildData();
+        classifier.setC(0.0001);
         try {
             Benchmarker.push("Build classifier");
-            classifier.buildClassifier(trainData);
+            classifier.buildClassifier(dataBuilder.getInstances());
         } catch (Exception e) {
             Benchmarker.popError();
             throw new RuntimeException(e);
@@ -94,9 +95,10 @@ public class SVMDisentangler implements Disentangler {
     public MessageTree predict(List<Message> test) {
         Preconditions.checkArgument(test.size() > 0, "Tried to predict empty tree!");
 
+        DataBuilder.TreeData td = dataBuilder.createTreeData(test);
+
         Map<Message, MessageNode> nodeForMessage = Maps.newHashMap();
         MessageNode root = new MessageNode(test.get(0));
-        System.out.println(test.get(0).getId());
         nodeForMessage.put(test.get(0), root);
 
         for(int i = 1; i < test.size(); i++) {
@@ -106,18 +108,12 @@ public class SVMDisentangler implements Disentangler {
             for(int p = 0; p < i; p++) {
                 MessageNode parentCandidate = nodeForMessage.get(test.get(p));
                 MessagePair candidatePair = MessagePair.of(parentCandidate.getMessage(), m);
-                Instance instance = dataBuilder.buildClassificationInstance(candidatePair);
-                instance.setDataset(trainData);
+                Instance instance = td.buildClassificationInstance(candidatePair);
+                instance.setDataset(dataBuilder.getInstances());
 
                 double []classProbs;
                 try {
                      classProbs = classifier.distributionForInstance(instance);
-                    if(classifier.classifyInstance(instance) == 1) {
-                     System.out.println("---");
-                     System.out.println(classifier.classifyInstance(instance));
-                     System.out.println(classProbs[0]);
-                     System.out.println(classProbs[1]);
-                    }
                 } catch(Exception e) {
                     throw new RuntimeException(e);
                 }

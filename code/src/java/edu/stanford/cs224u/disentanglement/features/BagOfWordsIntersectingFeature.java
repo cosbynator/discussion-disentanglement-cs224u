@@ -1,6 +1,7 @@
 package edu.stanford.cs224u.disentanglement.features;
 
 import com.google.common.collect.*;
+import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessagePair;
 import edu.stanford.cs224u.disentanglement.util.WordTokenizer;
 import weka.core.Attribute;
@@ -13,7 +14,7 @@ import java.util.Map;
 /**
  * A binary bag-of-words feature indicating presence of strings from a large vocabulary.
  */
-public class BagOfWordsIntersectingFeature extends AbstractFeature {
+public class BagOfWordsIntersectingFeature extends AbstractFeature implements FeatureFactory {
     private final List<String> vocabulary;
     private final ArrayList<Attribute> attributeList;
 
@@ -63,4 +64,5 @@ public class BagOfWordsIntersectingFeature extends AbstractFeature {
         }
         return values;
     }
+
 }

@@ -51,8 +51,9 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            new JaccardSimilarityFeatureFactory(),
-            new BagOfWordsIntersectingFeatureFactory(sentences, 5)
+            //new JaccardSimilarityFeatureFactory(),
+            //new BagOfWordsIntersectingFeatureFactory(sentences, 5),
+            new TFIDFFeatureFactory()
         );
         Benchmarker.pop();
 

@@ -1,10 +1,12 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import edu.stanford.nlp.pipeline.Annotation;
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
+import java.util.List;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 6535394886609049459L;
@@ -13,6 +15,7 @@ public class Message implements Serializable {
     private final DateTime timestamp;
     private final String body;
     private final Annotation bodyAnnotation;
+    private List<String> bodyWords;
 
     public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation) {
         this.id = id;
@@ -45,6 +48,13 @@ public class Message implements Serializable {
 
     public String getBody() {
         return body;
+    }
+
+    public List<String> getBodyWords() {
+        if(bodyWords == null) {
+            bodyWords = Lists.newArrayList(body.split("\\s"));
+        }
+        return bodyWords;
     }
 
     public Annotation getBodyAnnotation() {

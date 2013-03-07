@@ -6,7 +6,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
 import edu.stanford.cs224u.disentanglement.features.MinuteDifferenceFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.TfIdfFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
 import weka.classifiers.functions.SMO;
@@ -50,7 +50,7 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            new TfIdfFeatureFactory(),
+            new TFIDFFeatureFactory(),
             new MinuteDifferenceFeatureFactory()
         );
         Benchmarker.pop();

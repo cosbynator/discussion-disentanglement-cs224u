@@ -5,9 +5,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
-import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.MinuteDifferenceFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.TfIdfFeatureFactory;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
 import weka.classifiers.functions.SMO;
@@ -51,8 +50,8 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            new JaccardSimilarityFeatureFactory(),
-            new BagOfWordsIntersectingFeatureFactory(sentences, 5)
+            new TfIdfFeatureFactory(),
+            new MinuteDifferenceFeatureFactory()
         );
         Benchmarker.pop();
 

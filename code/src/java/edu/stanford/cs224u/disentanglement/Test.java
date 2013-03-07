@@ -2,17 +2,22 @@ package edu.stanford.cs224u.disentanglement;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import com.google.common.collect.ImmutableList;
 import edu.stanford.cs224u.disentanglement.disentanglers.AllReplyToOpDisentangler;
 import edu.stanford.cs224u.disentanglement.disentanglers.LinearThreadDisentangler;
 import edu.stanford.cs224u.disentanglement.disentanglers.SVMDisentangler;
+import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
 import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.Message;
+import edu.stanford.cs224u.disentanglement.structures.MessagePair;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
+import org.joda.time.DateTime;
 
 import javax.script.ScriptException;
 import java.io.FileNotFoundException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.List;
 
 public class Test {
     public static void main(String[] args) throws FileNotFoundException, ScriptException {
@@ -65,6 +70,14 @@ public class Test {
                 .run();
     }
 
+    public static void testSVMDev() throws Exception {
+        new DisentanglementPipeline()
+                .withLearner(new SVMDisentangler())
+                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
+                .withTestData(DataSets.ASK_REDDIT_DEV)
+                .run();
+    }
+
     public static void testPrintData() {
         for (MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
             System.out.println("****");
@@ -73,6 +86,18 @@ public class Test {
                 System.out.println("\t" + m);
             }
         }
+    }
+
+    public static void testTFIDF() {
+        Message m1  = new Message("blah1", "blah", new DateTime(), "test the best", null);
+        Message m2  = new Message("blah2", "blah", new DateTime(), "test the west", null);
+        Message m3  = new Message("blah3", "blah", new DateTime(), "test the", null);
+        List<Message> messages = ImmutableList.of(m1,m2,m3);
+        TFIDFFeatureFactory.TFIDF tfidf = new TFIDFFeatureFactory.TFIDF(messages);
+        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m1)));
+        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m2)));
+        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m3)));
+
     }
 
     static class CommandLineParser {

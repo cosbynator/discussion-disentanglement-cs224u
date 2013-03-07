@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class TfIdfFeatureFactory extends AbstractFeatureFactory {
+public class TFIDFFeatureFactory extends AbstractFeatureFactory {
 
     @Override
     public Feature createFeature(List<Message> messages) {

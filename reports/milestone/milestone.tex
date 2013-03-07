@@ -27,14 +27,14 @@ Our project focuses on conversation disentanglement, which broadly refers to
 the problem of guessing the structure of a multi-party, asynchronous
 conversation. In particular, we focus on the task of reconstructing conversation
 trees of modern internet forums like \textit{Reddit} from a linear view. Our unit of 
-analysis a time-ordered list of messages and our output in a candidate thread tree. 
+analysis a time-ordered list of messages and our output is a candidate thread tree. 
 With that in mind, we wish to answer the following questions:
 
 \begin{itemize}
   \item To what degree does semantic knowledge allow a machine to understand the 
     flow of online forum discussions?
-  \item How much does non-semantic information, such as timestamps and referencing
-  other speakers, aid the system?
+  \item How much does non-semantic information, such as timestamps and poster karma,
+    aid the system?
   \item Does performance vary across domains? Do factors such as tree depth,
     length of messages, and similarity of messages affect our ability to
     reconstruct conversations? 
@@ -67,17 +67,16 @@ interesting features, and we anticipate implementing many of them in the upcomin
 Furthermore, time permitting, we want to see if a conditional random field is a good way
 to model our problem and improve performance.
 
-{Milind - want to add anything here? What data did they use?}
+%{Milind - want to add anything here? What data did they use?}
 
 \section{Current Approach}
 \label{sec:approach}
 We are approaching conversation reconstruction as a \textit{classification} problem
 between parent and children messages. We take a threaded conversations from a modern internet forum 
-(described in Section~\ref{section:dataset}, flatten them into a time-sorted list, and them feed
-them into our reconstruction \textit{classifier} to make decisions on which posts are in reply
-to one another. The details our reconstruction algorithm are described in Section \ref{sec:classifier}.
-
-{Probably more here?}
+(described in Section~\ref{section:dataset}), flatten them into a time-sorted list, and them feed
+them into our reconstruction \textit{classifier} that attempts to recreate the tree
+with only message-level information. The details our reconstruction algorithm are 
+described in Section \ref{sec:classifier}.
 
 \section{Progress}
 Macroscopically, we have
@@ -89,11 +88,11 @@ improvements to our classifier.
 \subsection{Dataset}
 \label{section:dataset}
 Our approach differs from most of those listed in Section \ref{sec:approaches}
-by the scale of our approach: we are trying to reconstruct complex coversations
+by the scale of our approach: we are trying to reconstruct complex conversations
 with large branching numbers.  In that vein, we extract data from Reddit, an
 online link-sharing and discussion site. To ensure all conversations have a root
-element, we extract conversations from AskReddit, a popular subforum where 
-users initiate topics of conversation with a post. We treat the
+element, we used the popular AskReddit subforum where 
+users initiate topics of conversation with a question. We treat the
 initial post as the root of a conversation tree, and each top-level comment as a
 child of the root. Each message node is annotated with various data such as
 timestamp, username, and more.
@@ -106,7 +105,7 @@ of 200 messages per tree and a branching factor within a rounding error of 1.0. 
 node has an average branching factor of 55.50, suggesting that discussions are wide while
 sub-discussions tend to be narrow. It is also important to note that standard
 deviation for many of our statistics are often quite large relative to the
-value, suggesting the wide variance in conversations on reddit.
+value, suggesting the wide variance in conversations on Reddit.
 
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l |} 
@@ -138,7 +137,10 @@ versions of F1: one were precision and recall is calculated pairwise across all
 messages in all conversations, and another where F1 is calculated
 per-conversation, and the scores are averaged in the end. We expect to have
 very poor performance in large conversations, so we expect the average F1 score metric to be
-more forgiving. Both metrics have been implemented in our code.
+more forgiving. Both metrics have been implemented in our code. Since our 
+crawled dataset currently contains conversations of similar size, our
+distinct evaluation metrics result in scores that are equal to the 4th decimal. We
+anticipate our final dataset will have more diversity.
 
 Noting that it can be more important to get lower-depth subtrees correct, we
 are also considering weighting a clustering metric such as $B^3$. Here, we can
@@ -148,23 +150,14 @@ capturing more of the general discourse with less sensitivity to individual plac
 
 \subsection{Classifier and Preliminary Results}
 \label{sec:classifier}
-{Describe how we take highest confidence previous tree}
-These trees are given to the learner as training data. One can say that
-pairs of messages where one is in reply to the other are positive training
-examples, and all other pairs are negative examples.
+We have created a basic SVM classifier that guesses whether a given pair of messages are in a $(parent, child)$
+relationship or not. Since our desired output is a tree, we use a greedy approach
+to building message trees: for a given message, we pair it with the preceding-in-time 
+message of the highest $(parent, child)$ confidence from our classifier. 
 
-At test time, the learner is given a conversation linearized by time, with all
-reply structure removed, and it outputs a predicted tree. Our classifier does this
-by classifying, for each pair of messages, $M1$ and $M2$, whether $M2$ is in reply
-to $M1$. We deviate from a normal classification problem, because each message can
-be in reply to only one message, one that occurs at a previous time. Therefore, rather
-than classifying whether each pair of messages are linked, for each message, we estimate
-probabilities that it is linked to each message previous in time. We predict the
-message with the highest probability to be the parent.
-
-{add explanation of classifier and features}
-
-These results are a severe but unsatisfactory improvement over two trivial baseline
+Our baseline classifier has three feature templates: intersecting-bag-of-words, 
+Jacard similarity of messages, and the parent-child time lag. As Table \ref{table:results} shows, 
+our results are unsatisfactory compared to two trivial baseline
 systems: one guesses that all messages are made in reply to the root, and the
 other guesses that all messages are made in reply to most recent previous message.
 
@@ -173,24 +166,29 @@ other guesses that all messages are made in reply to most recent previous messag
    \hline
    \textbf{Statistic} & Pairwise F1 & Average-tree F1 \\
    \hline
-    SVM baseline &  & \\
+    SVM baseline & 0.081 & 0.081 \\
     All-reply-to-root baseline & 0.278 & 0.278 \\
     One-thread baseline & 0.021 & 0.021 \\
    \hline
   \end{tabular}
   \caption{Data statistics of our preliminary conversation dataset}
-  \label{table:stats}
+  \label{table:results}
 \end{table}
 
-Since our crawled dataset currently contains conversations of similar size, our
-distinct evaluation metrics result in scores that are equal to the 4th decimal.
-
 \section{Next Steps}
-- Many many more features
-- CRF models~\cite{Wang2011a}
+As mentioned in Section \ref{sec:classifier}, the next few weeks will be focused
+on feature engineering. We implemented bag-of-words and Jacard similarity
+because they were easy tests of our framework. Now that we have it set up,
+we hope to use more sophisticated features such as TF-IDF similarity, 
+speech acts and co-reference. Once we have a firm set of features,
+we will start to tweak classifier hyperparameters to achieve the best
+possible results.
 
-In addition, have discussed trying a different data source (Hacker News) to
-see how our performance varies accross domains. We anticipate Hacker News
+%{Milind, can you add something here?}
+%- CRF models~\cite{Wang2011a}
+
+We have also discussed using a different data source (Hacker News) to
+see how our performance varies across domains. We anticipate Hacker News
 to be a fairer representation of our classifier since discussions tend to be 
 smaller and more on-topic.
 

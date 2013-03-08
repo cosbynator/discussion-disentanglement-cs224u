@@ -73,7 +73,7 @@ public class Test {
     public static void testSVMDev() throws Exception {
         new DisentanglementPipeline()
                 .withLearner(new SVMDisentangler())
-                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
+                .withTrainData(DataSets.ASK_REDDIT_SMALL_TRAIN)
                 .withTestData(DataSets.ASK_REDDIT_DEV)
                 .run();
     }

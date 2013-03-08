@@ -33,6 +33,8 @@ public class TFIDFFeatureFactory extends AbstractFeatureFactory {
             @Override
             public Map<Integer, Double> processExample(MessagePair example) {
                 double totalTfIdf = 0.0;
+                double tfIdf1Norm = 0.0;
+                double tfIdf2Norm = 0.0;
                 Set<String> commonWords = example.getWordIntersection();
                 for (String word : commonWords) {
                     // Message 1
@@ -40,18 +42,34 @@ public class TFIDFFeatureFactory extends AbstractFeatureFactory {
                     Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
                     double maxFreq = counter.count(it.next());
                     double freq = counter.count(word);
-                    double tfIdf1 = freq / maxFreq * numMessages / dfCounter.count(word);
+                    double tfIdf1 = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
 
                     // Message 2
                     counter = tfCounters.get(example.getSecond().getId());
                     it = Multisets.copyHighestCountFirst(counter).iterator();
                     maxFreq = counter.count(it.next());
                     freq = counter.count(word);
-                    double tfIdf2 = freq / maxFreq * numMessages / dfCounter.count(word);
+                    double tfIdf2 = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
 
                     totalTfIdf += tfIdf1 * tfIdf2;
                 }
-                return ImmutableMap.of(0, totalTfIdf);
+                for (String word : WordTokenizer.tokenizeWhitespace(example.getFirst().getBody())) {
+                    Multiset<String> counter = tfCounters.get(example.getFirst().getId());
+                    Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
+                    double maxFreq = counter.count(it.next());
+                    double freq = counter.count(word);
+                    double tfIdf = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    tfIdf1Norm += tfIdf * tfIdf;
+                }
+                for (String word : WordTokenizer.tokenizeWhitespace(example.getSecond().getBody())) {
+                    Multiset<String> counter = tfCounters.get(example.getSecond().getId());
+                    Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
+                    double maxFreq = counter.count(it.next());
+                    double freq = counter.count(word);
+                    double tfIdf = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    tfIdf2Norm += tfIdf * tfIdf;
+                }
+                return ImmutableMap.of(0, totalTfIdf / (Math.sqrt(tfIdf1Norm) * Math.sqrt(tfIdf2Norm)));
             }
 
             @Override

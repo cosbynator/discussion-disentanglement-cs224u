@@ -79,10 +79,11 @@ public class SVMDisentangler implements Disentangler {
 
         classifier = new SMO();
         classifier.setBuildLogisticModels(true);
-        classifier.setC(0.0001);
+        classifier.setC(0.5);
         try {
             Benchmarker.push("Build classifier");
             classifier.buildClassifier(dataBuilder.getInstances());
+            System.out.println(classifier);
         } catch (Exception e) {
             Benchmarker.popError();
             throw new RuntimeException(e);

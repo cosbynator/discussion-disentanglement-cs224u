@@ -1,6 +1,6 @@
 \documentclass[10pt]{article}
 \usepackage{acl2012}
-\usepackage[margin=0.8in]{geometry}
+\usepackage[margin=0.75in]{geometry}
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{amsmath}
@@ -173,12 +173,18 @@ by choosing a larger bag-of-words, we found that the memory and runtime
 suffered unacceptable levels of degradation. We also considered Jaccard similarity, 
 but found no noticeable effect on classification accuracy.
 
+However, our excitement at crossing the trivial baseline should be limited, since 
+we don't currently have a visualization of the results, and it's possible that the 
+SVM is still making random guesses, leading to 32\% accuracy by simply associating 
+all messages with the root, for example. This is something we still need to address 
+by carefully visualizing the actual predicted trees.
+
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l |} 
    \hline
    \textbf{Statistic} & Pairwise F1 & Average-tree F1 \\
    \hline
-    SVM baseline & 0.3198 & 0.322 \\
+    SVM baseline & 0.329 & 0.331 \\
     All-reply-to-root baseline & 0.278 & 0.278 \\
     One-thread baseline & 0.021 & 0.021 \\
    \hline

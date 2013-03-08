@@ -88,18 +88,6 @@ public class Test {
         }
     }
 
-    public static void testTFIDF() {
-        Message m1  = new Message("blah1", "blah", new DateTime(), "test the best", null);
-        Message m2  = new Message("blah2", "blah", new DateTime(), "test the west", null);
-        Message m3  = new Message("blah3", "blah", new DateTime(), "test the", null);
-        List<Message> messages = ImmutableList.of(m1,m2,m3);
-        TFIDFFeatureFactory.TFIDF tfidf = new TFIDFFeatureFactory.TFIDF(messages);
-        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m1)));
-        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m2)));
-        System.out.println(tfidf.cosineSimilarity(new MessagePair(m1, m3)));
-
-    }
-
     static class CommandLineParser {
         @Parameter(names = {"-exp", "-experiment"}, description = "Name of experiment to run")
         private String experiment = "PrintData";

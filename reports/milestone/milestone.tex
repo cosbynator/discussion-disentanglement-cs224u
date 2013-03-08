@@ -1,12 +1,11 @@
 \documentclass[10pt]{article}
 \usepackage{acl2012}
-\usepackage[margin=1.0in]{geometry}
+\usepackage[margin=0.8in]{geometry}
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{multirow}
 \usepackage{url}
-
 
 \DeclareMathOperator*{\argmax}{arg\,max}
 \setlength\titlebox{3.5cm}    % Expanding the titlebox
@@ -40,8 +39,8 @@ With that in mind, we wish to answer the following questions:
     reconstruct conversations? 
 \end{itemize}
 
-In the interests of academic honesty, we have made our git repository public at
-\url{https://github.com/cosbynator/discussion-disentanglement-cs224u}
+We have made the git repository for our code public at 
+\url{https://github.com/cosbynator/discussion-disentanglement-cs224u}.
 
 \section{Previous Approaches}
 \label{sec:approaches}
@@ -62,12 +61,17 @@ where vertices are users and edges indicate existence of replies. We evaluate co
 per-message rather than per-user.
 
 Particularly interesting is the work of \cite{Wang2011a} which used a conditional random
-field to reconstruct newsgroup-style conversations. This work has a treasure trove of
+field (CRF) to reconstruct newsgroup-style conversations. This work has a treasure trove of
 interesting features, and we anticipate implementing many of them in the upcoming weeks.
 Furthermore, time permitting, we want to see if a conditional random field is a good way
-to model our problem and improve performance.
-
-%{Milind - want to add anything here? What data did they use?}
+to model our problem and improve performance. This is especially relevant, because, 
+as described in the experimental results section, we see that simple message-similarity 
+based approaches are not sufficient in determining message tree relationships, and 
+the use of history of predictions made so far would be helpful in improving overall 
+prediction accuracy. The dataset used by \cite{Wang2011a} is a set of threaded discussions 
+from online forums (such as the Apple support forums), and since our dataset most 
+closely matches theirs (see Section \ref{section:dataset}), we think our results with 
+CRF would improve.
 
 \section{Current Approach}
 \label{sec:approach}
@@ -153,20 +157,28 @@ capturing more of the general discourse with less sensitivity to individual plac
 We have created a basic SVM classifier that guesses whether a given pair of messages are in a $(parent, child)$
 relationship or not. Since our desired output is a tree, we use a greedy approach
 to building message trees: for a given message, we pair it with the preceding-in-time 
-message of the highest $(parent, child)$ confidence from our classifier. 
+message of the highest $(parent, child)$ confidence from our classifier.
 
-Our baseline classifier has three feature templates: intersecting-bag-of-words, 
-Jacard similarity of messages, and the parent-child time lag. As Table \ref{table:results} shows, 
-our results are unsatisfactory compared to two trivial baseline
-systems: one guesses that all messages are made in reply to the root, and the
+Our baseline classifier has two feature templates: TF-IDF similarity and the parent-child time lag in minutes. As Table \ref{table:results} shows, 
+our results slighlty improve over the trivial baseline systems: one guesses that all messages are made in reply to the root, and the
 other guesses that all messages are made in reply to most recent previous message.
+
+In selecting features for our classifier, we considered many message-based
+similarity features. The first approach was to use bag-of-words similarity
+(i.e. a binary vector indicating which of a fixed bag-of-words was present in
+both messages). However, since the most frequent words in the vocabulary were
+stop words like conjunctions and prepositions, we found that they had little
+effect on the discriminative ability of the SVM classifier. On the other hand,
+by choosing a larger bag-of-words, we found that the memory and runtime
+suffered unacceptable levels of degradation. We also considered Jaccard similarity, 
+but found no noticeable effect on classification accuracy.
 
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l |} 
    \hline
    \textbf{Statistic} & Pairwise F1 & Average-tree F1 \\
    \hline
-    SVM baseline & 0.081 & 0.081 \\
+    SVM baseline & 0.3198 & 0.322 \\
     All-reply-to-root baseline & 0.278 & 0.278 \\
     One-thread baseline & 0.021 & 0.021 \\
    \hline
@@ -176,16 +188,11 @@ other guesses that all messages are made in reply to most recent previous messag
 \end{table}
 
 \section{Next Steps}
-As mentioned in Section \ref{sec:classifier}, the next few weeks will be focused
-on feature engineering. We implemented bag-of-words and Jacard similarity
+As mentioned in Section \ref{sec:classifier}, the next few days will be focused
+on feature engineering. We implemented TF-IDF and parent-child time lag
 because they were easy tests of our framework. Now that we have it set up,
-we hope to use more sophisticated features such as TF-IDF similarity, 
-speech acts and co-reference. Once we have a firm set of features,
-we will start to tweak classifier hyperparameters to achieve the best
+we hope to use more sophisticated features such as speech acts and co-reference. We will also consider edge-based features that rely on predictions previously made on ancestors of candidate nodes, as described in the CRF framework used by \cite{Wang2011a}. Once we have a firm set of features, we will start to tweak classifier hyperparameters to achieve the best
 possible results.
-
-%{Milind, can you add something here?}
-%- CRF models~\cite{Wang2011a}
 
 We have also discussed using a different data source (Hacker News) to
 see how our performance varies across domains. We anticipate Hacker News

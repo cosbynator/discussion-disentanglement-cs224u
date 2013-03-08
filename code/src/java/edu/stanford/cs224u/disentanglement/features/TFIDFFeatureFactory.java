@@ -42,14 +42,14 @@ public class TFIDFFeatureFactory extends AbstractFeatureFactory {
                     Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
                     double maxFreq = counter.count(it.next());
                     double freq = counter.count(word);
-                    double tfIdf1 = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    double tfIdf1 = (freq / maxFreq) * Math.log((numMessages + 1) / dfCounter.count(word));
 
                     // Message 2
                     counter = tfCounters.get(example.getSecond().getId());
                     it = Multisets.copyHighestCountFirst(counter).iterator();
                     maxFreq = counter.count(it.next());
                     freq = counter.count(word);
-                    double tfIdf2 = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    double tfIdf2 = (freq / maxFreq) * Math.log((numMessages + 1) / dfCounter.count(word));
 
                     totalTfIdf += tfIdf1 * tfIdf2;
                 }
@@ -58,7 +58,7 @@ public class TFIDFFeatureFactory extends AbstractFeatureFactory {
                     Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
                     double maxFreq = counter.count(it.next());
                     double freq = counter.count(word);
-                    double tfIdf = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    double tfIdf = (freq / maxFreq) * Math.log((numMessages + 1) / dfCounter.count(word));
                     tfIdf1Norm += tfIdf * tfIdf;
                 }
                 for (String word : WordTokenizer.tokenizeWhitespace(example.getSecond().getBody())) {
@@ -66,7 +66,7 @@ public class TFIDFFeatureFactory extends AbstractFeatureFactory {
                     Iterator<String> it = Multisets.copyHighestCountFirst(counter).iterator();
                     double maxFreq = counter.count(it.next());
                     double freq = counter.count(word);
-                    double tfIdf = (freq / maxFreq) * Math.log(numMessages / dfCounter.count(word));
+                    double tfIdf = (freq / maxFreq) * Math.log((numMessages + 1) / dfCounter.count(word));
                     tfIdf2Norm += tfIdf * tfIdf;
                 }
                 return ImmutableMap.of(0, totalTfIdf / (Math.sqrt(tfIdf1Norm) * Math.sqrt(tfIdf2Norm)));

@@ -10,8 +10,7 @@ public class MessageBodyAnnotator {
 
     public MessageBodyAnnotator() {
         Properties props = new Properties();
-        // Ignore NER for now
-        props.put("annotators", "tokenize, ssplit, pos, lemma");
+        props.put("annotators", "tokenize, ssplit, pos, lemma, ner");
         pipeline = new StanfordCoreNLP(props);
     }
 

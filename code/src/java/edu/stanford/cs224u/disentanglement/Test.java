@@ -65,8 +65,8 @@ public class Test {
     public static void testSVMSanity() throws Exception {
         new DisentanglementPipeline()
                 .withLearner(new SVMDisentangler())
-                .withTrainData(DataSets.ASK_REDDIT_SMALL_TRAIN)
-                .withTestData(DataSets.ASK_REDDIT_SMALL_TRAIN)
+                .withTrainData(DataSets.ASK_HN_TRAIN_SMALL)
+                .withTestData(DataSets.ASK_HN_TRAIN_SMALL)
                 .run();
     }
 

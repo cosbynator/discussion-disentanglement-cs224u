@@ -14,7 +14,15 @@ public enum DataSets {
     ASK_REDDIT_DEV("data/AskReddit/dev"),
     ASK_REDDIT_TRAIN("data/AskReddit/train"),
     ASK_REDDIT_SMALL_TRAIN("data/AskReddit/train", 5),
-    ASK_REDDIT_TEST("data/AskReddit/test");
+    ASK_REDDIT_TEST("data/AskReddit/test"),
+
+    ASK_HN_TRAIN("data/AskHN/train"),
+    ASK_HN_DEV("data/AskHN/dev"),
+    ASK_HN_TEST("data/AskHN/test"),
+
+    ASK_HN_TRAIN_SMALL("data/AskHN/train", 100),
+    ASK_HN_DEV_SMALL("data/AskHN/dev", 100),
+    ASK_HN_TEST_SMALL("data/AskHN/test", 100);
 
     private final File location;
     private Integer sampleSize;

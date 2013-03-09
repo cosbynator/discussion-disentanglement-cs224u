@@ -8,6 +8,7 @@ import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
 import edu.stanford.cs224u.disentanglement.features.AuthorMentionFeature;
 import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeatureFactory;
 import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.MinuteDifferenceFeatureFactory;
 import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
@@ -51,10 +52,8 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            //new JaccardSimilarityFeatureFactory(),
-            //new BagOfWordsIntersectingFeatureFactory(sentences, 5),
-            new AuthorMentionFeature(),
-            new TFIDFFeatureFactory()
+            new TFIDFFeatureFactory(),
+            new MinuteDifferenceFeatureFactory()
         );
         Benchmarker.pop();
 
@@ -82,10 +81,11 @@ public class SVMDisentangler implements Disentangler {
 
         classifier = new SMO();
         classifier.setBuildLogisticModels(true);
-        classifier.setC(0.0001);
+        classifier.setC(0.5);
         try {
             Benchmarker.push("Build classifier");
             classifier.buildClassifier(dataBuilder.getInstances());
+            System.out.println(classifier);
         } catch (Exception e) {
             Benchmarker.popError();
             throw new RuntimeException(e);

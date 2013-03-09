@@ -6,6 +6,7 @@ import edu.stanford.cs224u.disentanglement.disentanglers.Disentangler;
 import edu.stanford.cs224u.disentanglement.evaluation.AverageTreeF1Evaluator;
 import edu.stanford.cs224u.disentanglement.evaluation.Evaluator;
 import edu.stanford.cs224u.disentanglement.evaluation.PairwiseF1Evaluator;
+import edu.stanford.cs224u.disentanglement.evaluation.UnderRootF1Evaluator;
 import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
@@ -20,6 +21,7 @@ public class DisentanglementPipeline {
 
     public DisentanglementPipeline() {
         evaluators = ImmutableList.of(
+                new UnderRootF1Evaluator(),
                 new PairwiseF1Evaluator(),
                 new AverageTreeF1Evaluator()
         );
@@ -62,11 +64,11 @@ public class DisentanglementPipeline {
                 evaluator.addPrediction(gold, guess);
             }
         }
-        Benchmarker.pop();
 
         System.out.println("Evaluations: ");
         for(Evaluator e : evaluators) {
             System.out.println("\t" + e.getEvaluation());
         }
+        Benchmarker.pop();
     }
 }

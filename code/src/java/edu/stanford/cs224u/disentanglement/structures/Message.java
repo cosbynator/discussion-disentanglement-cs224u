@@ -52,7 +52,7 @@ public class Message implements Serializable {
 
     public List<String> getBodyWords() {
         if(bodyWords == null) {
-            bodyWords = Lists.newArrayList(body.split("\\s"));
+            bodyWords = Lists.newArrayList(body.toLowerCase().split("(\\s|[.,!])"));
         }
         return bodyWords;
     }

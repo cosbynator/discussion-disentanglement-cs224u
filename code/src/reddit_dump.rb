@@ -214,6 +214,14 @@ class RedditDump
     end
   end
 
+  def fetch_hn_listing
+    extract = /http:\/\/news.ycombinator.com\/item\?id=(\d+)/
+    str =  open("#{RAW_DUMP_DIR}/AskHNArchive.html") { |f| f.read() }
+    str.to_enum(:scan, extract).map do
+      Regexp.last_match.captures[0]
+    end
+  end
+
   def run_test
     #dump_subreddit("AskReddit")
     #m = Message.new "id", "authorName", DateTime.new(), "body"
@@ -228,6 +236,7 @@ end
 
 
 #RedditDump.new.dump_subreddit "AskReddit"
-RedditDump.new.split_raw_subreddit "AskReddit"
+#RedditDump.new.split_raw_subreddit "AskReddit"
+RedditDump.new.fetch_hn_listing
 
 

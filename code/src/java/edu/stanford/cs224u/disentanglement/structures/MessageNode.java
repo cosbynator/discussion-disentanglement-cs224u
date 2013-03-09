@@ -13,6 +13,18 @@ public class MessageNode implements Serializable {
     private final Message message;
     private final List<MessageNode> children;
 
+    public interface TreeWalker {
+        public void visit(MessageNode m, MessageNode parent, int depth);
+    }
+
+    public MessageNode(MessageNode mn) {
+        this.message = mn.getMessage();
+        this.children = Lists.newArrayListWithCapacity(mn.getChildren().size());
+        for(MessageNode child : mn.getChildren()) {
+            this.children.add(new MessageNode(child));
+        }
+    }
+
     public MessageNode(Message m) {
         this.message = m;
         this.children = Lists.newArrayList();
@@ -43,10 +55,14 @@ public class MessageNode implements Serializable {
         return Collections.unmodifiableList(children);
     }
 
-    public void walk(Function<MessageNode, Void> walker) {
-        walker.apply(this);
+    public void walk(TreeWalker walker) {
+        walk(walker, null, 0);
+    }
+
+    public void walk(TreeWalker walker, MessageNode parent, int depth) {
+        walker.visit(this, parent, depth) ;
         for(MessageNode n : children) {
-            n.walk(walker);
+            n.walk(walker, this, depth + 1);
         }
     }
 

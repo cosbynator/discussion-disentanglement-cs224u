@@ -29,13 +29,13 @@ public class MessageTree implements Serializable {
     // TODO: Consider renaming and immutifying
     public List<Message> linearize() {
         final List<Message> ret = Lists.newArrayList();
-        this.root.walk(new Function<MessageNode, Void>() {
+        this.root.walk(new MessageNode.TreeWalker() {
             @Override
-            public Void apply(MessageNode messageNode) {
-                ret.add(messageNode.getMessage());
-                return null;
+            public void visit(MessageNode m, MessageNode parent, int depth) {
+                ret.add(m.getMessage());
             }
         });
+
         Collections.sort(ret, new Comparator<Message>() {
             @Override
             public int compare(Message o1, Message o2) {

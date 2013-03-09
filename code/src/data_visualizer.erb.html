@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <title>Classifier Output</title>
+    <script src="jquery-1.9.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $(".treeSelector").click(function(element) {
+                var id = $(this).data('id');
+                $(".goldTree, .guessTree").hide();
+                $("#gold_tree_" + id + ", #guess_tree_" + id).show();
+
+                return false;
+            });
+        });
+    </script>
+    <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <style>
+        .goldTree {
+            display: none;
+        }
+
+        .guessTree {
+            display: none;
+        }
+
+        .messageNode {
+            margin-left: 25px;
+        }
+
+        .clear {
+            clear: both;
+        }
+
+
+        .treeWrapper {
+            width: 48%;
+            float: left;
+            border: 1px solid black;
+        }
+
+        .normal {
+            background-color: #ffffff;
+        }
+
+        .alt {
+            background-color: #e0ffff;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <h2> Pick Tree </h2>
+    <div class="treePicker">
+        <ul>
+        <% master_list.each do |message_tree| %>
+            <li><a href="#" class="treeSelector" data-id="<%=message_tree.id%>"><%= message_tree.gold_tree.title %> </a> </li>
+        <% end %>
+        </ul>
+    </div>
+
+
+    <div class="treeWrappers">
+        <div class="goldTreeWrapper treeWrapper">
+            <% master_list.each do |message_tree| %>
+                <div class="goldTree" id="gold_tree_<%=message_tree.id%>">
+                    <h3>Gold tree</h3>
+                    <h5><%= message_tree.gold_tree.title %></h5>
+                    <%= render_tree_node(message_tree.gold_tree.root) %>
+                </div>
+            <% end %>
+        </div>
+
+        <div class="guessTreeWrapper treeWrapper">
+            <% master_list.each do |message_tree| %>
+            <div class="guessTree" id="guess_tree_<%=message_tree.id%>">
+                <h3>Guess tree</h3>
+                <h5><%= message_tree.guess_tree.title %></h5>
+                <%= render_tree_node(message_tree.guess_tree.root) %>
+            </div>
+            <% end %>
+        </div>
+    </div>
+
+    <br class="clear"/>
+</body>
+
+</html>

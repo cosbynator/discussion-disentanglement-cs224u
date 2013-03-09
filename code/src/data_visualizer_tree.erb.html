@@ -1,0 +1,12 @@
+<div class="messageNode <%= alt ? 'alt' : 'normal'%>">
+    <em> <%= node.message.author_name %> </em>
+    <div class="body ">
+        <%= node.message.body %>
+    </div>
+
+    <div class="children">
+        <% node.children.each do |node| %>
+            <%= render_tree_node(node, !alt) %>
+        <% end %>
+    </div>
+</div>

@@ -5,6 +5,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
+import edu.stanford.cs224u.disentanglement.features.AuthorMentionFeature;
 import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeatureFactory;
 import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeatureFactory;
 import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
@@ -38,11 +39,10 @@ public class SVMDisentangler implements Disentangler {
         List<MessageTree> train = Lists.newArrayList(trainingData);
         final List<String> sentences = Lists.newArrayList();
         for(MessageTree tree : train) {
-            tree.getRoot().walk(new Function<MessageNode, Void>() {
+            tree.getRoot().walk(new MessageNode.TreeWalker() {
                 @Override
-                public Void apply(MessageNode messageNode) {
-                    sentences.add(messageNode.getMessage().getBody());
-                    return null;
+                public void visit(MessageNode m, MessageNode parent, int depth) {
+                    sentences.add(m.getMessage().getBody());
                 }
             });
         }
@@ -53,6 +53,7 @@ public class SVMDisentangler implements Disentangler {
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
             //new JaccardSimilarityFeatureFactory(),
             //new BagOfWordsIntersectingFeatureFactory(sentences, 5),
+            new AuthorMentionFeature(),
             new TFIDFFeatureFactory()
         );
         Benchmarker.pop();
@@ -89,6 +90,8 @@ public class SVMDisentangler implements Disentangler {
             Benchmarker.popError();
             throw new RuntimeException(e);
         }
+        Benchmarker.pop();
+        System.out.println("Learned Classifier: " + classifier);
     }
 
     @Override

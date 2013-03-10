@@ -1,7 +1,10 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
+import com.beust.jcommander.internal.Sets;
+import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -9,6 +12,8 @@ import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Message implements Serializable {
     private static final long serialVersionUID = 6535394886609049459L;
@@ -17,7 +22,10 @@ public class Message implements Serializable {
     private final DateTime timestamp;
     private final String body;
     private final Annotation bodyAnnotation;
-    private List<String> bodyWords;
+
+    private Map<String, Set<String>> nersByType;
+    private List<String> bodyWords = null;
+    private String normalizedBodyString;
 
     public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation) {
         this.id = id;
@@ -52,18 +60,49 @@ public class Message implements Serializable {
         return body;
     }
 
-    public List<String> getBodyWords() {
-        if(bodyWords != null) {
-            return bodyWords;
+    // Memoized
+    public String getNormalizedBodyString() {
+        if(normalizedBodyString == null) {
+            normalizedBodyString  = Joiner.on(" ").join(getBodyWords());
         }
 
-        List<CoreLabel> coreLabels = bodyAnnotation.get(CoreAnnotations.TokensAnnotation.class);
-        bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
-        for(CoreLabel label : coreLabels) {
-            bodyWords.add(label.value().toLowerCase());
+        return normalizedBodyString;
+    }
+
+    // Memoized
+    public List<String> getBodyWords() {
+        if(bodyWords == null) {
+            List<CoreLabel> coreLabels = bodyAnnotation.get(CoreAnnotations.TokensAnnotation.class);
+            bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
+            for(CoreLabel label : coreLabels) {
+                bodyWords.add(label.value().toLowerCase());
+            }
         }
 
         return bodyWords;
+    }
+
+    // Memoized
+    public Set<String> getNamedEntitiesOfType(String type) {
+        if(nersByType == null) {
+            nersByType = Maps.newHashMap();
+        }
+
+        if(nersByType.containsKey(type)) {
+            return nersByType.get(type);
+        }
+
+        Set<String> ret = Sets.newHashSet();
+        List<CoreLabel> coreLabels = bodyAnnotation.get(CoreAnnotations.TokensAnnotation.class);
+        bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
+        for(CoreLabel label : coreLabels) {
+            if(label.ner().equals(type)) {
+                ret.add(label.word().toLowerCase());
+            }
+        }
+
+        nersByType.put(type, ret);
+        return ret;
     }
 
     public Annotation getBodyAnnotation() {

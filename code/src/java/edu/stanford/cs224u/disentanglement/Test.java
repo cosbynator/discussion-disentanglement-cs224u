@@ -54,16 +54,22 @@ public class Test {
     }
 
     public static void testLDA() throws IOException {
+        LDAModel model = LDAModel.loadModel(new File("test_model"));
+        Message m = DataSets.ASK_HN_TEST_SMALL.read().iterator().next().getRoot().getMessage();
+        System.out.println(Doubles.join(",", model.inferTopics(m)));
+        m = DataSets.ASK_HN_TEST_SMALL.read().iterator().next().getRoot().getChildren().get(0).getMessage();
+        System.out.println(Doubles.join(",", model.inferTopics(m)));
+
+        /*
         LDAModel model = LDAModel.createFromTrees(20, DataSets.ASK_HN_TRAIN.read());
         model.printTopics(20);
-        Message m = DataSets.ASK_HN_TEST_SMALL.read().iterator().next().getRoot().getMessage();
         System.out.println(m.getBody());
-        System.out.println(Doubles.join(",", model.inferTopics(m)));
 
         model.saveModel(new File("test_model"));
         model = LDAModel.loadModel(new File("test_model"));
         model.printTopics(20);
         System.out.println(Doubles.join(",", model.inferTopics(m)));
+        */
 
         /*
         // Begin by importing documents from text to feature sequences
@@ -174,7 +180,12 @@ public class Test {
     public static void testCoreNLP() {
         DataSets dataSet = DataSets.ASK_HN_TRAIN;
         for(MessageTree tree : dataSet.read()) {
-            System.out.println(tree.getRoot().getMessage().getBodyWords());
+            System.out.println("---");
+            System.out.println(tree.getRoot().getMessage().getNamedEntitiesOfType("PERSON"));
+            System.out.println(tree.getRoot().getMessage().getNamedEntitiesOfType("ORGANIZATION"));
+            System.out.println(tree.getRoot().getMessage().getNamedEntitiesOfType("LOCATION"));
+            System.out.println(tree.getRoot().getMessage().getNamedEntitiesOfType("MISC"));
+            //System.out.println(tree.getRoot().getMessage().getBodyWords());
         }
     }
 
@@ -231,16 +242,16 @@ public class Test {
     public static void testLinearThreadBaseline() {
         new DisentanglementPipeline()
                 .withLearner(new LinearThreadDisentangler())
-                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
-                .withTestData(DataSets.ASK_REDDIT_TEST)
+                .withTrainData(DataSets.ASK_HN_TRAIN)
+                .withTestData(DataSets.ASK_HN_DEV)
                 .run();
     }
 
     public static void testAllReplyBaseline() {
         new DisentanglementPipeline()
                 .withLearner(new AllReplyToOpDisentangler())
-                .withTrainData(DataSets.ASK_REDDIT_TRAIN)
-                .withTestData(DataSets.ASK_REDDIT_TEST)
+                .withTrainData(DataSets.ASK_HN_TRAIN)
+                .withTestData(DataSets.ASK_HN_DEV)
                 .run();
     }
 
@@ -255,8 +266,8 @@ public class Test {
     public static void testSVMDev() throws Exception {
         new DisentanglementPipeline()
                 .withLearner(new SVMDisentangler())
-                .withTrainData(DataSets.ASK_REDDIT_SMALL_TRAIN)
-                .withTestData(DataSets.ASK_REDDIT_DEV)
+                .withTrainData(DataSets.ASK_HN_TRAIN_SMALL)
+                .withTestData(DataSets.ASK_HN_DEV_SMALL)
                 .run();
     }
 

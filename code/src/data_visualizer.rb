@@ -19,6 +19,8 @@ class Visualizer
   def initialize(output_file, gold_trees, guess_trees)
     @output_file = output_file
     @master_list = []
+    @tree_node_erb = ERB.new(open("./code/src/data_visualizer_tree.erb.html").read)
+    @data_visualizer_erb = ERB.new(open("./code/src/data_visualizer.erb.html").read)
     i = 0
     gold_trees.zip(guess_trees) do |gold_tree, guess_tree|
       rt = RenderTree.new
@@ -35,14 +37,14 @@ class Visualizer
     old_alt = alt
     @node = node
     @alt = alt
-    ret = ERB.new(open("code/src/data_visualizer_tree.erb.html").read).result(get_binding)
+    ret = @tree_node_erb.result(get_binding)
     @node = old_node
     @alt = old_alt
     ret
   end
 
   def render_all
-    res = ERB.new(open("code/src/data_visualizer.erb.html").read).result(get_binding)
+    res = @data_visualizer_erb.result(get_binding)
     open(@output_file, 'w') { |f| f.write(res)  }
     puts "Wrote to #{@output_file}"
   end

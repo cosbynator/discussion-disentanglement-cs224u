@@ -4,20 +4,27 @@ import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Doubles;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
-import edu.stanford.cs224u.disentanglement.features.AuthorMentionFeature;
-import edu.stanford.cs224u.disentanglement.features.BagOfWordsIntersectingFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.JaccardSimilarityFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.MinuteDifferenceFeatureFactory;
-import edu.stanford.cs224u.disentanglement.features.TFIDFFeatureFactory;
+import edu.stanford.cs224u.disentanglement.features.*;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
+import edu.stanford.cs224u.disentanglement.util.LDAModel;
+import org.jgrapht.DirectedGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.alg.KruskalMinimumSpanningTree;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultWeightedEdge;
 import weka.classifiers.functions.SMO;
 import weka.core.Instance;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 enum MessagePairCategories {
     NOT_RELATED,
@@ -25,6 +32,8 @@ enum MessagePairCategories {
 }
 
 public class SVMDisentangler implements Disentangler {
+    private static final double FALL_BACK_TO_ROOT_PROBABILITY = 0.5;
+
     private SMO classifier;
     private DataBuilder dataBuilder;
     private final int numFalseExamples = 1;
@@ -36,6 +45,7 @@ public class SVMDisentangler implements Disentangler {
 
     @Override
     public void train(Iterable<MessageTree> trainingData) {
+        Preconditions.checkArgument(new File("test_model").exists(), "test_model LDA file must exist!");
         /*
         Benchmarker.push("Generate Vocabulary");
         List<MessageTree> train = Lists.newArrayList(trainingData);
@@ -54,8 +64,13 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
+            //new TFIDFFeatureFactory(),
+            //new MinuteDifferenceFeatureFactory()
             new TFIDFFeatureFactory(),
-            new MinuteDifferenceFeatureFactory()
+            new AuthorMentionFeatureFactory(),
+            new ReplyToSelfFeatureFactory(),
+            new JacardNERFactory(),
+            new LDAFeatureFactory(LDAModel.loadModel(new File("test_model")))
         );
         Benchmarker.pop();
 
@@ -99,7 +114,70 @@ public class SVMDisentangler implements Disentangler {
     @Override
     public MessageTree predict(List<Message> test) {
         Preconditions.checkArgument(test.size() > 0, "Tried to predict empty tree!");
+        return predictGreedy(test);
+    }
 
+    public MessageTree predictMST(List<Message> test) {
+        DataBuilder.TreeData td = dataBuilder.createTreeData(test);
+        DefaultDirectedWeightedGraph<Message, DefaultWeightedEdge> predictionGraph
+                = new DefaultDirectedWeightedGraph<Message, DefaultWeightedEdge>(DefaultWeightedEdge.class);
+
+        Map<Message, MessageNode> nodeForMessage = Maps.newHashMap();
+        MessageNode root = new MessageNode(test.get(0));
+        nodeForMessage.put(test.get(0), root);
+        predictionGraph.addVertex(test.get(0));
+        for(int i = 1; i < test.size(); i++){
+            predictionGraph.addVertex(test.get(i));
+            MessageNode mn = new MessageNode(test.get(i));
+            nodeForMessage.put(test.get(i), mn);
+        }
+
+        for(int i = 1; i < test.size(); i++) {
+            Message m = test.get(i);
+            boolean hasAttached = false;
+            for(int p = 0; p < i; p++) {
+                Message parentCandidate = test.get(p);
+                MessagePair candidatePair = MessagePair.of(parentCandidate, m);
+                Instance instance = td.buildClassificationInstance(candidatePair);
+                instance.setDataset(dataBuilder.getInstances());
+
+                double []classProbs;
+                try {
+                    classProbs = classifier.distributionForInstance(instance);
+                } catch(Exception e) {
+                    throw new RuntimeException(e);
+                }
+
+
+                double prob = classProbs[1];
+                if(classProbs[1] > classProbs[0]) {
+                    predictionGraph.addEdge(parentCandidate, m);
+                    predictionGraph.setEdgeWeight(predictionGraph.getEdge(parentCandidate,m), -prob);
+                    hasAttached = true;
+                }
+            }
+
+            if(!hasAttached) {
+                predictionGraph.addEdge(root.getMessage(), m);
+                predictionGraph.setEdgeWeight(predictionGraph.getEdge(root.getMessage(),m), -2.0);
+            }
+        }
+
+        Benchmarker.push("Create maximum spanning tree");
+        KruskalMinimumSpanningTree<Message, DefaultWeightedEdge> mst = new KruskalMinimumSpanningTree(predictionGraph);
+        for(DefaultWeightedEdge edge : mst.getEdgeSet()) {
+            MessageNode parent = nodeForMessage.get(predictionGraph.getEdgeSource(edge));
+            MessageNode child = nodeForMessage.get(predictionGraph.getEdgeTarget(edge));
+            parent.addChildren(child);
+        }
+        System.err.println("MST cost: " + mst.getSpanningTreeCost());
+        Benchmarker.pop();
+
+        return new MessageTree(root, "Predicted Tree");
+    }
+
+
+    public MessageTree predictGreedy(List<Message> test) {
         DataBuilder.TreeData td = dataBuilder.createTreeData(test);
 
         Map<Message, MessageNode> nodeForMessage = Maps.newHashMap();
@@ -108,7 +186,8 @@ public class SVMDisentangler implements Disentangler {
 
         for(int i = 1; i < test.size(); i++) {
             Message m = test.get(i);
-            MessageNode maxParent = null;
+            // When in doubt, attach to root
+            MessageNode maxParent = root;
             double maxProb = Double.NEGATIVE_INFINITY;
             for(int p = 0; p < i; p++) {
                 MessageNode parentCandidate = nodeForMessage.get(test.get(p));
@@ -125,7 +204,7 @@ public class SVMDisentangler implements Disentangler {
 
 
                 double prob = classProbs[1];
-                if(prob > maxProb) {
+                if(classProbs[1] > FALL_BACK_TO_ROOT_PROBABILITY && prob > maxProb) {
                     maxProb = prob;
                     maxParent = parentCandidate;
                 }
@@ -135,7 +214,7 @@ public class SVMDisentangler implements Disentangler {
             nodeForMessage.put(m, mn);
         }
 
-        return new MessageTree(root, "Predicted reddit tree");
+        return new MessageTree(root, "Predicted Tree");
     }
 
 }

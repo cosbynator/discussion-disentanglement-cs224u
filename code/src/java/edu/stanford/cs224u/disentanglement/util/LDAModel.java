@@ -18,7 +18,7 @@ import java.util.regex.Pattern;
 public class LDAModel implements Serializable {
 
     private static Instance createInstance(Message m) {
-        String messageText = Joiner.on(" ").join(m.getBodyWords());
+        String messageText = m.getNormalizedBodyString();
         String target = m.getId();
         return new Instance(messageText, target, target, m.getBody());
     }
@@ -82,8 +82,7 @@ public class LDAModel implements Serializable {
         InstanceList testing = new InstanceList(pipe);
         testing.addThruPipe(createInstance(message));
         TopicInferencer inferencer = model.getInferencer();
-        double[] testProbabilities = inferencer.getSampledDistribution(testing.get(0), 10, 1, 5);
-        return testProbabilities;
+        return inferencer.getSampledDistribution(testing.get(0), 10, 1, 5);
     }
 
     public void printTopics(int numWords) {

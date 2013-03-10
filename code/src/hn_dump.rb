@@ -5,6 +5,7 @@ require 'ostruct'
 require 'open-uri'
 require 'fileutils'
 require 'peach'
+require 'sanitize'
 
 CRAWL_DELAY = 4.0
 TRAIN_SPLIT = 0.7
@@ -17,12 +18,6 @@ java_import java.io.ObjectOutputStream
 java_import java.io.BufferedOutputStream
 java_import java.io.FileOutputStream
 java_import java.util.zip.GZIPOutputStream
-
-class String
-  def strip_tags
-    self.gsub( %r{</?[^>]+?>}, '' )
-  end
-end
 
 class HNDump
   include_package "edu.stanford.cs224u.disentanglement.structures"
@@ -63,7 +58,7 @@ class HNDump
 
     root_title = root_json["title"]
     root_username = root_json["username"]
-    root_text = root_json["text"].strip_tags
+    root_text = Sanitize.clean(root_json["text"])
     root_sigid = root_json["_id"]
     num_comments = root_json["num_comments"]
     p root_json
@@ -77,7 +72,7 @@ class HNDump
       username = comment["username"]
       points = comment["points"]
       sigid = comment["_id"]
-      text = comment["text"]
+      text = Sanitize.clean(comment["text"])
       time = DateTime.parse(comment["create_ts"]).with_zone(DateTimeZone::UTC)
 
       begin
@@ -91,7 +86,7 @@ class HNDump
     comments.each do |comment|
       sigid = comment["_id"]
       parent_id = comment["parent_sigid"]
-      if(message_by_sigid[parent_id])
+      if(message_by_sigid[parent_id] && message_by_sigid[sigid])
         message_by_sigid[parent_id].add_children([message_by_sigid[sigid]].to_java(MessageNode))
       end
     end

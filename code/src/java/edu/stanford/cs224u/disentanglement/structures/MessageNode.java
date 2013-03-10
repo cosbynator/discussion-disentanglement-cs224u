@@ -62,7 +62,9 @@ public class MessageNode implements Serializable {
     public void walk(TreeWalker walker, MessageNode parent, int depth) {
         walker.visit(this, parent, depth) ;
         for(MessageNode n : children) {
-            n.walk(walker, this, depth + 1);
+            if(n != null) {
+                n.walk(walker, this, depth + 1);
+            }
         }
     }
 

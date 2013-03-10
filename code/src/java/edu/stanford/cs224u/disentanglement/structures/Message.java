@@ -2,6 +2,8 @@ package edu.stanford.cs224u.disentanglement.structures;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import edu.stanford.nlp.ling.CoreAnnotations;
+import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import org.joda.time.DateTime;
 
@@ -51,9 +53,16 @@ public class Message implements Serializable {
     }
 
     public List<String> getBodyWords() {
-        if(bodyWords == null) {
-            bodyWords = Lists.newArrayList(body.toLowerCase().split("(\\s|[.,!])"));
+        if(bodyWords != null) {
+            return bodyWords;
         }
+
+        List<CoreLabel> coreLabels = bodyAnnotation.get(CoreAnnotations.TokensAnnotation.class);
+        bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
+        for(CoreLabel label : coreLabels) {
+            bodyWords.add(label.value().toLowerCase());
+        }
+
         return bodyWords;
     }
 

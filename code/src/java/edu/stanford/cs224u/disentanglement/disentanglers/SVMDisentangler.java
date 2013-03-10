@@ -36,6 +36,7 @@ public class SVMDisentangler implements Disentangler {
 
     @Override
     public void train(Iterable<MessageTree> trainingData) {
+        /*
         Benchmarker.push("Generate Vocabulary");
         List<MessageTree> train = Lists.newArrayList(trainingData);
         final List<String> sentences = Lists.newArrayList();
@@ -48,6 +49,7 @@ public class SVMDisentangler implements Disentangler {
             });
         }
         Benchmarker.pop();
+        */
 
         Benchmarker.push("Create data builder");
 

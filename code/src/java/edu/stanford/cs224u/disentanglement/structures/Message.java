@@ -10,22 +10,25 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import org.joda.time.DateTime;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class Message implements Serializable {
-    private static final long serialVersionUID = 6535394886609049459L;
+    private static final long serialVersionUID = 6553324886609049459L;
     private final String id;
     private final String authorName;
     private final DateTime timestamp;
     private final String body;
     private final Annotation bodyAnnotation;
 
-    private Map<String, Set<String>> nersByType;
-    private List<String> bodyWords = null;
-    private String normalizedBodyString;
+    private transient Map<String, Set<String>> nersByType;
+    private transient List<String> bodyWords;
+    private transient String normalizedBodyString;
 
     public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation) {
         this.id = id;
@@ -97,7 +100,7 @@ public class Message implements Serializable {
         bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
         for(CoreLabel label : coreLabels) {
             if(label.ner().equals(type)) {
-                ret.add(label.word().toLowerCase());
+                ret.add(label.get(CoreAnnotations.LemmaAnnotation.class).toLowerCase());
             }
         }
 

@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class ChildrenClusterEvaluator implements Evaluator {
     private double totalF1;
+    private int numTrees;
 
     @Override
     public void addPrediction(MessageTree gold, MessageTree guess) {
@@ -36,10 +37,13 @@ public class ChildrenClusterEvaluator implements Evaluator {
         double recall = b3RecallTotal / numElements;
         System.out.printf("P %.3f R %.3f\n", precision, recall);
         totalF1 += 2 * precision * recall / (precision + recall);
+        numTrees++;
     }
 
     @Override
-    public Evaluation getEvaluation() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+    public EvaluationResult getEvaluation() {
+        EvaluationResult.Builder builder = new EvaluationResult.Builder("ChildrenClusterB3");
+        builder.addMetric("b3AverageF1", totalF1 / numTrees);
+        return builder.build();
     }
 }

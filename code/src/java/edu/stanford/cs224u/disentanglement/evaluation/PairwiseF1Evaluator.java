@@ -6,6 +6,10 @@ import java.util.Set;
 
 public class PairwiseF1Evaluator implements Evaluator {
 
+    public static final String PRECISION_METRIC = "precision";
+    public static final String RECALL_METRIC = "recall";
+    public static final String F1_METRIC = "f1";
+
     int correctPredictions;
     int totalPredictions;
     int correctRetrievals;
@@ -27,9 +31,13 @@ public class PairwiseF1Evaluator implements Evaluator {
     }
 
     @Override
-    public F1Evaluation getEvaluation() {
-        double precision = (double) correctPredictions / totalPredictions;
-        double recall = (double) correctRetrievals / totalRetrievals;
-        return new F1Evaluation(precision, recall);
+    public EvaluationResult getEvaluation() {
+            double precision = (double) correctPredictions / totalPredictions;
+            double recall = (double) correctRetrievals / totalRetrievals;
+        EvaluationResult.Builder builder = new EvaluationResult.Builder("F1Result");
+        builder.addMetric(PRECISION_METRIC, precision);
+        builder.addMetric(RECALL_METRIC, recall);
+        builder.addMetric(F1_METRIC, 2 * precision * recall / (precision + recall));
+        return builder.build();
     }
 }

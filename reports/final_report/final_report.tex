@@ -1,0 +1,215 @@
+\documentclass[10pt]{article}
+\usepackage{acl2012}
+\usepackage[margin=0.75in]{geometry}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage{url}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\setlength\titlebox{3.5cm}    % Expanding the titlebox
+
+\title{{\small CS224U Final Project} \\ Discourse Disentanglement}
+\author{Julius Cheng \\
+  \\\And
+  Thomas Dimson  \\
+  \\\And
+  Milind Ganjoo \\
+}
+\date{}
+\begin{document}
+\maketitle
+
+\section{Overview and Goals}
+Our project focuses on conversation disentanglement, which broadly refers to
+the problem of guessing the structure of a multi-party, asynchronous
+conversation. In particular, we focus on the task of reconstructing conversation
+trees of modern internet forums like \textit{Reddit} from a linear view. Our unit of 
+analysis a time-ordered list of messages and our output is a candidate thread tree. 
+With that in mind, we wish to answer the following questions:
+
+\begin{itemize}
+  \item To what degree does semantic knowledge allow a machine to understand the 
+    flow of online forum discussions?
+  \item How much does non-semantic information, such as timestamps and poster karma,
+    aid the system?
+  \item Does performance vary across domains? Do factors such as tree depth,
+    length of messages, and similarity of messages affect our ability to
+    reconstruct conversations? 
+\end{itemize}
+
+We have made the git repository for our code public at 
+\url{https://github.com/cosbynator/discussion-disentanglement-cs224u}.
+
+\section{Previous Approaches}
+\label{sec:approaches}
+As discussed in our literature review, there has been some limited prior 
+work in reconstructing threaded discussion in online conversions. 
+
+Work such as \cite{Elsner2008a} 
+uses internet chat data and attempts to cluster messages into coherent 
+conversations using a MaxEnt classifier. In this case, data has to be hand annotated and
+the gold set is subjective.
+
+Closer to our project was the work of \cite{Aumayr2011a}. Here, authors took
+internet forum posts from traditional \texttt{vBulletin} style message boards
+and attempted to reconstruct the reply structure from a linearized view. The authors
+use a decision tree with features such as TF-IDF distance and elapsed time. The biggest
+difference between them and us is that they use a reply graph as an evaluation metric,
+where vertices are users and edges indicate existence of replies. We evaluate correctness
+per-message rather than per-user.
+
+Particularly interesting is the work of \cite{Wang2011a} which used a conditional random
+field (CRF) to reconstruct newsgroup-style conversations. This work has a treasure trove of
+interesting features, and we anticipate implementing many of them in the upcoming weeks.
+Furthermore, time permitting, we want to see if a conditional random field is a good way
+to model our problem and improve performance. This is especially relevant, because, 
+as described in the experimental results section, we see that simple message-similarity 
+based approaches are not sufficient in determining message tree relationships, and 
+the use of history of predictions made so far would be helpful in improving overall 
+prediction accuracy. The dataset used by \cite{Wang2011a} is a set of threaded discussions 
+from the Apple support forums, and since our dataset most 
+closely matches theirs (see Section \ref{section:dataset}), we think our results with 
+CRF would improve.
+
+\section{Current Approach}
+\label{sec:approach}
+We are approaching conversation reconstruction as a \textit{classification} problem
+between parent and children messages. We take a threaded conversations from a modern internet forum 
+(described in Section~\ref{section:dataset}), flatten them into a time-sorted list, and them feed
+them into our reconstruction \textit{classifier} that attempts to recreate the tree
+with only message-level information. The details our reconstruction algorithm are 
+described in Section \ref{sec:classifier}.
+
+\section{Progress}
+Macroscopically, we have
+been successful in creating a pipeline to reconstruct conversation trees and
+evaluate our performance based on two metrics. The numbers leave something to be desired and
+we anticipate spending most of our remaining time on feature engineering and
+improvements to our classifier.
+
+\subsection{Dataset}
+\label{section:dataset}
+Our approach differs from most of those listed in Section \ref{sec:approaches}
+by the scale of our approach: we are trying to reconstruct complex
+conversations with large branching numbers.  In that vein, we extract data
+from Reddit, an online link-sharing and discussion site. To ensure all
+conversations have a root element, we used the popular AskReddit subforum
+where users initiate topics of conversation with a question. We treat the
+initial post as the root of a conversation tree, and each top-level comment as
+a child of the root. Each message node is annotated with various data such as
+timestamp, username, and more.
+
+To grab the data, we wrote a quick JRuby crawler and took a small sample (342)
+of the top AskReddit posts over the last month. The crawler was written to
+make data gathering easy and we anticipate creating a bigger dataset to report
+our final results. Table \ref{table:stats} shows some aggregated statistics of
+the preliminary crawl. In particular, we have an average of 200 messages per
+tree and a branching factor within a rounding error of 1.0. The root node has
+an average branching factor of 55.50, suggesting that discussions are wide
+while sub-discussions tend to be narrow. It is also important to note that
+standard deviation for many of our statistics are often quite large relative
+to the value, suggesting the wide variance in conversations on Reddit.
+
+\begin{table}[h]\footnotesize
+ \begin{tabular}{| l | l | l |} 
+   \hline
+   \textbf{Statistic} & \textbf{$n / \mu$} & \textbf{$\sigma$} \\
+   \hline
+    \# Conversation Trees &  342 & \\
+    \# Conversation Nodes (Posts) & 68639 & \\
+    \# Nodes Per Tree &  200.70 & 200.20 \\
+    Mean Branching Factor & 1.00 & 4.20 \\
+    Mean Root Branching Factor &  55.50 & 57.91 \\
+    Mean Node Depth  & 3.56 & 3.40 \\
+    Mean Parent Lag & 7767.96s & 11331.07s \\
+    Mean Body Length & 200.43 c & 483.07 \\
+   \hline
+  \end{tabular}
+  \caption{Data statistics of our preliminary conversation dataset}
+  \label{table:stats}
+\end{table}
+
+We have divided the input data randomly into training / development / test 
+sets at a 70\% / 10\% / 20\% split.
+
+\subsection{Evaluation}
+For now, we are primarily considering F1 score as our evaluation metric. We
+compute precision and recall based on how many of our guessed 
+$(parent,child)$ conversation edges match the gold tree. We are considering 
+two versions of F1: one were precision and recall is calculated pairwise 
+across all messages in all conversations, and another where F1 is calculated 
+per-conversation, and the scores are averaged in the end. We expect to have 
+very poor performance  in large conversations, so we expect the average F1
+score metric to be more forgiving. Both metrics have been implemented in our 
+code. Since our crawled dataset currently contains conversations of similar 
+size, our distinct evaluation metrics result in scores that are equal to the 
+4th decimal. We anticipate our final dataset will have more diversity.
+
+Noting that it can be more important to get lower-depth subtrees correct, we
+are also considering weighting a clustering metric such as $B^3$. Here, we 
+can treat subtrees at a given depth as clusters, comparing against gold 
+clusters at that depth. We could weight proportional to the inverse depth to 
+reward us for capturing more of the general discourse with less sensitivity 
+to individual placement.
+
+\subsection{Classifier and Preliminary Results}
+\label{sec:classifier}
+We have created a basic SVM classifier that guesses whether a given pair of
+messages are in a $(parent, child)$ relationship or not. Since our desired
+output is a tree, we use a greedy approach to building message trees: for a
+given message, we pair it with the preceding-in-time message of the highest
+$(parent, child)$ confidence from our classifier.
+
+Our baseline classifier has two feature templates: TF-IDF similarity
+(calculated in the context of a message's original tree) and the parent-child
+time lag in minutes. As Table \ref{table:results} shows, our results slightly
+improve over the trivial baseline systems: one that guesses that all messages
+are made in reply to the root, and the other that guesses that all messages
+are made in reply to most recent previous message.
+
+In selecting features for our classifier, we considered many message-based
+similarity features. The first approach was to use bag-of-words similarity
+(i.e. a binary vector indicating which of a fixed bag-of-words was present in
+both messages). However, since the most frequent words in the vocabulary were
+stop words like conjunctions and prepositions, we found that they had little
+effect on the discriminative ability of the SVM classifier. On the other hand, by choosing a larger bag-of-words, we found that the memory and runtime
+suffered unacceptable levels of degradation. We also considered Jaccard similarity, but found no noticeable effect on classification accuracy.
+
+However, our excitement at crossing the trivial baseline should be limited,
+since we don't currently have a visualization of the results, and it's
+possible that the SVM is still making random guesses, leading to 32\% F1 by
+simply associating all messages with the root, for example. This is something
+we still need to address by carefully visualizing the actual predicted trees.
+
+\begin{table}[h]\footnotesize
+ \begin{tabular}{| l | l | l |} 
+   \hline
+   \textbf{Statistic} & Pairwise F1 & Average-tree F1 \\
+   \hline
+    SVM baseline & 0.329 & 0.331 \\
+    All-reply-to-root baseline & 0.278 & 0.278 \\
+    One-thread baseline & 0.021 & 0.021 \\
+   \hline
+  \end{tabular}
+  \caption{Data statistics of our preliminary conversation dataset}
+  \label{table:results}
+\end{table}
+
+\section{Next Steps}
+As mentioned in Section \ref{sec:classifier}, the next few days will be focused
+on feature engineering. We implemented TF-IDF and parent-child time lag
+because they were easy tests of our framework. Now that we have it set up,
+we hope to use more sophisticated features such as speech acts and co-reference. We will also consider edge-based features that rely on predictions previously made on ancestors of candidate nodes, as described in the CRF framework used by \cite{Wang2011a}. Once we have a firm set of features, we will start to tweak classifier hyperparameters to achieve the best
+possible results.
+
+We have also discussed using a different data source (Hacker News) to
+see how our performance varies across domains. We anticipate Hacker News
+to be a fairer representation of our classifier since discussions tend to be 
+smaller and more on-topic.
+
+\bibliography{final_report}{} 
+\bibliographystyle{acl2012}
+
+\end{document}

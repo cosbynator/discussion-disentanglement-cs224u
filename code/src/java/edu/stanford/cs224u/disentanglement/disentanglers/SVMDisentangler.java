@@ -148,7 +148,8 @@ public class SVMDisentangler implements Disentangler {
         }
 
         Benchmarker.push("Create maximum spanning tree");
-        KruskalMinimumSpanningTree<Message, DefaultWeightedEdge> mst = new KruskalMinimumSpanningTree(predictionGraph);
+        KruskalMinimumSpanningTree<Message, DefaultWeightedEdge> mst
+                = new KruskalMinimumSpanningTree<Message, DefaultWeightedEdge>(predictionGraph);
         for(DefaultWeightedEdge edge : mst.getEdgeSet()) {
             MessageNode parent = nodeForMessage.get(predictionGraph.getEdgeSource(edge));
             MessageNode child = nodeForMessage.get(predictionGraph.getEdgeTarget(edge));

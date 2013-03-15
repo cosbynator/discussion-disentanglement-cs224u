@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Message implements Serializable, Comparable<Message> {
-    private static final long serialVersionUID = 6535394886609049459L;
+    private static final long serialVersionUID = 6553324886609049459L;
     private final String id;
     private final String authorName;
     private final DateTime timestamp;

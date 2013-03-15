@@ -1,6 +1,5 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -21,28 +20,21 @@ public class MessageTree implements Serializable {
         metadata = Maps.newHashMap();
     }
 
-    // TODO: Do we need to make this immutable?
     public void addMetadata(String name, Object value) {
         metadata.put(name, value);
     }
 
-    // TODO: Consider renaming and immutifying
     public List<Message> linearize() {
-        final List<Message> ret = Lists.newArrayList();
-        this.root.walk(new MessageNode.TreeWalker() {
-            @Override
-            public void visit(MessageNode m, MessageNode parent, int depth) {
-                ret.add(m.getMessage());
-            }
-        });
+        final List<Message> linearizedMessages = Lists.newArrayList();
+        this.root.preorderWalk(new MessageNode.CopyToCollectionWalker(linearizedMessages));
+        Collections.sort(linearizedMessages);
+        return linearizedMessages;
+    }
 
-        Collections.sort(ret, new Comparator<Message>() {
-            @Override
-            public int compare(Message o1, Message o2) {
-                return o1.getTimestamp().compareTo(o2.getTimestamp());
-            }
-        });
-        return ret;
+    public List<Set<Message>> getChildrenBags(int startDepth) {
+        List<Set<Message>> childrenBags = Lists.newArrayList();
+        this.root.preorderWalk(new MessageNode.BagifyChildrenWalker(childrenBags, startDepth));
+        return childrenBags;
     }
 
     public MessageNode getRoot() {

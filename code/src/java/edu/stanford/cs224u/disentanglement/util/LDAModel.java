@@ -44,9 +44,9 @@ public class LDAModel implements Serializable {
         final InstanceList instances = new InstanceList(pipe);
 
         for(final MessageTree t : trees) {
-            t.getRoot().walk(new MessageNode.TreeWalker() {
+            t.getRoot().preorderWalk(new MessageNode.TreeWalker() {
                 @Override
-                public void visit(MessageNode m, MessageNode parent, int depth) {
+                public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
                     instances.addThruPipe(createInstance(m.getMessage()));
                 }
             });

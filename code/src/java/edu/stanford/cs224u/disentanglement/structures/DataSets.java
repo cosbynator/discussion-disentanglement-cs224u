@@ -13,7 +13,7 @@ import java.util.zip.GZIPInputStream;
 public enum DataSets {
     ASK_REDDIT_DEV("data/AskReddit/dev"),
     ASK_REDDIT_TRAIN("data/AskReddit/train"),
-    ASK_REDDIT_SMALL_TRAIN("data/AskReddit/train", 5),
+    ASK_REDDIT_TRAIN_SMALL("data/AskReddit/train", 5),
     ASK_REDDIT_TEST("data/AskReddit/test"),
 
     ASK_HN_TRAIN("data/AskHN/train"),

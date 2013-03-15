@@ -1,10 +1,5 @@
 package edu.stanford.cs224u.disentanglement;
 
-import cc.mallet.pipe.*;
-import cc.mallet.pipe.iterator.CsvIterator;
-import cc.mallet.topics.ParallelTopicModel;
-import cc.mallet.topics.TopicInferencer;
-import cc.mallet.types.*;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.google.common.base.Joiner;
@@ -18,13 +13,11 @@ import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.LDAModel;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.mutable.MutableInt;
-import org.joda.time.DateTime;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class Test {
     public static void main(String[] args) throws Exception {
@@ -89,9 +82,9 @@ public class Test {
         DataSets ds = DataSets.ASK_HN_TRAIN_SMALL;
 
         for(final MessageTree t : ds.read()) {
-            t.getRoot().walk(new MessageNode.TreeWalker() {
+            t.getRoot().preorderWalk(new MessageNode.TreeWalker() {
                 @Override
-                public void visit(MessageNode m, MessageNode parent, int depth) {
+                public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
                     String messageText = Joiner.on(" ").join(m.getMessage().getBodyWords());
                     String target = m.getMessage().getId();
                     instances.addThruPipe(new Instance(messageText, target, target, m.getMessage().getBody()));
@@ -211,22 +204,22 @@ public class Test {
         final PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(tempFile)));
         try {
             for(final MessageTree tree : dataSet.read()) {
-                tree.getRoot().walk(new MessageNode.TreeWalker() {
+                tree.getRoot().preorderWalk(new MessageNode.TreeWalker() {
                     @Override
-                    public void visit(MessageNode m, MessageNode parent, int depth) {
+                    public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
                         lastInsert.increment();
                         int docId = lastInsert.intValue();
                         integerIdMap.put(m.getMessage().getId(), docId);
 
                         int parentId;
-                        if(depth == 0) {
+                        if (depth == 0) {
                             parentId = -1;
                         } else {
                             parentId = integerIdMap.get(parent.getMessage().getId());
                         }
 
-                        writer.println(docId  + " " + parentId
-                                + " "  + tree.getRoot().getMessage().getId() + "_" + m.getMessage().getId()
+                        writer.println(docId + " " + parentId
+                                + " " + tree.getRoot().getMessage().getId() + "_" + m.getMessage().getId()
                                 + " " + Joiner.on(" ").join(m.getMessage().getBodyWords()));
 
                     }
@@ -272,7 +265,7 @@ public class Test {
     }
 
     public static void testPrintData() {
-        for (MessageTree tree : DataSets.ASK_REDDIT_TRAIN.read()) {
+        for (MessageTree tree : DataSets.ASK_REDDIT_TRAIN_SMALL.read()) {
             System.out.println("****");
             System.out.println(tree);
             for (Message m : tree.linearize()) {

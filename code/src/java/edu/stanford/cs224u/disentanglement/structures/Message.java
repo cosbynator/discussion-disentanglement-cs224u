@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class Message implements Serializable {
-    private static final long serialVersionUID = 6553324886609049459L;
+public class Message implements Serializable, Comparable<Message> {
+    private static final long serialVersionUID = 6535394886609049459L;
     private final String id;
     private final String authorName;
     private final DateTime timestamp;
@@ -121,5 +121,10 @@ public class Message implements Serializable {
     public String toString() {
         return Objects.toStringHelper(this).add("id", id).add("author", authorName)
                 .add("time", timestamp).add("body", body.substring(0, (Math.min(body.length(), 100)))).toString();
+    }
+
+    @Override
+    public int compareTo(Message o) {
+        return this.getTimestamp().compareTo(o.getTimestamp());
     }
 }

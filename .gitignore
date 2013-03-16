@@ -36,3 +36,4 @@ code/.idea/workspace.xml
 code/.idea/tasks.xml
 code/target
 *.pdf
+visuals/*.html

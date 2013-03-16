@@ -16,15 +16,27 @@ public class MessageNode implements Serializable {
         public void preorderVisit(MessageNode m, MessageNode parent, int depth);
     }
 
-    public static class CopyToCollectionWalker implements TreeWalker {
+    public static class CopyVerticesWalker implements TreeWalker {
         private Collection<Message> coll;
-        public CopyToCollectionWalker(Collection<Message> coll) {
+        public CopyVerticesWalker(Collection<Message> coll) {
             this.coll = coll;
         }
 
         @Override
         public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
             coll.add(m.getMessage());
+        }
+    }
+
+    public static class CopyEdgesWalker implements TreeWalker {
+        private Collection<MessagePair> coll;
+        public CopyEdgesWalker(Collection<MessagePair> coll) {
+            this.coll = coll;
+        }
+
+        @Override
+        public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
+            coll.add(new MessagePair(parent.getMessage(), m.getMessage()));
         }
     }
 

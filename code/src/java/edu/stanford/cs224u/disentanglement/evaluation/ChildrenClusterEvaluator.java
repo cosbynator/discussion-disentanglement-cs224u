@@ -18,7 +18,6 @@ public class ChildrenClusterEvaluator implements Evaluator {
         totalF1 = new double[MAX_DEPTH];
         numTrees = new int[MAX_DEPTH];
         for (int depth = 1; depth <= MAX_DEPTH; depth++) {
-            // Just begin with depth 1
             List<Set<Message>> referencePartition = gold.getChildrenBags(depth);
             List<Set<Message>> responsePartition = guess.getChildrenBags(depth);
 

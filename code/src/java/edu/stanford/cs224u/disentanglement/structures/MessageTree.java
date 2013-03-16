@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import java.io.Serializable;
 import java.util.*;
@@ -26,7 +27,7 @@ public class MessageTree implements Serializable {
 
     public List<Message> linearize() {
         final List<Message> linearizedMessages = Lists.newArrayList();
-        this.root.preorderWalk(new MessageNode.CopyToCollectionWalker(linearizedMessages));
+        this.root.preorderWalk(new MessageNode.CopyVerticesWalker(linearizedMessages));
         Collections.sort(linearizedMessages);
         return linearizedMessages;
     }
@@ -35,6 +36,12 @@ public class MessageTree implements Serializable {
         List<Set<Message>> childrenBags = Lists.newArrayList();
         this.root.preorderWalk(new MessageNode.BagifyChildrenWalker(childrenBags, startDepth));
         return childrenBags;
+    }
+
+    public Set<MessagePair> extractEdges() {
+        Set<MessagePair> edgeSet = Sets.newHashSet();
+        this.root.preorderWalk(new MessageNode.CopyEdgesWalker(edgeSet));
+        return edgeSet;
     }
 
     public MessageNode getRoot() {
@@ -56,24 +63,5 @@ public class MessageTree implements Serializable {
                 .add("title", title)
                 .add("metadata", metadata)
                 .toString();
-    }
-
-    /**
-     * Extract an immutable set of edges from the tree. An edge is represented by a <code>MessagePair</code> object.
-     *
-     * @return an immutable set of edges from the tree
-     */
-    public Set<MessagePair> extractEdges() {
-        Stack<MessageNode> stack = new Stack<MessageNode>();
-        stack.push(getRoot());
-        ImmutableSet.Builder<MessagePair> builder = new ImmutableSet.Builder<MessagePair>();
-        while (!stack.empty()) {
-            MessageNode parent = stack.pop();
-            for (MessageNode child : parent.getChildren()) {
-                builder.add(new MessagePair(parent.getMessage(), child.getMessage()));
-                stack.push(child);
-            }
-        }
-        return builder.build();
     }
 }

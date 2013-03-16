@@ -27,7 +27,8 @@ public class DisentanglementPipeline {
         evaluators = ImmutableList.of(
                 new UnderRootF1Evaluator(),
                 new PairwiseF1Evaluator(),
-                new AverageTreeF1Evaluator()
+                new AverageTreeF1Evaluator(),
+                new ChildrenClusterEvaluator()
         );
         visualizationFile = "visuals/last_run.html";
     }

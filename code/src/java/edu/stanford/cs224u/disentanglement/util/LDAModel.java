@@ -9,6 +9,7 @@ import com.google.common.base.Joiner;
 import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessageNode;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
+import edu.stanford.cs224u.disentanglement.structures.TreeWalker;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -44,7 +45,7 @@ public class LDAModel implements Serializable {
         final InstanceList instances = new InstanceList(pipe);
 
         for(final MessageTree t : trees) {
-            t.getRoot().preorderWalk(new MessageNode.TreeWalker() {
+            t.getRoot().preorderWalk(new TreeWalker() {
                 @Override
                 public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
                     instances.addThruPipe(createInstance(m.getMessage()));

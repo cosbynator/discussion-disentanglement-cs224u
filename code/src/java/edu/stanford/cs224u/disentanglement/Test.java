@@ -204,7 +204,7 @@ public class Test {
         final PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter(tempFile)));
         try {
             for(final MessageTree tree : dataSet.read()) {
-                tree.getRoot().preorderWalk(new MessageNode.TreeWalker() {
+                tree.getRoot().preorderWalk(new TreeWalker() {
                     @Override
                     public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
                         lastInsert.increment();
@@ -219,7 +219,8 @@ public class Test {
                         }
 
                         writer.println(docId + " " + parentId
-                                + " " + tree.getRoot().getMessage().getId() + "_" + m.getMessage().getId()
+                                + " " + tree.getRoot().getMessage().getId()
+                                + "_" + m.getMessage().getId()
                                 + " " + Joiner.on(" ").join(m.getMessage().getBodyWords()));
 
                     }

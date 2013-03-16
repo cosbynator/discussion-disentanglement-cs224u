@@ -27,20 +27,28 @@ public class MessageTree implements Serializable {
 
     public List<Message> linearize() {
         final List<Message> linearizedMessages = Lists.newArrayList();
-        this.root.preorderWalk(new MessageNode.CopyVerticesWalker(linearizedMessages));
+        this.root.preorderWalk(new TreeWalkers.CopyVerticesWalker(linearizedMessages));
         Collections.sort(linearizedMessages);
         return linearizedMessages;
     }
 
     public List<Set<Message>> getChildrenBags(int startDepth) {
         List<Set<Message>> childrenBags = Lists.newArrayList();
-        this.root.preorderWalk(new MessageNode.BagifyChildrenWalker(childrenBags, startDepth));
+        this.root.preorderWalk(new TreeWalkers.BagifyChildrenWalker(childrenBags, startDepth));
         return childrenBags;
     }
 
     public Set<MessagePair> extractEdges() {
+        return extractEdges(-1);
+    }
+
+    public Set<MessagePair> extractEdges(int maxDepth) {
         Set<MessagePair> edgeSet = Sets.newHashSet();
-        this.root.preorderWalk(new MessageNode.CopyEdgesWalker(edgeSet));
+        if (maxDepth > 0) {
+            this.root.preorderWalk(new TreeWalkers.CopyEdgesWalker(edgeSet, maxDepth));
+        } else {
+            this.root.preorderWalk(new TreeWalkers.CopyEdgesWalker(edgeSet));
+        }
         return edgeSet;
     }
 

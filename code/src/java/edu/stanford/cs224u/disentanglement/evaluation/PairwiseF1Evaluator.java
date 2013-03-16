@@ -10,15 +10,32 @@ public class PairwiseF1Evaluator implements Evaluator {
     public static final String RECALL_METRIC = "recall";
     public static final String F1_METRIC = "f1";
 
+    private final int maxDepth;
+
     int correctPredictions;
     int totalPredictions;
     int correctRetrievals;
     int totalRetrievals;
 
+    public PairwiseF1Evaluator() {
+        this(-1);
+    }
+
+    public PairwiseF1Evaluator(int maxDepth) {
+        this.maxDepth = maxDepth;
+    }
+
     @Override
     public void addPrediction(MessageTree gold, MessageTree guess) {
-        Set<MessagePair> targetEdges = gold.extractEdges();
-        Set<MessagePair> predictedEdges = guess.extractEdges();
+        Set<MessagePair> targetEdges;
+        Set<MessagePair> predictedEdges;
+        if (maxDepth > 0) {
+            targetEdges = gold.extractEdges(maxDepth);
+            predictedEdges = guess.extractEdges(maxDepth);
+        } else {
+            targetEdges = gold.extractEdges();
+            predictedEdges = guess.extractEdges();
+        }
         for (MessagePair predictedEdge : predictedEdges) {
             if (targetEdges.contains(predictedEdge)) correctPredictions++;
             totalPredictions++;

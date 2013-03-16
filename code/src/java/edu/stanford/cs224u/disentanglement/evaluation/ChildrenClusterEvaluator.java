@@ -9,14 +9,21 @@ import java.util.Set;
 
 public class ChildrenClusterEvaluator implements Evaluator {
     private static final int MAX_DEPTH = 4;
+    public static final String B3_DEPTH_METRIC_PREFIX = "b3Depth";
+    public static final String F1_DEPTH_METRIC_PREFIX = "f1Depth";
 
-    private double totalF1[];
+    private double f1[];
+    private double bagF1[];
     private int numTrees[];
+
+    public ChildrenClusterEvaluator() {
+        bagF1 = new double[MAX_DEPTH];
+        f1 = new double[MAX_DEPTH];
+        numTrees = new int[MAX_DEPTH];
+    }
 
     @Override
     public void addPrediction(MessageTree gold, MessageTree guess) {
-        totalF1 = new double[MAX_DEPTH];
-        numTrees = new int[MAX_DEPTH];
         for (int depth = 1; depth <= MAX_DEPTH; depth++) {
             List<Set<Message>> referencePartition = gold.getChildrenBags(depth);
             List<Set<Message>> responsePartition = guess.getChildrenBags(depth);
@@ -41,10 +48,19 @@ public class ChildrenClusterEvaluator implements Evaluator {
                 }
             }
 
+            // Calculate F1 score till that depth
+            Evaluator eval = new PairwiseF1Evaluator(depth);
+            eval.addPrediction(gold, guess);
+            EvaluationResult result = eval.getEvaluation();
+
             double precision = b3PrecisionTotal / numElements;
             double recall = b3RecallTotal / numElements;
-            totalF1[depth - 1] += 2 * precision * recall / (precision + recall);
-            numTrees[depth - 1]++;
+            double b3f1 = 2 * precision * recall / (precision + recall);
+            if (!Double.isNaN(b3f1)) {
+                f1[depth - 1] += result.getMetric(PairwiseF1Evaluator.F1_METRIC);
+                bagF1[depth - 1] += b3f1;
+                numTrees[depth - 1]++;
+            }
         }
     }
 
@@ -52,10 +68,12 @@ public class ChildrenClusterEvaluator implements Evaluator {
     public EvaluationResult getEvaluation() {
         EvaluationResult.Builder builder = new EvaluationResult.Builder("ChildrenClusterB3");
         for (int i = 0; i < MAX_DEPTH; i++) {
-            if (numTrees[i] == 0) {
-                continue;
+            if (numTrees[i] > 0) {
+                builder.addMetric(String.format(B3_DEPTH_METRIC_PREFIX + "%d", i + 1),
+                        bagF1[i] / numTrees[i]);
+                builder.addMetric(String.format(F1_DEPTH_METRIC_PREFIX + "%d", i + 1),
+                        f1[i] / numTrees[i]);
             }
-            builder.addMetric(String.format("b3Depth%d", i + 1), totalF1[i] / numTrees[i]);
         }
         return builder.build();
     }

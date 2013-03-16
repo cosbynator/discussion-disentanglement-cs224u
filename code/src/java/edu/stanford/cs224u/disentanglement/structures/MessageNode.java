@@ -12,60 +12,6 @@ public class MessageNode implements Serializable {
     private final Message message;
     private final List<MessageNode> children;
 
-    public interface TreeWalker {
-        public void preorderVisit(MessageNode m, MessageNode parent, int depth);
-    }
-
-    public static class CopyVerticesWalker implements TreeWalker {
-        private Collection<Message> coll;
-        public CopyVerticesWalker(Collection<Message> coll) {
-            this.coll = coll;
-        }
-
-        @Override
-        public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
-            coll.add(m.getMessage());
-        }
-    }
-
-    public static class CopyEdgesWalker implements TreeWalker {
-        private Collection<MessagePair> coll;
-        public CopyEdgesWalker(Collection<MessagePair> coll) {
-            this.coll = coll;
-        }
-
-        @Override
-        public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
-            coll.add(new MessagePair(parent.getMessage(), m.getMessage()));
-        }
-    }
-
-    public static class BagifyChildrenWalker implements TreeWalker {
-        private Collection<Set<Message>> bagCollection;
-        private Set<Message> currentSet;
-        private int startDepth;
-
-        public BagifyChildrenWalker(Collection<Set<Message>> bagCollection) {
-            this(bagCollection, 1);
-        }
-
-        public BagifyChildrenWalker(Collection<Set<Message>> bagCollection, int startDepth) {
-            this.bagCollection = bagCollection;
-            this.startDepth = startDepth;
-        }
-
-        @Override
-        public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
-            if (depth >= startDepth) {
-                if (depth == startDepth) {
-                    currentSet = Sets.newHashSet();
-                    bagCollection.add(currentSet);
-                }
-                currentSet.add(m.getMessage());
-            }
-        }
-    }
-
     public MessageNode(MessageNode mn) {
         this.message = mn.getMessage();
         this.children = Lists.newArrayListWithCapacity(mn.getChildren().size());

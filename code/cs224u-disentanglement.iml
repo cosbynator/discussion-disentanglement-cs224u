@@ -54,6 +54,8 @@
     <orderEntry type="library" name="Maven: com.google.guava:guava:13.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.beust:jcommander:1.30" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.6" level="project" />
+    <orderEntry type="library" name="Python 2.7.2 interpreter library" level="application" />
+    <orderEntry type="library" scope="PROVIDED" name="jruby-1.7.3-p385 facet library" level="application" />
   </component>
 </module>
 

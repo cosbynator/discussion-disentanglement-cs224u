@@ -31,7 +31,9 @@
 *.xdy
 *.tdo
 *.fls
+*.pdf
 code/.idea/workspace.xml
 code/.idea/tasks.xml
 code/target
 *.pdf
+visuals/*.html

@@ -1,21 +1,16 @@
 package edu.stanford.cs224u.disentanglement.structures;
 
-import com.google.common.base.Function;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class MessageNode implements Serializable {
     private static final long serialVersionUID = -3910005688986138369L;
     private final Message message;
     private final List<MessageNode> children;
-
-    public interface TreeWalker {
-        public void visit(MessageNode m, MessageNode parent, int depth);
-    }
 
     public MessageNode(MessageNode mn) {
         this.message = mn.getMessage();
@@ -35,12 +30,10 @@ public class MessageNode implements Serializable {
         addChildren(children);
     }
 
-    // TODO: Need to remove this and integrate with constructor in order to keep the whole thing immutable
     public void addChildren(List<MessageNode> messages) {
         this.children.addAll(messages);
     }
 
-    // TODO: Need to remove this and integrate with constructor in order to keep the whole thing immutable
     public void addChildren(MessageNode... messages) {
         for (MessageNode m : messages) {
             children.add(m);
@@ -55,15 +48,15 @@ public class MessageNode implements Serializable {
         return Collections.unmodifiableList(children);
     }
 
-    public void walk(TreeWalker walker) {
-        walk(walker, null, 0);
+    public void preorderWalk(TreeWalker walker) {
+        preorderWalk(walker, null, 0);
     }
 
-    public void walk(TreeWalker walker, MessageNode parent, int depth) {
-        walker.visit(this, parent, depth) ;
+    public void preorderWalk(TreeWalker walker, MessageNode parent, int depth) {
+        walker.preorderVisit(this, parent, depth);
         for(MessageNode n : children) {
             if(n != null) {
-                n.walk(walker, this, depth + 1);
+                n.preorderWalk(walker, this, depth + 1);
             }
         }
     }

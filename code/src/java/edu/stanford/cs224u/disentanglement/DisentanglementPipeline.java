@@ -9,10 +9,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import edu.stanford.cs224u.disentanglement.disentanglers.Disentangler;
-import edu.stanford.cs224u.disentanglement.evaluation.AverageTreeF1Evaluator;
-import edu.stanford.cs224u.disentanglement.evaluation.Evaluator;
-import edu.stanford.cs224u.disentanglement.evaluation.PairwiseF1Evaluator;
-import edu.stanford.cs224u.disentanglement.evaluation.UnderRootF1Evaluator;
+import edu.stanford.cs224u.disentanglement.evaluation.*;
 import edu.stanford.cs224u.disentanglement.structures.DataSets;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
@@ -30,7 +27,8 @@ public class DisentanglementPipeline {
         evaluators = ImmutableList.of(
                 new UnderRootF1Evaluator(),
                 new PairwiseF1Evaluator(),
-                new AverageTreeF1Evaluator()
+                new AverageTreeF1Evaluator(),
+                new ChildrenClusterEvaluator()
         );
         visualizationFile = "visuals/last_run.html";
     }

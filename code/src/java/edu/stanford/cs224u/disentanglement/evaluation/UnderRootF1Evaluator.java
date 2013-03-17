@@ -1,12 +1,7 @@
 package edu.stanford.cs224u.disentanglement.evaluation;
 
-import com.google.common.collect.Lists;
 import edu.stanford.cs224u.disentanglement.structures.MessageNode;
-import edu.stanford.cs224u.disentanglement.structures.MessagePair;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
-
-import java.util.List;
-import java.util.Set;
 
 public class UnderRootF1Evaluator implements Evaluator {
     PairwiseF1Evaluator underRootEvaluator = new PairwiseF1Evaluator();
@@ -27,9 +22,9 @@ public class UnderRootF1Evaluator implements Evaluator {
     }
 
     @Override
-    public Evaluation getEvaluation() {
-        F1Evaluation ret = underRootEvaluator.getEvaluation();
-        ret.setName("UnderRootF1Evaluation");
-        return ret;
+    public EvaluationResult getEvaluation() {
+        EvaluationResult ret = underRootEvaluator.getEvaluation();
+        EvaluationResult.Builder builder = new EvaluationResult.Builder("UnderRootF1Result", ret);
+        return builder.build();
     }
 }

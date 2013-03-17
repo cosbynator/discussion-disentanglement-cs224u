@@ -1,16 +1,13 @@
 package edu.stanford.cs224u.disentanglement.evaluation;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import edu.stanford.cs224u.disentanglement.structures.*;
-import edu.stanford.cs224u.disentanglement.util.Pair;
-
-import java.util.Iterator;
-import java.util.Set;
 
 
 public class AverageTreeF1Evaluator implements Evaluator {
+
+    public static final String AVERAGE_F1_METRIC = "averageF1";
+
     double totalF1 = 0.0;
     int treeCount = 0;
 
@@ -19,20 +16,14 @@ public class AverageTreeF1Evaluator implements Evaluator {
         PairwiseF1Evaluator evaluator = new PairwiseF1Evaluator();
         evaluator.addPrediction(gold,guess);
         treeCount++;
-        totalF1 += evaluator.getEvaluation().f1;
+        totalF1 += evaluator.getEvaluation().getMetric(PairwiseF1Evaluator.F1_METRIC);
     }
 
     @Override
-    public Evaluation getEvaluation() {
-        final double averageF1 = totalF1 / treeCount;
-        return new Evaluation() {
-            @Override
-            public String toString() {
-                return Objects.toStringHelper("AveragePairwiseF1")
-                        .add("averageF1", averageF1)
-                        .toString();
-            }
-        };
+    public EvaluationResult getEvaluation() {
+        EvaluationResult.Builder builder = new EvaluationResult.Builder("AveragePairwiseF1");
+        builder.addMetric(AVERAGE_F1_METRIC, totalF1 / treeCount);
+        return builder.build();
     }
 
 }

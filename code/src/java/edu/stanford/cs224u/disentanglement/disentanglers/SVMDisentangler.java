@@ -46,25 +46,9 @@ public class SVMDisentangler implements Disentangler {
     @Override
     public void train(Iterable<MessageTree> trainingData) {
         Preconditions.checkArgument(new File("test_model").exists(), "test_model LDA file must exist!");
-        /*
-        Benchmarker.push("Generate Vocabulary");
-        List<MessageTree> train = Lists.newArrayList(trainingData);
-        final List<String> sentences = Lists.newArrayList();
-        for(MessageTree tree : train) {
-            tree.getRoot().walk(new MessageNode.TreeWalker() {
-                @Override
-                public void visit(MessageNode m, MessageNode parent, int depth) {
-                    sentences.add(m.getMessage().getBody());
-                }
-            });
-        }
-        Benchmarker.pop();
-        */
-
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            //new TFIDFFeatureFactory(),
             //new MinuteDifferenceFeatureFactory()
             new TFIDFFeatureFactory(),
             new AuthorMentionFeatureFactory(),
@@ -164,7 +148,8 @@ public class SVMDisentangler implements Disentangler {
         }
 
         Benchmarker.push("Create maximum spanning tree");
-        KruskalMinimumSpanningTree<Message, DefaultWeightedEdge> mst = new KruskalMinimumSpanningTree(predictionGraph);
+        KruskalMinimumSpanningTree<Message, DefaultWeightedEdge> mst
+                = new KruskalMinimumSpanningTree<Message, DefaultWeightedEdge>(predictionGraph);
         for(DefaultWeightedEdge edge : mst.getEdgeSet()) {
             MessageNode parent = nodeForMessage.get(predictionGraph.getEdgeSource(edge));
             MessageNode child = nodeForMessage.get(predictionGraph.getEdgeTarget(edge));

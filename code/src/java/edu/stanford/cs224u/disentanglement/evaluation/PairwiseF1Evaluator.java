@@ -6,30 +6,55 @@ import java.util.Set;
 
 public class PairwiseF1Evaluator implements Evaluator {
 
-    double correctPredictions = 0.0;
-    double totalPredictions = 0.0;
-    double correctRetrievals = 0.0;
-    double totalRetrievals = 0.0;
+    public static final String PRECISION_METRIC = "precision";
+    public static final String RECALL_METRIC = "recall";
+    public static final String F1_METRIC = "f1";
+
+    private final int maxDepth;
+
+    int correctPredictions;
+    int totalPredictions;
+    int correctRetrievals;
+    int totalRetrievals;
+
+    public PairwiseF1Evaluator() {
+        this(-1);
+    }
+
+    public PairwiseF1Evaluator(int maxDepth) {
+        this.maxDepth = maxDepth;
+    }
 
     @Override
     public void addPrediction(MessageTree gold, MessageTree guess) {
-        Set<MessagePair> targetEdges = gold.extractEdges();
-        Set<MessagePair> predictedEdges = guess.extractEdges();
+        Set<MessagePair> targetEdges;
+        Set<MessagePair> predictedEdges;
+        if (maxDepth > 0) {
+            targetEdges = gold.extractEdges(maxDepth);
+            predictedEdges = guess.extractEdges(maxDepth);
+        } else {
+            targetEdges = gold.extractEdges();
+            predictedEdges = guess.extractEdges();
+        }
         for (MessagePair predictedEdge : predictedEdges) {
-            if (targetEdges.contains(predictedEdge)) correctPredictions += 1.0;
-            totalPredictions += 1.0;
+            if (targetEdges.contains(predictedEdge)) correctPredictions++;
+            totalPredictions++;
         }
         for (MessagePair targetEdge : targetEdges) {
-            if (predictedEdges.contains(targetEdge)) correctRetrievals += 1.0;
-            totalRetrievals += 1.0;
+            if (predictedEdges.contains(targetEdge)) correctRetrievals++;
+            totalRetrievals++;
         }
 
     }
 
     @Override
-    public F1Evaluation getEvaluation() {
-        double precision = correctPredictions / totalPredictions;
-        double recall = correctRetrievals / totalRetrievals;
-        return new F1Evaluation(precision, recall);
+    public EvaluationResult getEvaluation() {
+            double precision = (double) correctPredictions / totalPredictions;
+            double recall = (double) correctRetrievals / totalRetrievals;
+        EvaluationResult.Builder builder = new EvaluationResult.Builder("F1Result");
+        builder.addMetric(PRECISION_METRIC, precision);
+        builder.addMetric(RECALL_METRIC, recall);
+        builder.addMetric(F1_METRIC, 2 * precision * recall / (precision + recall));
+        return builder.build();
     }
 }

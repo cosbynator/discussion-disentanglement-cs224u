@@ -56,13 +56,6 @@ end
 class HNDump
   include_package "edu.stanford.cs224u.disentanglement.structures"
 
-  def initialize
-  end
-
-  def annotator
-    @annotator ||= MessageBodyAnnotator.new
-  end
-
   def crawl_ids(ids)
     dump_file = lambda { |id| "data/raw/AskHN/#{id["_id"]}.json.gz"  }
     uniqs = (ids.uniq {|id| id["_id"]}).select{|id| (id["text"] || "").size >= 200 && id["num_comments"] < 100 && !File.exist?(dump_file.call(id))}
@@ -130,7 +123,7 @@ class HNDump
     end
   end
 
-  def parse_message_tree(json_gz, user_hash)
+  def parse_message_tree(json_gz, user_hash, annotator)
     response = Zlib::GzipReader.open(json_gz) { |f| JSON.parse(f.read()) }
     root_json, discussions_json = response
 
@@ -155,6 +148,10 @@ class HNDump
       sigid = comment["_id"]
       text = Sanitize.clean(comment["text"])
       time = DateTime.parse(comment["create_ts"]).with_zone(DateTimeZone::UTC)
+
+      if user_hash[username].nil?
+        puts "NO USER FOUND for #{username}"
+      end
 
       begin
         message = MessageNode.new(Message.new(sigid, username, time, text, annotator.annotateBody(text), user_hash[username]))
@@ -188,6 +185,7 @@ class HNDump
   end
 
   def make_dataset
+    annotator = MessageBodyAnnotator.new
     good_files = []
     Dir.glob("data/raw/AskHN/*.gz") do |filename|
       good_files << filename
@@ -210,9 +208,9 @@ class HNDump
       output_directory = "#{base_dir}/#{type}"
       FileUtils.mkdir_p(output_directory)
 
-      files.peach(8) do |filename|
+      files.peach(6) do |filename|
         puts "Reading #{filename}"
-        tree = parse_message_tree(filename, users_hash)
+        tree = parse_message_tree(filename, users_hash, annotator)
         output_name = "#{output_directory}/#{File.basename(filename, '.json.gz')}.dmt.gz"
         output_stream = ObjectOutputStream.new(GZIPOutputStream.new(BufferedOutputStream.new(FileOutputStream.new(output_name))))
         begin
@@ -256,9 +254,9 @@ end
 
 if __FILE__ == $0
   dump = HNDump.new
-  dump.parse_message_tree "data/raw/AskHN/127952-83197.json.gz", dump.users_hash()
+  #dump.parse_message_tree "data/raw/AskHN/127952-83197.json.gz", dump.users_hash()
   #dump.crawl_ids(dump.read_ids("data/raw/ask_hn_ids.json"))
-  #dump.make_dataset
+  dump.make_dataset
   #dump.crawl_users(dump.extract_usernames DataSets::ASK_HN_TRAIN, DataSets::ASK_HN_TEST, DataSets::ASK_HN_DEV)
   #puts dump.calc_average_karma(dump.users_hash.values)
 end

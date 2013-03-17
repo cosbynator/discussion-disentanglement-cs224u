@@ -31,7 +31,7 @@ class Visualizer
       rt.guess_tree = guess_tree
       evaluator = PairwiseF1Evaluator.new
       evaluator.add_prediction(gold_tree, guess_tree)
-      rt.f1_score = evaluator.get_evaluation.f1
+      rt.f1_score = evaluator.get_evaluation.get_metric("f1")
 
       @master_list << rt
       i += 1

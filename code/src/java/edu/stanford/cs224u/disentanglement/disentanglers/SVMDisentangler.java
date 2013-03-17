@@ -1,21 +1,14 @@
 package edu.stanford.cs224u.disentanglement.disentanglers;
 
-import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.primitives.Doubles;
 import edu.stanford.cs224u.disentanglement.classifier.DataBuilder;
 import edu.stanford.cs224u.disentanglement.features.*;
 import edu.stanford.cs224u.disentanglement.structures.*;
 import edu.stanford.cs224u.disentanglement.util.Benchmarker;
 import edu.stanford.cs224u.disentanglement.util.LDAModel;
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.Graph;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
-import org.jgrapht.graph.DefaultEdge;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import weka.classifiers.functions.SMO;
 import weka.core.Instance;
@@ -24,7 +17,6 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 enum MessagePairCategories {
     NOT_RELATED,
@@ -54,7 +46,8 @@ public class SVMDisentangler implements Disentangler {
             new AuthorMentionFeatureFactory(),
             new ReplyToSelfFeatureFactory(),
             new JacardNERFactory(),
-            new LDAFeatureFactory(LDAModel.loadModel(new File("test_model")))
+            new LDAFeatureFactory(LDAModel.loadModel(new File("test_model"))),
+            new UserStatsFeatureFactory()
         );
         Benchmarker.pop();
 

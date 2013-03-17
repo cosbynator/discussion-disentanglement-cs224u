@@ -20,6 +20,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 
 enum MessagePairCategories {
     NOT_RELATED,
@@ -61,21 +62,26 @@ public class SVMDisentangler implements Disentangler {
         for(MessageTree tree : trainingData) {
             List<Message> linearized = tree.linearize();
             DataBuilder.TreeData td = dataBuilder.createTreeData(linearized);
-            for(MessagePair p : tree.extractEdges()) {
+            Set<MessagePair> edges = tree.extractEdges();
+            for(MessagePair p : edges) {
                 td.addExample(p, MessagePairCategories.RELATED);
+            }
+
+            // Find some negatives up the tree
+            for(int messageNumber = 1; messageNumber < linearized.size(); messageNumber++) {
                 int foundExamples = 0;
                 int iterations = 0;
-                while(iterations < 100 && foundExamples < numFalseExamples) {
+                Message message = linearized.get(messageNumber);
+                while(iterations < 100 && foundExamples < numFalseExamples && foundExamples < (messageNumber - 1)) {
                     iterations++;
-                    Message example = linearized.get(random.nextInt(linearized.size()));
-                    if(example.equals(p.getSecond()) || example.equals(p.getFirst())) {
+                    Message falseParent = linearized.get(random.nextInt(messageNumber));
+                    MessagePair falsePair = new MessagePair(falseParent, message);
+                    if(message.equals(falseParent) || edges.contains(falsePair)) {
                         continue;
                     }
-                    MessagePair pReplace = new MessagePair(example, p.getSecond());
-                    td.addExample(pReplace, MessagePairCategories.NOT_RELATED);
+                    td.addExample(falsePair, MessagePairCategories.NOT_RELATED);
                     foundExamples++;
                 }
-
             }
         }
 

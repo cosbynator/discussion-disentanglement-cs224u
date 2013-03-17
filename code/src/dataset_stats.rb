@@ -53,6 +53,7 @@ end
 def compute_stats(*datasets)
   aggregate_stats = datasets.map do |dataset|
     acc = StatAcc.new(dataset.to_s,
+      "Nodes" => "Trees",
       "Children" => "Nodes",
       "Depth" => "Nodes",
       "Parent Lag" => "Nodes",
@@ -62,15 +63,15 @@ def compute_stats(*datasets)
     )
     dataset.read.each do |message_tree|
       acc.add_total "Trees"
+      acc.add_total "Nodes Under Root", message_tree.root.children.size
+      acc.add_total "Nodes", message_tree.linearize.size
       authors = Set.new
       walk(message_tree.root) do |node, parent, depth|
         authors.add(node.message.author_name)
-        acc.add_total "Nodes"
         acc.add_total "Parent Lag", Seconds::seconds_between(parent.message.timestamp, node.message.timestamp).seconds unless parent.nil?
         acc.add_total "Children", node.children.size
         acc.add_total "Depth", depth
         acc.add_total "Body Length", node.message.body.length
-        acc.add_total "Nodes Under Root" if depth == 2
       end
 
       acc.add_total "Percentage Unique Authors", authors.length
@@ -80,4 +81,5 @@ def compute_stats(*datasets)
   end.inject(StatAcc.new("AGGREGATED")) { |res, o| res.merge!(o); res }.print
 end
 
-compute_stats(DataSets::ASK_REDDIT_TEST, DataSets::ASK_REDDIT_DEV, DataSets::ASK_REDDIT_TRAIN)
+#compute_stats(DataSets::ASK_REDDIT_TEST, DataSets::ASK_REDDIT_DEV, DataSets::ASK_REDDIT_TRAIN)
+compute_stats(DataSets::ASK_HN_TEST, DataSets::ASK_HN_DEV, DataSets::ASK_HN_TRAIN)

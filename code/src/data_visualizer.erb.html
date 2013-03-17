@@ -57,7 +57,7 @@
     <div class="treePicker">
         <ul>
         <% master_list.each do |message_tree| %>
-            <li><a href="#" class="treeSelector" data-id="<%=message_tree.id%>"><%= message_tree.gold_tree.title %> </a> </li>
+            <li><a href="#" class="treeSelector" data-id="<%=message_tree.id%>"><%= message_tree.gold_tree.title %> [<%= "%.2f" % (message_tree.f1_score * 100)%> %]</a> </li>
         <% end %>
         </ul>
     </div>

@@ -9,10 +9,12 @@ class RenderTree
   attr_accessor :id
   attr_accessor :gold_tree
   attr_accessor :guess_tree
+  attr_accessor :f1_score
 end
 
 
 class Visualizer
+  include_package "edu.stanford.cs224u.disentanglement.evaluation"
   attr_reader :master_list
   attr_reader :node, :alt
 
@@ -27,9 +29,14 @@ class Visualizer
       rt.id = i
       rt.gold_tree = gold_tree
       rt.guess_tree = guess_tree
+      evaluator = PairwiseF1Evaluator.new
+      evaluator.add_prediction(gold_tree, guess_tree)
+      rt.f1_score = evaluator.get_evaluation.f1
+
       @master_list << rt
       i += 1
     end
+    @master_list = @master_list.sort_by(&:f1_score).reverse
   end
 
   def render_tree_node(node, alt=false)

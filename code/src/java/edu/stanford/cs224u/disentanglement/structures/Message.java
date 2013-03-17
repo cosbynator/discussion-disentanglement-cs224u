@@ -10,6 +10,7 @@ import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
 import org.joda.time.DateTime;
 
+import javax.annotation.CheckForNull;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -19,23 +20,27 @@ import java.util.Map;
 import java.util.Set;
 
 public class Message implements Serializable {
-    private static final long serialVersionUID = 6553324886609049459L;
+    private static final long serialVersionUID = -4733088982094242922L;
     private final String id;
     private final String authorName;
     private final DateTime timestamp;
     private final String body;
     private final Annotation bodyAnnotation;
 
+    @CheckForNull
+    private final MessageUser user;
+
     private transient Map<String, Set<String>> nersByType;
     private transient List<String> bodyWords;
     private transient String normalizedBodyString;
 
-    public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation) {
+    public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation, MessageUser user) {
         this.id = id;
         this.authorName = authorName;
         this.timestamp = timestamp;
         this.body = body;
         this.bodyAnnotation = bodyAnnotation;
+        this.user = user;
     }
 
     @Override
@@ -61,6 +66,11 @@ public class Message implements Serializable {
 
     public String getBody() {
         return body;
+    }
+
+    @CheckForNull
+    public MessageUser getUser() {
+        return user;
     }
 
     // Memoized

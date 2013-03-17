@@ -18,7 +18,6 @@ RAW_DUMP_DIR = "#{DATA_DIR}/raw"
 TEST_DIR = "#{DATA_DIR}/test"
 
 REDDIT_CRAWL_RATE = 25.0 / 60.0 #25 requests every minute
-
 class RedditDump
   include_package "edu.stanford.cs224u.disentanglement.structures"
 
@@ -126,7 +125,7 @@ class RedditDump
     id = child_data["id"]
     date = DateTime.new(child_data["created_utc"] * 1000, DateTimeZone::UTC)
 
-    root = MessageNode.new(Message.new(id, author, date, body, @annotator.annotateBody(body)))
+    root = MessageNode.new(Message.new(id, author, date, body, @annotator.annotateBody(body), nil))
     ret = MessageTree.new root, title
     ret.add_metadata "subreddit", child_data["subreddit"]
     ret.add_metadata "score", child_data["score"]
@@ -157,7 +156,7 @@ class RedditDump
         date = DateTime.new(data["created_utc"] * 1000, DateTimeZone::UTC)
         body = data["body"]
 
-        root  = MessageNode.new(Message.new(id, author, date, body, @annotator.annotateBody(body)))
+        root  = MessageNode.new(Message.new(id, author, date, body, @annotator.annotateBody(body), nil))
         root.addChildren(message_nodes(data["replies"]).to_java(MessageNode)) unless data["replies"].empty?
         root
       end
@@ -236,7 +235,7 @@ end
 
 
 #RedditDump.new.dump_subreddit "AskReddit"
-#RedditDump.new.split_raw_subreddit "AskReddit"
-RedditDump.new.fetch_hn_listing
+RedditDump.new.split_raw_subreddit "AskReddit"
+#RedditDump.new.fetch_hn_listing
 
 

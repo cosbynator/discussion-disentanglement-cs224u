@@ -11,7 +11,7 @@ import java.util.Map;
  * Date: 3/7/13
  * Time: 6:57 AM
  */
-public class MinuteDifferenceFeatureFactory extends AbstractFeatureFactory {
+public class HourDifferenceFeatureFactory extends AbstractFeatureFactory {
     @Override
     public Map<Integer, Double> processExample(MessagePair example) {
         return ImmutableMap.of(

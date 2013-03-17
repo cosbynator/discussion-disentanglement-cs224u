@@ -6,6 +6,7 @@ import cc.mallet.topics.TopicInferencer;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import com.google.common.base.Joiner;
+import com.google.common.collect.Lists;
 import edu.stanford.cs224u.disentanglement.structures.Message;
 import edu.stanford.cs224u.disentanglement.structures.MessageNode;
 import edu.stanford.cs224u.disentanglement.structures.MessageTree;
@@ -14,9 +15,11 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class LDAModel implements Serializable {
+    private static final long serialVersionUID = 4245122957821320742L;
 
     private static Instance createInstance(Message m) {
         String messageText = m.getNormalizedBodyString();
@@ -40,19 +43,12 @@ public class LDAModel implements Serializable {
         return new SerialPipes(pipeList);
     }
 
-    public static LDAModel createFromTrees(int numTopics, Iterable<MessageTree> trees) throws IOException {
+    public static LDAModel createFromMessages(int numTopics, Iterable<Message> messages) throws IOException {
         final Pipe pipe = createPipe();
         final InstanceList instances = new InstanceList(pipe);
-
-        for(final MessageTree t : trees) {
-            t.getRoot().preorderWalk(new TreeWalker() {
-                @Override
-                public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
-                    instances.addThruPipe(createInstance(m.getMessage()));
-                }
-            });
+        for(Message m : messages) {
+            instances.addThruPipe(createInstance(m));
         }
-
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
@@ -60,15 +56,26 @@ public class LDAModel implements Serializable {
 
         model.addInstances(instances);
 
-        // Use two parallel samplers, which each look at one half the corpus and combine
-        //  statistics after every iteration.
-        model.setNumThreads(4);
+        model.setNumThreads(6);
 
         // Run the model for 50 iterations and stop (this is for testing only,
         //  for real applications, use 1000 to 2000 iterations)
-        model.setNumIterations(1000);
+        model.setNumIterations(100);
         model.estimate();
         return new LDAModel(model, pipe);
+    }
+
+    public static LDAModel createFromTrees(int numTopics, Iterable<MessageTree> trees) throws IOException {
+        final List<Message> messages = Lists.newArrayList();
+        for(final MessageTree t : trees) {
+            t.getRoot().preorderWalk(new TreeWalker() {
+                @Override
+                public void preorderVisit(MessageNode m, MessageNode parent, int depth) {
+                    messages.add(m.getMessage());
+                }
+            });
+        }
+        return createFromMessages(numTopics, messages);
     }
 
     private final ParallelTopicModel model;

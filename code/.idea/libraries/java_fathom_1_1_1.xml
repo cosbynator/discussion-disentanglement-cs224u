@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="java_fathom-1.1.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/vendor/java_fathom-1.1.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

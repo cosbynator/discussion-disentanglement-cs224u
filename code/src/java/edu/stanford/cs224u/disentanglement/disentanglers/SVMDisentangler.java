@@ -10,7 +10,10 @@ import edu.stanford.cs224u.disentanglement.util.LDAModel;
 import org.jgrapht.alg.KruskalMinimumSpanningTree;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
+import weka.classifiers.Classifier;
+import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.trees.RandomForest;
 import weka.core.Instance;
 
 import java.io.File;
@@ -26,9 +29,9 @@ enum MessagePairCategories {
 public class SVMDisentangler implements Disentangler {
     private static final double FALL_BACK_TO_ROOT_PROBABILITY = 0.5;
 
-    private SMO classifier;
+    private Classifier classifier;
     private DataBuilder dataBuilder;
-    private final int numFalseExamples = 1;
+    private final int numFalseExamples = 2;
     private Random random;
 
     public SVMDisentangler() {
@@ -41,13 +44,16 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            //new MinuteDifferenceFeatureFactory()
+            //new HourDifferenceFeatureFactory(),
             new TFIDFFeatureFactory(),
             new AuthorMentionFeatureFactory(),
             new ReplyToSelfFeatureFactory(),
             new JacardNERFactory(),
             new LDAFeatureFactory(LDAModel.loadModel(new File("test_model"))),
-            new UserStatsFeatureFactory()
+            //new PerTreeLDAFeatureFactory(),
+            new ReadabilityFeatureFactory(),
+            new UserStatsFeatureFactory(),
+            new LengthDifferenceFeatureFactory()
         );
         Benchmarker.pop();
 
@@ -73,9 +79,18 @@ public class SVMDisentangler implements Disentangler {
             }
         }
 
-        classifier = new SMO();
-        classifier.setBuildLogisticModels(true);
-        classifier.setC(0.5);
+        SMO smoClassifier = new SMO();
+        smoClassifier = new SMO();
+        smoClassifier.setBuildLogisticModels(true);
+        smoClassifier.setC(0.5);
+        classifier = smoClassifier;
+
+        /*
+        RandomForest forest = new RandomForest();
+        classifier = forest;
+        */
+        //NaiveBayes bayes = new NaiveBayes();
+        //classifier = bayes;
         try {
             Benchmarker.push("Build classifier");
             classifier.buildClassifier(dataBuilder.getInstances());

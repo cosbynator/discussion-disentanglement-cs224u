@@ -5,6 +5,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.representqueens.lingua.en.Fathom;
 import edu.stanford.nlp.ling.CoreAnnotations;
 import edu.stanford.nlp.ling.CoreLabel;
 import edu.stanford.nlp.pipeline.Annotation;
@@ -30,9 +31,10 @@ public class Message implements Serializable, Comparable<Message> {
     @CheckForNull
     private final MessageUser user;
 
-    private transient Map<String, Set<String>> nersByType;
-    private transient List<String> bodyWords;
-    private transient String normalizedBodyString;
+    private transient Map<String, Set<String>> nersByType = null;
+    private transient List<String> bodyWords = null;
+    private transient String normalizedBodyString = null;
+    private transient Fathom.Stats bodyFathom = null;
 
     public Message(String id, String authorName, DateTime timestamp, String body, Annotation bodyAnnotation, MessageUser user) {
         this.id = id;
@@ -74,8 +76,16 @@ public class Message implements Serializable, Comparable<Message> {
     }
 
     // Memoized
+    public Fathom.Stats fathomBody() {
+        if(bodyFathom == null) {
+            bodyFathom = Fathom.analyze(getNormalizedBodyString());
+        }
+        return bodyFathom;
+    }
+
+    // Memoized
     public String getNormalizedBodyString() {
-        if(normalizedBodyString == null) {
+        if(normalizedBodyString == null || normalizedBodyString.equals("")) {
             normalizedBodyString  = Joiner.on(" ").join(getBodyWords());
         }
 
@@ -84,11 +94,11 @@ public class Message implements Serializable, Comparable<Message> {
 
     // Memoized
     public List<String> getBodyWords() {
-        if(bodyWords == null) {
+        if(bodyWords == null || bodyWords.size() == 0) {
             List<CoreLabel> coreLabels = bodyAnnotation.get(CoreAnnotations.TokensAnnotation.class);
             bodyWords = Lists.newArrayListWithCapacity(coreLabels.size());
             for(CoreLabel label : coreLabels) {
-                bodyWords.add(label.value().toLowerCase());
+                bodyWords.add(label.get(CoreAnnotations.LemmaAnnotation.class).toLowerCase());
             }
         }
 

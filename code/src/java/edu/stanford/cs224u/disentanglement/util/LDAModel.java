@@ -36,7 +36,7 @@ public class LDAModel implements Serializable {
         pipeList.add( new CharSequenceLowercase() );
         pipeList.add( new CharSequence2TokenSequence(Pattern.compile("(\\p{L}[\\p{L}\\p{P}]+\\p{L}|[?!])")) );
         pipeList.add(new TokenSequenceRemoveStopwords(false).addStopWords(new String[] {
-                "and", "is", "the", "for", "n't", "lrb", "rrb", "'s"
+                "and", "is", "the", "for", "n't", "lrb", "rrb", "'s", "great", "good", "llb", "rrb", "rcb", "lcb"
         }));
         //pipeList.add( new TokenSequenceRemoveStopwords(new File("stoplists/en.txt"), "UTF-8", false, false, false) );
         pipeList.add( new TokenSequence2FeatureSequence() );
@@ -52,7 +52,8 @@ public class LDAModel implements Serializable {
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
-        ParallelTopicModel model = new ParallelTopicModel(numTopics, 1.0, 0.01);
+        //ParallelTopicModel model = new ParallelTopicModel(numTopics, 1.0, 0.01);
+        ParallelTopicModel model = new ParallelTopicModel(numTopics, 50.0, 0.1);
 
         model.addInstances(instances);
 
@@ -60,7 +61,7 @@ public class LDAModel implements Serializable {
 
         // Run the model for 50 iterations and stop (this is for testing only,
         //  for real applications, use 1000 to 2000 iterations)
-        model.setNumIterations(100);
+        model.setNumIterations(2000);
         model.estimate();
         return new LDAModel(model, pipe);
     }
@@ -78,6 +79,10 @@ public class LDAModel implements Serializable {
         return createFromMessages(numTopics, messages);
     }
 
+    public ParallelTopicModel getModel() {
+        return model;
+    }
+
     private final ParallelTopicModel model;
     private final Pipe pipe;
     public LDAModel(ParallelTopicModel model, Pipe pipe) {
@@ -90,7 +95,7 @@ public class LDAModel implements Serializable {
         InstanceList testing = new InstanceList(pipe);
         testing.addThruPipe(createInstance(message));
         TopicInferencer inferencer = model.getInferencer();
-        return inferencer.getSampledDistribution(testing.get(0), 10, 1, 5);
+        return inferencer.getSampledDistribution(testing.get(0), 30, 1, 5);
     }
 
     public void printTopics(int numWords) {

@@ -13,6 +13,7 @@ import org.jgrapht.graph.DefaultWeightedEdge;
 import weka.classifiers.Classifier;
 import weka.classifiers.bayes.NaiveBayes;
 import weka.classifiers.functions.SMO;
+import weka.classifiers.functions.SimpleLogistic;
 import weka.classifiers.trees.RandomForest;
 import weka.core.Instance;
 
@@ -45,12 +46,12 @@ public class SVMDisentangler implements Disentangler {
         Benchmarker.push("Create data builder");
 
         dataBuilder = new DataBuilder(MessagePairCategories.class, "SVMDisentangler",
-            //new HourDifferenceFeatureFactory(),
+            new HourDifferenceFeatureFactory(),
             new TFIDFFeatureFactory(),
             new AuthorMentionFeatureFactory(),
             new ReplyToSelfFeatureFactory(),
             new JacardNERFactory(),
-            new LDAFeatureFactory(LDAModel.loadModel(new File("test_model"))),
+            new LDAFeatureFactory(LDAModel.loadModel(new File("ask_hn_20_topics_full.lda"))),
             //new PerTreeLDAFeatureFactory(),
             new ReadabilityFeatureFactory(),
             new UserStatsFeatureFactory(),
@@ -90,11 +91,13 @@ public class SVMDisentangler implements Disentangler {
         smoClassifier.setBuildLogisticModels(true);
         smoClassifier.setC(0.5);
         classifier = smoClassifier;
-
         /*
         RandomForest forest = new RandomForest();
         classifier = forest;
         */
+
+        //SimpleLogistic logit = new SimpleLogistic();
+        //classifier = logit;
         //NaiveBayes bayes = new NaiveBayes();
         //classifier = bayes;
         try {

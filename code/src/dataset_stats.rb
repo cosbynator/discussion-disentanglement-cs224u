@@ -58,9 +58,14 @@ def compute_stats(*datasets)
       "Depth" => "Nodes",
       "Parent Lag" => "Nodes",
       "Body Length" => "Nodes",
+      "Body Tokens" => "Nodes",
       "Percentage Unique Authors" => "Nodes",
-      "Nodes Under Root" => "Trees"
+      "Nodes Under Root" => "Trees",
+      "Author Karma" => "Authors"
     )
+
+    all_authors = Set.new
+
     dataset.read.each do |message_tree|
       acc.add_total "Trees"
       acc.add_total "Nodes Under Root", message_tree.root.children.size
@@ -72,10 +77,17 @@ def compute_stats(*datasets)
         acc.add_total "Children", node.children.size
         acc.add_total "Depth", depth
         acc.add_total "Body Length", node.message.body.length
+        acc.add_total "Body Tokens", node.message.body_words.length
+        all_authors << node.message.user if node.message.user
       end
 
       acc.add_total "Percentage Unique Authors", authors.length
     end
+    acc.add_total "Authors", all_authors.length
+    all_authors.each do |author|
+      acc.add_total "Author Karma", author.karma
+    end
+
     acc.print
     acc
   end.inject(StatAcc.new("AGGREGATED")) { |res, o| res.merge!(o); res }.print

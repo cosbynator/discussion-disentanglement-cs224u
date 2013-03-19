@@ -14,10 +14,18 @@ import java.util.List;
 import java.util.Map;
 
 public class LDAFeatureFactory extends AbstractFeatureFactory {
-    private LDAModel model;
+    private final LDAModel model;
+    private final int numTopics;
+    private final boolean buildCartesianProduct;
 
     public LDAFeatureFactory(LDAModel model) {
+        this(model, false);
+    }
+
+    public LDAFeatureFactory(LDAModel model, boolean buildCartesianProduct) {
         this.model = model;
+        this.numTopics = model.getModel().getNumTopics();
+        this.buildCartesianProduct = buildCartesianProduct;
     }
 
     public static final double log2 = Math.log(2);
@@ -36,10 +44,19 @@ public class LDAFeatureFactory extends AbstractFeatureFactory {
 
     @Override
     public ArrayList<Attribute> getAttributeList() {
-        return Lists.newArrayList(
+        ArrayList<Attribute> ret = Lists.newArrayList(
                 new Attribute("KL_LDA_PARENT_CHILD"),
                 new Attribute("KL_LDA_CHILD_PARENT")
         );
+
+        if(buildCartesianProduct) {
+            for(int i = 0; i < numTopics; i++) {
+                for(int j = 0; j < numTopics; j++) {
+                    ret.add(new Attribute("LDA Topic " + i + "*" + j));
+                }
+            }
+        }
+        return ret;
     }
 
     @Override
@@ -58,15 +75,25 @@ public class LDAFeatureFactory extends AbstractFeatureFactory {
             public Map<Integer, Double> processExample(MessagePair example) {
                 double []topicDistribution1 = topicInferenceForMessage(example.getFirst());
                 double []topicDistribution2 = topicInferenceForMessage(example.getSecond());
-                return ImmutableMap.of(
-                    0, klDivergence(topicDistribution1, topicDistribution2),
-                    1, klDivergence(topicDistribution2, topicDistribution1)
-                );
+                ImmutableMap.Builder<Integer, Double> b = ImmutableMap.builder();
+                b.put(0, klDivergence(topicDistribution1, topicDistribution2));
+                b.put(1, klDivergence(topicDistribution2, topicDistribution1));
+                if(buildCartesianProduct) {
+                    int cnt = 2;
+                    for(int i = 0; i < numTopics; i++) {
+                        for(int j = 0; j < numTopics; j++) {
+                            b.put(cnt, (topicDistribution1[i] * 2 -1) * (topicDistribution2[j] * 2 - 1));
+                            cnt++;
+                        }
+                    }
+                }
+
+                return b.build();
             }
 
             @Override
             public int getMaxLength() {
-                return 2;
+                return 2 + (buildCartesianProduct ? numTopics * numTopics : 0);
             }
         };
     }

@@ -325,6 +325,21 @@ size, our distinct evaluation metrics result in scores that are equal to the
 Milind, Julius - can we put some more stuff here. 
 Specifically, about the $B^3$ metric.
 
+\subsection{Features}
+\begin{table}[h]\footnotesize
+ \begin{tabular}{| l | l | l | l | l | l | l |} 
+   \hline
+   \textbf{Statistic} & Pairwise F1 & Average-tree F1 & $B^3$ depth 1 & $B^3$ depth 2 & $B^3$ depth 3 & $B^3$ depth 4\\
+   \hline
+   All-reply-to-root Baseline & 0.476 & 0.488 & 0.641 & & & \\
+        Linear-reply Baseline & 0.093 & 0.111 & 0.219 & 0.178 & 0.144 & 0.125  \\
+   \hline
+  \end{tabular}
+  \caption{Development Set }
+  \label{table:results}
+\end{table}
+
+
 \section{Results}
 \label{sec:results}
 However, our excitement at crossing the trivial baseline should be limited,

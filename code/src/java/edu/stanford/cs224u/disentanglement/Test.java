@@ -47,16 +47,19 @@ public class Test {
     }
 
     public static void testLDA() throws IOException {
+        /*
         LDAModel model = LDAModel.loadModel(new File("test_model"));
         Message m = DataSets.ASK_HN_TEST_SMALL.read().iterator().next().getRoot().getMessage();
         System.out.println(Doubles.join(",", model.inferTopics(m)));
         m = DataSets.ASK_HN_TEST_SMALL.read().iterator().next().getRoot().getChildren().get(0).getMessage();
         System.out.println(Doubles.join(",", model.inferTopics(m)));
 
-        /*
         LDAModel model = LDAModel.createFromTrees(20, DataSets.ASK_HN_TRAIN.read());
         model.printTopics(20);
-        System.out.println(m.getBody());
+        model.saveModel(new File("ask_hn_20_topics_full.lda"));
+        */
+
+        /*
 
         model.saveModel(new File("test_model"));
         model = LDAModel.loadModel(new File("test_model"));

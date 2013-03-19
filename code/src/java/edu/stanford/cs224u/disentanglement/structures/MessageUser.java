@@ -7,6 +7,7 @@ import com.google.common.base.Objects;
 
 public class MessageUser implements Serializable {
     private static final long serialVersionUID = -9023358711694762919L;
+
     public final String userName;
     public final int karma;
     public final DateTime joinDate;
@@ -25,6 +26,19 @@ public class MessageUser implements Serializable {
         MessageUser messageUser = (MessageUser)mu;
         return Objects.equal(userName, messageUser.userName);
     }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public int getKarma() {
+        return karma;
+    }
+
+    public DateTime getJoinDate() {
+        return joinDate;
+    }
+
 
     @Override
     public int hashCode() {

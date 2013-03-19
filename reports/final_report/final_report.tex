@@ -326,35 +326,19 @@ Milind, Julius - can we put some more stuff here.
 Specifically, about the $B^3$ metric.
 
 \subsection{Features}
-\paragraph{Hour Difference} The number of hours between a parent post and a child
+We decided to try out a split of semantic and non-semantic features to see how 
+well we could reconstruct trees. To quantify our progress, Table
+\ref{table:perfeature} shows the results of a naive bayes classifier trained on
+each feature \textit{in isolation}. Below, we describe all the features and
+attempt to interpret our results. 
 
-\paragraph{TF-IDF} The cosine-similarity between parent post and child. We compute the 
-TF-IDF weighting with each message in a tree as a document (i.e. we get a new weighting
-scheme for every tree).
-
-\paragraph{Author Mention Feature} Whether the child post mentions the parent's author
-
-\paragraph{Reply to Self Feature} Whether both parent and child have the same author
-
-\paragraph{Named Entity Jacard Feature} This feature breaks up Stanford parsed NER
-entities (LOCATION, PERSON, ORGANIZATION and MISC) and compares the Jacard Similarity
-of the parent post and child. We compute separate features for each type of entity.
-
-\paragraph{LDA Divergence} Here we compute the KL-Divergence of the topic distribution
-of parent and child. We calculated the topic distribution using 20 topics with
-an $\alpha=\frac{5}{2}$ and $\beta = 0.5$.
-
-\paragraph{Flesch-Kincaid} This is the Flesch-Kincaid readability score. We computed
-two features - the parent's score by the child's score and the child's score divided
-by the parent.
-
-\paragraph{Poster Reputation} Here, we calculated the reputation or ``karma'' of the
-parent poster and divided it by the ``karma'' of the child poster. We did the same
-for the child divided by the parent.
-
-Table \ref{table:perfeature} shows the results of a naive bayes classifier trained
-on each feature, in isolation, and tested on our development set.
-%Some insightful stuff here
+There is a dichotomy between features that tend to benefit attachment to the root (top
+level discussion) and features that tend to benefit messages lower down in the
+tree. In general, we found that most of the ``low hanging fruit'' non-semantic
+features seem to discriminate well underneath the root, while more complicated
+semantic features (TF-IDF, LDA) seem to get most of their benefit deeper. This
+seems to suggest that \textit{post similarity} is more discriminating lower in
+the tree, or that sub-discussions veer off the topic of the main discussion. 
 
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l | l | l | l | l |} 
@@ -383,9 +367,70 @@ Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
    % Increases as we go down in depth
    \hline
   \end{tabular}
-  \caption{Development Set Scores for Naive bayes and a single feature}
+  \caption{Development Set Scores on AskHN data for naive bayes run exclusively
+  on a single feature}
   \label{table:perfeature}
 \end{table}
+
+\paragraph{Hour Difference} This feature is the number of hours between a parent 
+post timestamp and a child timestamp. This appears to have a modest impact on
+at all depths of the tree.
+
+\paragraph{TF-IDF} The cosine-similarity between parent post and child. We compute the 
+TF-IDF weighting with each message in a tree as a document (i.e. we get a new weighting
+scheme for every tree). This was our most helpful \textit{semantic} feature and
+gives a large boost to performance. In contrast to many other
+features, the performance boost seems to be more pronounced at higher depths in
+the tree. We remark that this is actually insightful - cosine similarity of text
+becomes more pertinant as discussions get more specialized. This confirms our
+hypothesis that sub-discussions actual contains their topics in themselves.
+
+\paragraph{Author Mention Feature} A 0/1 feature identifying whether the child 
+post mentions the parent's author. As Table \ref{table:perfeature} shows, this
+fires very rarely but with high precision. Interestingly, we notice that data gets
+sparser as the depth increases - this indicates that people are less apt to 
+mention their parent's name as discussions descend into sub-discussions.
+
+\paragraph{Reply to Self Feature} Whether both parent and child have the same
+author. Again, this is a high-precision feature that indicates whether a person
+is in reply to themselves (which happens rarely in the data). We notice that
+this feature is able to make high-precision decisions at depth 1 and depth 2,
+which is likely due to sparsity of data as the discussion descends. 
+
+\paragraph{Named Entity Jacard Feature} This feature breaks up Stanford parsed NER
+entities (LOCATION, PERSON, ORGANIZATION and MISC) and compares the Jacard Similarity
+of the parent post and child. We compute separate features for each type of entity.
+We notice that this feature gets a high score near the top of the tree but a very low
+score as  discussions descend downwards. As such, it would appear people are
+more prone to mention named entities that occur in the root node then appear
+in sub-discussions. Many of the AskHN posts revolve around topics such as
+``Where is your startup located?'' and which puts our results in context.
+
+\paragraph{LDA Divergence} Here we compute the KL-Divergence of the topic distribution
+of parent and child. We calculated the topic distribution using 20 topics with
+an $\alpha=\frac{5}{2}$ and $\beta = 0.5$. One of the intersting findings is
+that LDA appears to be dramatically more useful in classification in higher
+depth decisions than near the top of the tree, where it performs abysmally (0.14
+pairwise F1 score). This requires more investigation - our initial hypothesis is
+that topics (such as start-ups, or work) are more discriminative as discussions
+tend towards sub-discussions. It seems probable that the top-level discussions
+all revolve around the same discussion.
+
+\paragraph{Flesch-Kincaid} This is the Flesch-Kincaid readability score. We computed
+two features - the parent's score by the child's score and the child's score divided
+by the parent. We included this feature ``for fun'' to see whether it would give
+us any interesting non-semantic correlation between a poster's vocabularly and
+that of the child. From Table \ref{table:perfeature}, this doesn't appear to
+show any interesting correlations.
+
+\paragraph{Poster Reputation} Here, we calculated the reputation or ``karma'' of the
+parent poster and divided it by the ``karma'' of the child poster. We did the same
+for the child divided by the parent. Like many features, this did not appear to
+be particularly discriminative - we suspect that there is not a clear pattern
+between high karma users and low karma users interacting. At most, the signal
+appears to be lower in the tree rather than higher in the tree. More
+investigation needs to be performed to determine whether average karma varies
+wih depth.
 
 
 \section{Results}

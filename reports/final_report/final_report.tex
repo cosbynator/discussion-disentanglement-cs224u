@@ -326,17 +326,65 @@ Milind, Julius - can we put some more stuff here.
 Specifically, about the $B^3$ metric.
 
 \subsection{Features}
+\paragraph{Hour Difference} The number of hours between a parent post and a child
+
+\paragraph{TF-IDF} The cosine-similarity between parent post and child. We compute the 
+TF-IDF weighting with each message in a tree as a document (i.e. we get a new weighting
+scheme for every tree).
+
+\paragraph{Author Mention Feature} Whether the child post mentions the parent's author
+
+\paragraph{Reply to Self Feature} Whether both parent and child have the same author
+
+\paragraph{Named Entity Jacard Feature} This feature breaks up Stanford parsed NER
+entities (LOCATION, PERSON, ORGANIZATION and MISC) and compares the Jacard Similarity
+of the parent post and child. We compute separate features for each type of entity.
+
+\paragraph{LDA Divergence} Here we compute the KL-Divergence of the topic distribution
+of parent and child. We calculated the topic distribution using 20 topics with
+an $\alpha=\frac{5}{2}$ and $\beta = 0.5$.
+
+\paragraph{Flesch-Kincaid} This is the Flesch-Kincaid readability score. We computed
+two features - the parent's score by the child's score and the child's score divided
+by the parent.
+
+\paragraph{Poster Reputation} Here, we calculated the reputation or ``karma'' of the
+parent poster and divided it by the ``karma'' of the child poster. We did the same
+for the child divided by the parent.
+
+Table \ref{table:perfeature} shows the results of a naive bayes classifier trained
+on each feature, in isolation, and tested on our development set.
+%Some insightful stuff here
+
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l | l | l | l | l |} 
    \hline
-   \textbf{Statistic} & Pairwise F1 & Average-tree F1 & $B^3$ depth 1 & $B^3$ depth 2 & $B^3$ depth 3 & $B^3$ depth 4\\
+   \textbf{Feature} & Tree F1 & Avg. F1 & \multicolumn{4}{l|}{$B^3$ depth} \\
+                      & & & 1 & 2 & 3 & 4\\
    \hline
-   All-reply-to-root Baseline & 0.476 & 0.488 & 0.641 & & & \\
-        Linear-reply Baseline & 0.093 & 0.111 & 0.219 & 0.178 & 0.144 & 0.125  \\
+   %All-reply-to-root Baseline & 0.476 & 0.488 & 0.641 & & & \\
+        %Linear-reply Baseline & 0.093 & 0.111 & 0.219 & 0.178 & 0.144 & 0.125 \\
+      Hour Difference & 0.28 & 0.29 & 0.51 & 0.31 & 0.24 & 0.24 \\
+   % I'm guessing this reflects some property of the sort algorithm they use
+               TF-IDF & 0.31 & 0.32 & 0.44 & 0.48 & 0.44 & 0.41 \\ 
+   % This indicates that TF-IDF is mostly helpful in sub-discussions, which is interesting
+       Author Mention & 0.46 & 0.48 & 0.64 & 0.07 & 0.07 & \\
+   % This indicates author mentions are really only useful at top level, which is interesting
+        Reply to Self & 0.48 & 0.50 & 0.63 & 0.21 & & \\
+   % Indicates people reply to themselves at the top level rarely, but sometimes lower in the tree
+Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
+   % Kind of contrasts to the TF-IDF feature, people only talk about similar entities high in the tree?
+               LDA Divergence & 0.15 & 0.16 & 0.32 & 0.39 & 0.41 & 0.39 \\
+   % Sort of like similarity, starts off weak but picks up deeper into the discussion
+   % Always weaker than similarity. Probably correlated.
+         Flesch-Kincaid & 0.14 & 0.16 & 0.37 & 0.36 & 0.35 & 0.33 \\
+   % Pretty much a "for funzies" feature. Interesting that it predicts more in sub-discussions
+            Poster Reputation & 0.15 & 0.17 & 0.36 & 0.34 & 0.36 & 0.41 \\
+   % Increases as we go down in depth
    \hline
   \end{tabular}
-  \caption{Development Set }
-  \label{table:results}
+  \caption{Development Set Scores for Naive bayes and a single feature}
+  \label{table:perfeature}
 \end{table}
 
 

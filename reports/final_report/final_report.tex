@@ -2,6 +2,7 @@
 \usepackage{acl2012}
 %\usepackage[margin=0.75in]{geometry} if we are desperate for more space
 \usepackage{times}
+\usepackage{tabularx}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{multirow}
@@ -33,10 +34,10 @@ conversation. In particular, we discuss the problem of \textit{conversation
 reconstruction}, where machine-learning is employed to recover a lost
 relationship between messages.
 
-We concentrate on modern internet forums such as forums such as 
+We concentrate on modern internet forums such as 
 \textit{Hacker News}\footnote{\url{http://news.ycombinator.com}} 
 and \textit{Reddit}\footnote{\url{http://www.reddit.com}}. 
-On these forums, users is able to seed a conversation tree by posting a 
+On these forums, users are able to seed a conversation tree by posting a 
 \textit{root message}, and participants reply and to begin sub-discussions 
 underneath this root. The forums are characterised by a complex 
 discussion tree that emerges as conversations drift and sub-discussions form.
@@ -44,7 +45,7 @@ discussion tree that emerges as conversations drift and sub-discussions form.
 In our conversation reconstruction task, we analyse a time-ordered list
 of messages and construct a candidate conversation tree, presumed to be the structure
 that was lost. On a high level, we minimize the reconstruction
-error when forum conversation trees trees become lists.
+error when forum conversation trees flatten into lists.
 
 Our research aims to answer three questions:
 \begin{itemize}
@@ -56,6 +57,9 @@ Our research aims to answer three questions:
     length of messages, and similarity of messages affect our ability to
     reconstruct conversations? 
 \end{itemize}
+
+As we show, answering these questions correlates to the performance of a system
+in the conversation reconstruction task. 
 
 We have made the code and datasets for our project available online
 \footnote{\url{https://github.com/cosbynator/discussion-disentanglement-cs224u}} on the
@@ -158,9 +162,10 @@ unsupervised Hidden Markov Model that  maps speech acts to hidden states.
 They believe that the words of a message 
 in a conversation are generated according to language models associated
 with a state or speech act. They report hidden states
-that correfctly correspond to speech acts, for example, a collection of
+that correctly correspond to speech acts, for example, a collection of
 question-related pronouns and words corresponding to a speech act beginning a
-forum post about a technical question. 
+forum post about a technical question. As we show in Section \ref{sec:dataset}, 
+our results with their model were not as successful.
 
 The authors of \cite{Ritter2010a} consider unsupervised tagging of speech acts.
 The paper describes an unsupervised LDA-like approach to act tagging 
@@ -189,48 +194,110 @@ compared to previous works is likely due to entanglement.
 
 \subsection{Dataset}
 \label{section:dataset}
-Our approach differs from most of those listed in Section \ref{sec:approaches}
-by the scale of our approach: we are trying to reconstruct complex
-conversations with large branching numbers.  In that vein, we extract data
-from Reddit, an online link-sharing and discussion site. To ensure all
-conversations have a root element, we used the popular AskReddit subforum
-where users initiate topics of conversation with a question. We treat the
-initial post as the root of a conversation tree, and each top-level comment as
-a child of the root. Each message node is annotated with various data such as
-timestamp, username, and more.
+Our approach differs from most of those listed in Section \ref{sec:prior_work}
+by scale: we are trying to reconstruct large, complex
+conversations with a unpredictable branching structures. After reviewing existing datasets,
+we decided that gathering our own was the best option. We looked at two
+online forums: Hacker News and Reddit. To ensure that all conversations had a long
+and well formed root node, we chose discussions that revolved around question and answer 
+(AskHN and AskReddit respectively). 
 
-To grab the data, we wrote a quick JRuby crawler and took a small sample (342)
-of the top AskReddit posts over the last month. The crawler was written to
-make data gathering easy and we anticipate creating a bigger dataset to report
-our final results. Table \ref{table:stats} shows some aggregated statistics of
-the preliminary crawl. In particular, we have an average of 200 messages per
-tree and a branching factor within a rounding error of 1.0. The root node has
-an average branching factor of 55.50, suggesting that discussions are wide
-while sub-discussions tend to be narrow. It is also important to note that
-standard deviation for many of our statistics are often quite large relative
-to the value, suggesting the wide variance in conversations on Reddit.
+For our Reddit dataset, we wrote a small JRuby script that utilized their API. Here,
+we fetched a few pages of the listing for the ``top'' AskReddit discussions of the last
+week, and downloaded the comments for each page in turn. Hacker News does not have
+an official API, but the popular third party ``HNSearch'' API functions similarly.
+In this case, we ran a query for all discussions with between 20 and 100 comments
+that has the words ``Ask HN'' in the title. After rounding up the results (using
+a timestamp-based hack to get around paging limits), we fetched the contents of
+each discussion directly from its search identifier. Finally, we gathered all
+the unique authors in the discussions and ran a disjunctive query to search for
+their usernames. In both cases, we amalgamated the data, ran it through
+CoreNLP's \texttt{tokenize, ssplit, pos, lemma} and \texttt{ner} annotators and
+then serialized it on-disk for structured access.
+
+\begin{table}[h]\footnotesize
+  \begin{tabularx}{0.5\textwidth}{| l X |}
+   \hline
+   \textbf{Hacker News} & \\
+   \hline
+   Programming  & code, ?, language, web, python, data, good, time, server, work, php, java, app, programming, system, things, languages, windows, lot, make \\
+
+  Sites  & ?, people, site, !, email, google, page, make, good, users, idea, app, design, find, great, search, time, user, sites, post \\
+
+  Business  & ?, work, company, people, money, business, time, good, job, startup, make, pay, companies, working, lot, years, market, idea, year, find \\
+
+  College,  Learning  & people, time, ?, good, work, things, make, lot, find, learn, school, life, years, read, !, thing, problem, programming, college, day \\
+   \hline
+   \textbf{Reddit} & \\
+   \hline
+  Americanism & people, work, ?, money, time, english, make, lot, world, job, free, language, good, things, country, american, war, reddit, white, edit \\
+
+  Minutia & back, time, ?, guy, !, day, car, house, room, night, home, told, friend, put, shit, door, dad, people, work, started \\
+
+  Family/Friends  & people, ?, time, life, years, school, good, things, love, make, day, feel, friends, thing, !, person, year, lot, family, girl \\
+
+  Trolls/Memes  & !, ?, http:\/\/www.youtube.com\/watch?v, edit, movie, fuck, man, good, song, deleted, love, shit, fucking, favorite, reddit, link, make, god, video, great \\
+   \hline
+  \end{tabularx}
+  \caption{Top words over four topics in our datasets}
+  \label{table:lda}
+\end{table}
+
+After analysing both sets of data, we decided to focus our efforts on Hacker News.
+While the AskReddit discussions tended to have a higher branching factor 
+and more sub-discussions, they also had less of a topical focus, fewer words per message
+and a higher presence of trolls. Table~\ref{table:lda} shows the top words associated
+with topics on both Reddit and Hacker News gathered by performing latent dirichlet allocation (LDA)
+on the data. Topics of Hacker News, such as business and programming, are 
+what we would expect given that the site is organized around the startup community.
+In contrast, the Reddit data more closely match what we would expect in an IRC
+chatroom: broad topics that resemble watercooler-type conversations with trolls
+and inappropriate jokes. As Section\ref{sec:results} shows, we are more successful
+at finding attachment points when topics are more specialized. We were hoping that
+some of the topics would be correlated with \textit{speech acts} in the data but 
+none of them appear to be. As an experiment, we tried running the unsupervised speech act 
+model of~\cite{Paula} but found the acts fell more along the lines of 
+topics than speech acts. More investigation is needed to determine if this
+is an inherent property of our data.
+
 
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l |} 
    \hline
    \textbf{Statistic} & \textbf{$n / \mu$} & \textbf{$\sigma$} \\
    \hline
-    \# Conversation Trees &  342 & \\
-    \# Conversation Nodes (Posts) & 68639 & \\
-    \# Nodes Per Tree &  200.70 & 200.20 \\
-    Mean Branching Factor & 1.00 & 4.20 \\
-    Mean Root Branching Factor &  55.50 & 57.91 \\
-    Mean Node Depth  & 3.56 & 3.40 \\
-    Mean Parent Lag & 7767.96s & 11331.07s \\
-    Mean Body Length & 200.43 c & 483.07 \\
+   \# of Conversations Trees & 2476 & \\
+   \# of Messages & 97414 & \\
+   \# of Authors & 27861 & \\
+   Messages per Tree & 39.34 & 43.09 \\
+   Messaged Attached to Root &  18.20 & 20.24 \\
+   Branching Factor & 0.97 & 3.29 \\
+   Mean Depth & 2.96 & 2.77 \\
+   Mean Message Tokens & 86.32 & 134.92 \\
    \hline
   \end{tabular}
-  \caption{Data statistics of our preliminary conversation dataset}
+  \caption{Data statistics of our Hacker News AskHN dataset}
   \label{table:stats}
 \end{table}
 
-We have divided the input data randomly into training / development / test 
-sets at a 70\% / 10\% / 20\% split.
+Table \ref{table:stats} shows aggregate information on our Hacker News
+dataset. The data consists of nearly a hundred thousand messages distributed
+over 2476 different conversations, indicating that conversation trees 
+are relatively full. On average, slightly less than half the messages
+in a discussion are directly attached to the root element. This accounts
+for the great performance of our baselines in \ref{sec:results}. 
+The branching factor for any particular node is close to 1.0, indicating
+that conversations tend to be wide at the top and then narrow down with
+depth. The messages we examine have approximately 86 tokens per message,
+which suggests that there may be enough semantic information to make
+decisions. Finally, all statistics in the Hacker News dataset have a
+a high standard deviation. We believe this reflects the chaotic nature of
+online discussion - \textit{anyone} can participate and has their own
+style of replying.
+
+In all cases we divided the input data randomly into training / development
+and test sets at a 70\% / 10\% / 20\% split. Except for our final results, we
+conduct and report all of our experiments on our development sets.
 
 \section{Our Model}
 \subsection{Approach}
@@ -255,15 +322,11 @@ code. Since our crawled dataset currently contains conversations of similar
 size, our distinct evaluation metrics result in scores that are equal to the 
 4th decimal. We anticipate our final dataset will have more diversity.
 
-Noting that it can be more important to get lower-depth subtrees correct, we
-are also considering weighting a clustering metric such as $B^3$. Here, we 
-can treat subtrees at a given depth as clusters, comparing against gold 
-clusters at that depth. We could weight proportional to the inverse depth to 
-reward us for capturing more of the general discourse with less sensitivity 
-to individual placement.
+Milind, Julius - can we put some more stuff here. 
+Specifically, about the $B^3$ metric.
 
 \section{Results}
-\label{sec:classifier}
+\label{sec:results}
 However, our excitement at crossing the trivial baseline should be limited,
 since we don't currently have a visualization of the results, and it's
 possible that the SVM is still making random guesses, leading to 32\% F1 by

@@ -418,6 +418,7 @@ Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
    % Pretty much a "for funzies" feature. Interesting that it predicts more in sub-discussions
             Poster Reputation & 0.15 & 0.17 & 0.36 & 0.34 & 0.36 & 0.41 \\
    % Increases as we go down in depth
+               Message Length & 0.15 & 0.17 & 0.37 & 0.38 & 0.35 & 0.33 \\
    \hline
   \end{tabular}
   \caption{Development Set Scores on AskHN data for naive bayes run exclusively
@@ -485,28 +486,54 @@ appears to be lower in the tree rather than higher in the tree. More
 investigation needs to be performed to determine whether average karma varies
 wih depth.
 
+\paragraph{Message Length} With this feature, we calculated the length of the
+parent divided by the length of the child and vice-versa. The feature's
+performance resembles poster reputation - it does not appear to overly
+discriminative, except for a weak signal deeper in the tree.
 
 \section{Results}
 \label{sec:results}
-However, our excitement at crossing the trivial baseline should be limited,
-since we don't currently have a visualization of the results, and it's
-possible that the SVM is still making random guesses, leading to 32\% F1 by
-simply associating all messages with the root, for example. This is something
-we still need to address by carefully visualizing the actual predicted trees.
+We show the best results on the Hacker News data set in Table
+\ref{table:results}. To ground our results, we implemented two trivial baseline
+systems: one that guesses all messages are made in reply tor the root
+(All-Reply), and one that guesses all messages are made in reply to the previous
+message (Linear-reply). 
 
 \begin{table}[h]\footnotesize
- \begin{tabular}{| l | l | l | l | l | l | l |} 
+ \begin{tabular}{| l | l | l | l | l | l | c |} 
    \hline
-   \textbf{Feature} & Tree F1 & Avg. F1 & \multicolumn{4}{l|}{$B^3$ depth} \\
+   \textbf{Test} & \multirow{2}{*}{\shortstack{Tree\\F1}} & \multirow{2}{*}{\shortstack{Avg.\\F1}} & \multicolumn{4}{c|}{$B^3$ depth} \\
                       & & & 1 & 2 & 3 & 4\\
    \hline
-   All-reply-to-root Baseline & 0.48 & 0.49 & 0.64 & & & \\
-        Linear-reply Baseline & 0.09 & 0.11 & 0.21 & 0.18 & 0.14 & 0.13 \\
+   All-Reply & 0.48 & 0.49 & 0.64 & & & \\
+        Linear-Reply & 0.09 & 0.11 & 0.21 & 0.18 & 0.14 & 0.13 \\
+  \textbf{Our Model} & \textbf{0.75} & \textbf{0.77} & \textbf{0.76} & \textbf{0.78} & \textbf{0.68} & \textbf{0.60} \\
+        Cross-domain &  \\
    \hline
   \end{tabular}
-  \caption{Test set scores baselines and our system}
+  \caption{Test set scores our system as compared to two trivial baselines}
   \label{table:results}
 \end{table}
+
+Our model was able to beat both baselines by a significant margin. We found 
+these results  striking because the experiments of Section~\ref{sec:features} 
+suggest that pairwise F1 and depth-based $B^3$ measurements are independent metrics.
+
+Table~\ref{table:results} also reports our results with our \em{cross-domain}
+experiments where we trained on our AskReddit data and tested on Hacker News. 
+
+We utilized the popular Weka machine learning software to drive our
+$(parent,child)$ binary classifier. Our results come after a long period of
+validation over our development set. In particular, we optimize over the $\theta$ 
+default-root threshold, $n$, the number of
+false examples and over the choice of our underlying classifier. For our
+classifiers, we tried a choice of naive bayes, logistic regression, 
+linear SVMs and random forests. For our hyperparameters, we performed an
+informal grid search over possible choices. Our best results across all metrics 
+are reported using $\theta=0.1$, $n=25$ and a random forest (10 trees with 4
+features each). This choice of $n$, creates a training set of over \textit{1.5
+million} examples.In the future we would also like to try kernelized SVMs as an
+option, but decided against more extensive cross-validation. 
 
 \section{Error Analysis}
 %TODO
@@ -514,7 +541,7 @@ We should put something here.
 
 \section{Conclusion and Next Steps}
 Throughout our work, we have tried to address the fundamental question of
-\textit{how does discussion evolve in an online setting?}. As a way of answering
+\textit{how does discussion evolve in an online setting?} As a way of answering
 this question, we proposed the task of \textit{thread reconstruction} on modern
 online forums such as Hacker News and Reddit. Disentanglement has a number of
 user-facing applications. One might imagine a system that induces tree structure
@@ -522,6 +549,13 @@ out of flat conversations to make email chains and chat rooms more readable.
 Building an effective model for this problem is interesting also because we can
 compare performance with various sets of features to gain insight into how 
 tree-structured online discourse evolves.
+
+We identify two ways of quantifying success - the ability to
+predict parent-child relationships (pairwise F1), and the ability to 
+predict the general grouping of sub-conversations ($B^3$ at various depths). For
+both measures, we created a machine learning model that as able to significantly 
+outperform baseline systems. In our experiments, the strongest signal comes from
+the ability to determine message similarity relative to the rest of the tree.
 
 In our feature engineering experiments listed in Section \ref{sec:features} we
 found an interesting divide between features that primarily benefit high-depth

@@ -51,7 +51,7 @@ replies can be made to the same message, and discussions are usually sorted by
 the sum of votes of approval or disapproval from other users. In
 such forums, users are able to seed a conversation tree by posting a
 \textit{root message}, and participants reply and begin sub-discussions
-underneath this root. The forums are characterised by a complex discussion
+underneath this root. The forums are characterized by a complex discussion
 tree that emerges as conversations drift and sub-discussions form.
 
 In our conversation reconstruction task, we analyze a time-ordered list of
@@ -204,7 +204,7 @@ ssplit, pos, lemma} and \texttt{ner} annotators and then serialized it on-disk
 for structured access.
 
 By desconstructing existing trees, we are able to automatically generate
-labelled examples. This approach therefore allows us to a virtually unlimited
+labeled examples. This approach therefore allows us to a virtually unlimited
 annotated dataset. Furthermore, since forums like Reddit are so broad in their
 range of topics, we can potentially train different models for various content
 and style domains.
@@ -245,7 +245,7 @@ and style domains.
   \label{table:lda}
 \end{table}
 
-After analysing both sets of data, we decided to focus our efforts on Hacker
+After analyzing both sets of data, we decided to focus our efforts on Hacker
 News. While the AskReddit discussions tended to have a higher branching factor
 and more sub-discussions, they also had less of a topical focus, fewer words
 per message and a higher presence of trolls. Table~\ref{table:lda} shows the
@@ -316,7 +316,7 @@ We explored a variety of classifiers, which operate by deciding whether pairs
 of messages are in a parent-child  relationship or not. In order to train the
 classifier, we walk the training set trees  and feed in each true link as a
 positive example. For our negative examples, we randomly sample $n$ parents
-that preceed a given message in time. This parameter $n$ controls  the
+that precede a given message in time. This parameter $n$ controls  the
 skewedness of our data, and we cross-validate to choose its value, as
 explained in Section  \ref{sec:results}.
 
@@ -370,7 +370,7 @@ would be exactly the same.
 \subsection{Evaluating subconversation clustering accuracy}
 While the ability of the classifier to completely reconstruct a conversation
 tree is certainly the ideal scenario, we would also like to see its ability to
-preserve the general discourse stucture at a macroscopic level. A typical
+preserve the general discourse structure at a macroscopic level. A typical
 online conversation begins with a central message, followed by multiple
 primary replies, which then set off a series of subconversations with shorter
 and more localized responses. In general, we want to be able to detect that a
@@ -400,7 +400,7 @@ conversations.
 \label{sec:features}
 We decided to try out a split of semantic and non-semantic features to see how
 well we could reconstruct trees. To quantify our progress, Table
-\ref{table:perfeature} shows the results of a naive bayes classifier trained on
+\ref{table:perfeature} shows the results of a Naïve Bayes classifier trained on
 each feature \textit{in isolation}. Below, we describe all the features and
 attempt to interpret our results. 
 
@@ -448,7 +448,7 @@ Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
                Message Length & 0.15 & 0.17 & 0.37 & 0.38 & 0.35 & 0.33 \\
    \hline
   \end{tabular}
-  \caption{Development Set Scores on AskHN data for naive bayes run exclusively
+  \caption{Development Set Scores on AskHN data for Naïve Bayes run exclusively
   on a single feature}
   \label{table:perfeature}
 \end{table}
@@ -463,7 +463,7 @@ weighting scheme for every tree). This was our most helpful \textit{semantic}
 feature and gives a large boost to performance. In contrast to many other
 features, the performance boost seems to be more pronounced at higher depths
 in the tree. We remark that this is actually insightful - cosine similarity of
-text becomes more pertinant as discussions get more specialized. This confirms
+text becomes more pertinent as discussions get more specialized. This confirms
 our hypothesis that sub-discussions actual contains their topics in
 themselves.
 
@@ -479,8 +479,8 @@ person is in reply to themselves (which happens rarely in the data). We notice
 that this feature is able to make high-precision decisions at depth 1 and
 depth 2, which is likely due to sparsity of data as the discussion descends.
 
-\paragraph{Named Entity Jacard Feature} This feature breaks up Stanford parsed NER
-entities (LOCATION, PERSON, ORGANIZATION and MISC) and compares the Jacard
+\paragraph{Named Entity Jaccard Feature} This feature breaks up Stanford parsed NER
+entities (LOCATION, PERSON, ORGANIZATION and MISC) and compares the Jaccard
 Similarity of the parent post and child. We compute separate features for each
 type of entity. We notice that this feature gets a high score near the top of
 the tree but a very low score as  discussions descend downwards. As such, it
@@ -491,7 +491,7 @@ results in context.
 
 \paragraph{LDA Divergence} Here we compute the KL-Divergence of the topic distribution
 of parent and child. We calculated the topic distribution using 20 topics with
-an $\alpha=\frac{5}{2}$ and $\beta = 0.5$. One of the intersting findings is
+an $\alpha=\frac{5}{2}$ and $\beta = 0.5$. One of the interesting findings is
 that LDA appears to be dramatically more useful in classification in higher
 depth decisions than near the top of the tree, where it performs abysmally
 (0.14 pairwise F1 score). This requires more investigation - our initial
@@ -503,7 +503,7 @@ level discussions all revolve around the same discussion.
 two features - the parent's score by the child's score and the child's score
 divided by the parent. We included this feature ``for fun'' to see whether it
 would give us any interesting non-semantic correlation between a poster's
-vocabularly and that of the child. From Table \ref{table:perfeature}, this
+vocabulary and that of the child. From Table \ref{table:perfeature}, this
 doesn't appear to show any interesting correlations.
 
 \paragraph{Poster Reputation} Here, we calculated the reputation or ``karma'' of the
@@ -513,7 +513,7 @@ appear to be particularly discriminative - we suspect that there is not a
 clear pattern between high karma users and low karma users interacting. At
 most, the signal appears to be lower in the tree rather than higher in the
 tree. More investigation needs to be performed to determine whether average
-karma varies wih depth.
+karma varies with depth.
 
 \paragraph{Message Length} With this feature, we calculated the length of the
 parent divided by the length of the child and vice-versa. The feature's
@@ -557,7 +557,7 @@ implementation. Our results come after  validation over our development set.
 In particular, we optimize over the $\theta$ 
 default-root threshold, $n$, the number of
 false examples and over the choice of our underlying classifier. For our
-classifiers, we tried a choice of naive bayes, logistic regression, 
+classifiers, we tried a choice of Naïve Bayes, logistic regression, 
 linear SVMs and random forests. For our hyperparameters, we performed an
 informal grid search over possible choices. Our best results for the F1 metric
 are reported using $\theta=0.9$, $n=5$ and logistic regression, although this
@@ -579,7 +579,7 @@ to ``That's interesting. I'll definitely have to check in to that. That's a
 great idea. Thanks.'' Given the brevity of both messages, especially of the 
 child, the model has classified these messages as having very high TF-IDF 
 similarity due to the occurrence of the word ``thanks.'' The strength of this 
-semantic content feature supercedes the negative weight given to the Reply to 
+semantic content feature supersedes the negative weight given to the Reply to 
 Self feature.
 
 In one particularly poor performance, our model achieved a Tree F1 of 38.71\% 
@@ -591,7 +591,7 @@ online marketing-related terms such as ``ad'', ``content'', ``relevant'', and
 more. Since our TF-IDF is calculated with a single conversation treated as a 
 document, these words are frequent enough in this discussion as to not 
 strongly affect TF-IDF values. In this scenario, our model tends to 
-misclassify using weaker features. Some of the features used to make decisions 
+mis-classify using weaker features. Some of the features used to make decisions 
 are Hour Difference, karma of child user divided by karma of the parent, and 
 length ratio. Each of these features are weighted low, but individual 
 instances can have high enough values to swing the classification in favor of 
@@ -616,7 +616,7 @@ code hasn't changed in a long time.'' While our model classified this
 correctly, it did so mostly due to a karma feature, not a semantic feature. A 
 reply to this message begins, ``Another bug report/oddity: Loading any page 
 when I'm logged in has started taking forever [...]'', and it goes on to 
-describe a change in the system he/she has noticed. Here, there is little 
+describe a change in the system they have noticed. Here, there is little 
 semantic relevance to the previous message, but by using ``another'' to start 
 the message, the poster indicates that the content in the message is related 
 to the parent, but is actually in response to an ancestor, in this case the 

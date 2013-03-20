@@ -549,8 +549,79 @@ option, but did not investigate them for this report (due to requirements of
 more extensive validation).
 
 \section{Error Analysis}
-%TODO
-We should put something here.
+In one Ask Hacker News discussion where the model achieved a Tree F1 of 78.95\%,
+a user asks a question about how to automatically crawl for high-quality, 
+personalized RSS feeds. The thread contains approximately 15 messages, 5 of 
+which are short messages by the author, thanking each reply to the original 
+topic. The model correctly classifies most of the messages, but classifies two 
+of the ``thank you'' messages as being in reply to other such messages by the 
+same author. The predicted tree has message ``Very cool. Thanks.'' in response 
+to ``That's interesting. I'll definitely have to check in to that. That's a 
+great idea. Thanks.'' Given the brevity of both messages, especially of the 
+child, the model has classified these messages as having very high TF-IDF 
+similarity due to the occurrence of the word ``thanks.'' The strength of this 
+semantic content feature supercedes the negative weight given to the Reply to 
+Self feature.
+
+In one particularly poor performance, our model achieved a Tree F1 of 38.71\% 
+in another Ask Hacker News discussion ``How Can Ads Not Suck?". This 
+discussion contains 30 messages, with 22 of these of being in reply to the 
+root message. This discussion has fairly lengthy messages, with an average of 
+113 words per message. Most messages discuss online ads, frequently using 
+online marketing-related terms such as ``ad'', ``content'', ``relevant'', and 
+more. Since our TF-IDF is calculated with a single conversation treated as a 
+document, these words are frequent enough in this discussion as to not 
+strongly affect TF-IDF values. In this scenario, our model tends to 
+misclassify using weaker features. Some of the features used to make decisions 
+are Hour Difference, karma of child user divided by karma of the parent, and 
+length ratio. Each of these features are weighted low, but individual 
+instances can have high enough values to swing the classification in favor of 
+some random message. In the absence of other strong signals, a message from a 
+low karma user can be attached, often incorrectly, to a message from a high 
+karma user. Or, a short message can be attached to the longest potential parent.
+
+Another discussion, ``Is there something changed in the rank/sorting algorithm 
+of HN?'', demonstrates some of the limitations of our model in deeply threaded 
+conversations. This conversation contains 22 messages, where most of these 
+messages are part of two mostly linear threads, one of depth 7, and another of 
+depth 10. Our model reconstructed this with a Tree F1 of 19.05\%. The 
+particular structure of this conversation has a few features that make it 
+difficult for a machine, and possibly even a human, to correctly classify. 
+This conversation contains a heavy use of pronouns, and without a 
+sophisticated coreference resolution system, we often unable to correctly 
+relate two messages where the child message refers to an entity in the parent 
+without naming it directly. In this conversation, the original poster asks if 
+there has been a recent change in how Hacker News ranks and sorts posts. One 
+reply states, ``I noticed it too. I'm not sure what's happening, because that 
+code hasn't changed in a long time.'' While our model classified this 
+correctly, it did so mostly due to a karma feature, not a semantic feature. A 
+reply to this message begins, ``Another bug report/oddity: Loading any page 
+when I'm logged in has started taking forever [...]'', and it goes on to 
+describe a change in the system he/she has noticed. Here, there is little 
+semantic relevance to the previous message, but by using ``another'' to start 
+the message, the poster indicates that the content in the message is related 
+to the parent, but is actually in response to an ancestor, in this case the 
+grandparent. It seems unlikely that any model can capture this interaction 
+without specially learning these cue words and without some use of conditional 
+probability in order to correctly classify this structure that involves 
+multiple levels.
+
+The model incorrectly classifies other deep messages in this conversation that 
+use pronouns or other contextual clues to express meaning. One message states 
+``Just wanted to chime in and say that I've seen behavior like this a few times
+'', where no key word is shared with its parent. Another says, ``this is 
+fantastically awesome. Your support and responsiveness is truly appreciated''. 
+For this case, some use of speech acts could help. If a system could identify 
+the message as being a ``thank you'' message, then a classifier could attach 
+it to a parent that provides information or assistance. Given that Ask Hacker 
+News is inherently a question/answer environment, there still may be many 
+candidates, but it would certainly increase precision; our classifier happened 
+to incorrectly attach this message to the root.
+
+Together, these errors demonstrate that our semantic and non-semantic 
+features, while achieving above-baseline results, are limited, especially 
+without approaching some of the other fundamental problems in NLP, such as 
+coreference resolution and speech act labeling.
 
 \section{Conclusion and Next Steps}
 Throughout our work, we have tried to address the fundamental question of how

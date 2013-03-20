@@ -400,7 +400,7 @@ conversations.
 \label{sec:features}
 We decided to try out a split of semantic and non-semantic features to see how
 well we could reconstruct trees. To quantify our progress, Table
-\ref{table:perfeature} shows the results of a Naïve Bayes classifier trained on
+\ref{table:perfeature} shows the results of a Naive Bayes classifier trained on
 each feature \textit{in isolation}. Below, we describe all the features and
 attempt to interpret our results. 
 
@@ -448,7 +448,7 @@ Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
                Message Length & 0.15 & 0.17 & 0.37 & 0.38 & 0.35 & 0.33 \\
    \hline
   \end{tabular}
-  \caption{Development Set Scores on AskHN data for Naïve Bayes run exclusively
+  \caption{Development Set Scores on AskHN data for Naive Bayes run exclusively
   on a single feature}
   \label{table:perfeature}
 \end{table}
@@ -565,7 +565,7 @@ implementation. Our results come after  validation over our development set.
 In particular, we optimize over the $\theta$ 
 default-root threshold, $n$, the number of
 false examples and over the choice of our underlying classifier. For our
-classifiers, we tried a choice of Naïve Bayes, logistic regression, 
+classifiers, we tried a choice of Naive Bayes, logistic regression, 
 linear SVMs and random forests. For our hyperparameters, we performed an
 informal grid search over possible choices. Our best results for the F1 metric
 are reported using $\theta=0.9$, $n=5$ and logistic regression, although this

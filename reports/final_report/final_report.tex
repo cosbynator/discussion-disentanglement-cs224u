@@ -5,6 +5,7 @@
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{multirow}
+\usepackage{graphicx}
 \usepackage{url}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -354,6 +355,17 @@ precision, recall and F1 score, as described in \cite{Bagga98}. We perform
 this evaluation at depths of 1, 2, 3 and 4 in order to study the change in
 clustering accuracy as we delve deeper into smaller, more localized
 conversations.
+
+\subsection{Method}
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.7\textwidth]{attachment.pdf}
+  \caption{The attachment approaches used in our model. We define a probability threshold, 
+  $\theta$, and then calculate the attachment probability between a candidate node 
+  and all preceding nodes in the timeline from the beginning of time. Then, for the 
+  node for which we obtain maximum attachment probability, we may (a) attach the candidate if the probability exceeds the threshold, or (b) attach to root by default.}
+  \label{fig:attachment}
+\end{figure*}
 
 \subsection{Features}
 \label{sec:features}

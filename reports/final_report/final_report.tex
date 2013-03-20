@@ -193,7 +193,7 @@ The authors conclude that the failure of structural information
 compared to previous works is likely due to entanglement.
 
 \subsection{Dataset}
-\label{section:dataset}
+\label{sec:dataset}
 Our approach differs from most of those listed in Section \ref{sec:prior_work}
 by scale: we are trying to reconstruct large, complex
 conversations with a unpredictable branching structures. After reviewing existing datasets,
@@ -304,12 +304,13 @@ conduct and report all of our experiments on our development sets.
 \label{sec:approach}
 We are approaching conversation reconstruction as a \textit{classification} problem
 between parent and children messages. We take a threaded conversations from a modern internet forum 
-(described in Section~\ref{section:dataset}), flatten them into a time-sorted list, and them feed
+(described in Section~\ref{sec:dataset}), flatten them into a time-sorted list, and them feed
 them into our reconstruction \textit{classifier} that attempts to recreate the tree
 with only message-level information. The details our reconstruction algorithm are 
 described in Section \ref{sec:classifier}.
 
 \subsection{Evaluation}
+\label{sec:evaluation}
 For now, we are primarily considering F1 score as our evaluation metric. We
 compute precision and recall based on how many of our guessed 
 $(parent,child)$ conversation edges match the gold tree. We are considering 
@@ -326,6 +327,7 @@ Milind, Julius - can we put some more stuff here.
 Specifically, about the $B^3$ metric.
 
 \subsection{Features}
+\label{sec:features}
 We decided to try out a split of semantic and non-semantic features to see how 
 well we could reconstruct trees. To quantify our progress, Table
 \ref{table:perfeature} shows the results of a naive bayes classifier trained on
@@ -460,9 +462,48 @@ we still need to address by carefully visualizing the actual predicted trees.
 We should put something here.
 
 \section{Conclusion and Next Steps}
-%TODO
-We should also put something here
+Throughout our work, we have tried to address the fundamental question of
+\textit{how does discussion evolve in an online setting?}. As a way of answering
+this question, we proposed the task of \textit{thread reconstruction} on modern
+online forums such as Hacker News and Reddit. MORE HERE
+%Needs more, how about something 
 
+In our feature engineering experiments listed in Section \ref{sec:features} we
+found an interesting divide between features that primarily benefit high-depth
+attachments, and features that primarily benefit root-level attachments. This
+suggests that finding the correct balance of features may require us to take into
+account \textit{previous} decisions we made in our classification tree. Although
+we are not yet experienced in the realm of probabilistic graphical models, we
+believe our work leads to a natural extension using conditional random fields
+(CRFs) to factor in all possible tree decision structures, as opposed to taking
+taking a greedy approximation. In addition to a better balance, CRFs
+would allow us to factor in features that extend beyond the $(parent,child)$
+relationship such as parent depth, grand parent mentions, our cluster topics. 
+
+Although LDA was unable to capture \textit{speech acts} as a feature, much of
+the literature mentioned in Section \ref{sec:prior_work} suggests that they may
+be a key component in understanding dialog structure. After gaining some more
+experience with graphical models, we would like to revisit our
+data and see if we can find an LDA-like act that could explain some of the reply
+relationships. As our analysis showed
+
+As an extension to our evaluative measures, we suspect that there is an upper
+bound to human-level performance on this task. Often, replies online are short
+and without context (e.g., ``I had the same idea'', or ``That's awesome!'').
+Although speech acts may help understand some of the structure, it is probable
+that humans would also have difficulty attaching messages to the root. We
+propose a future experiment utilizing Amazon's Mechanical Turk to perform
+conversation reconstruction with real humans. This would provide us an upper
+bound on our performance and give our models something to aim for in terms of
+our proposed evaluation metrics.
+
+Our CS224U project has been a learning experience for all of us. We are
+particularly pleased with the domain we uncovered and dataset that we have
+captured. As noted in Section \ref{sec:evaluation}, our evaluation measurements
+help quantify how well we preserve conversation \textit{order} as well as how we
+preserve the general discourse. Obviously, the experiments have piqued our curiosity 
+about the nature of conversation. In the near future, we hope to revisit our 
+questions with armed with machinery of graphical models.
 
 \bibliography{final_report}{} 
 \bibliographystyle{acl2012}

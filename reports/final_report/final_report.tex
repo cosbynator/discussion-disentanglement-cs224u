@@ -1,6 +1,5 @@
-\documentclass[10pt]{article}
+\documentclass{article}
 \usepackage{acl2012}
-%\usepackage[margin=0.75in]{geometry} if we are desperate for more space
 \usepackage{times}
 \usepackage{tabularx}
 \usepackage{latexsym}
@@ -302,29 +301,59 @@ conduct and report all of our experiments on our development sets.
 \section{Our Model}
 \subsection{Approach}
 \label{sec:approach}
-We are approaching conversation reconstruction as a \textit{classification} problem
-between parent and children messages. We take a threaded conversations from a modern internet forum 
-(described in Section~\ref{sec:dataset}), flatten them into a time-sorted list, and them feed
-them into our reconstruction \textit{classifier} that attempts to recreate the tree
-with only message-level information. The details our reconstruction algorithm are 
-described in Section \ref{sec:classifier}.
+We approach conversation reconstruction as a \textit{classification} problem
+between parent and children messages. We take a threaded conversations from a
+modern internet forum (described in Section~\ref{section:dataset}), flatten
+them into a time-sorted list, and them feed them into our reconstruction
+\textit{classifier} that attempts to recreate the tree with only message-level
+information. The details of our reconstruction algorithm are described in
+Section \ref{sec:classifier}.
 
-\subsection{Evaluation}
+\subsection{Evaluating classification accuracy}
 \label{sec:evaluation}
-For now, we are primarily considering F1 score as our evaluation metric. We
-compute precision and recall based on how many of our guessed 
-$(parent,child)$ conversation edges match the gold tree. We are considering 
-two versions of F1: one were precision and recall is calculated pairwise 
-across all messages in all conversations, and another where F1 is calculated 
-per-conversation, and the scores are averaged in the end. We expect to have 
-very poor performance  in large conversations, so we expect the average F1
-score metric to be more forgiving. Both metrics have been implemented in our 
-code. Since our crawled dataset currently contains conversations of similar 
-size, our distinct evaluation metrics result in scores that are equal to the 
-4th decimal. We anticipate our final dataset will have more diversity.
+Since the basis of our model is a binary decision for every pair of messages,
+identifying whether they are in a parent-child relationship, the most natural
+metric for the problem is the F1 score. We compute precision and recall based
+on how many of our guessed $(parent,child)$ conversation edges match the gold
+tree. We consider two versions of F1: one were precision and recall is
+calculated pairwise across all messages in all conversations, and another
+where F1 is calculated per-conversation, and the scores are averaged in the
+end. The first metric is calculated at the level the classifier operates on,
+and is thus intended to provide an insight into classifiction accuracy.
+However, since a large conversation yields many possible trees (with
+potentially small probability differences between them), the accuracy for
+large trees is expectd to be small. The second metric, which averages the F1
+across conversations, was chosen in order to compensate for the low scores
+assigned to particularly large trees in the dataset.
 
-Milind, Julius - can we put some more stuff here. 
-Specifically, about the $B^3$ metric.
+\subsubsection{Evaluating subconversation clustering accuracy}
+While the ability of the classifier to completely reconstruct a conversation
+tree is certainly the ideal scenario, we would also like to see its ability to
+preserve the general discourse stucture at a macroscopic level. A typical
+online conversation begins with a central message, followed by multiple
+primary replies, which then set off a series of subconversations with shorter
+and more localized responses. In general, we want to be able to detect that a
+group of messages belong to the same \emph{subconversation}, without
+particularly concerning ourselves with individual message attachments.
+
+This intuition motivates the choice of a clustering accuracy metric that
+compares the set of messages between subconversations of the gold and guess
+trees. For this paper, we use the B-CUBED clustering metric \cite{Bagga98} and
+obtain average F1 scores across subconversations.
+
+To cluster the messages, we start at a specified depth and, for each message
+at that depth, we obtain the set of its children. We do this for both the
+guess and the gold trees, and as a result, obtain two different partitions of
+the same messages. We discard any messages that belong to either the gold
+partition but not the guess partition (or vice versa), which could happen if
+those messages were attached at a lower depth in either the guess or gold
+partitions than the depth under consideration.
+
+With the two gold and guess partitions of messages, we calculate the B-CUBED
+precision, recall and F1 score, as described in \cite{Bagga98}. We perform
+this evaluation at depths of 1, 2, 3 and 4 in order to study the change in
+clustering accuracy as we delve deeper into smaller, more localized
+conversations.
 
 \subsection{Features}
 \label{sec:features}

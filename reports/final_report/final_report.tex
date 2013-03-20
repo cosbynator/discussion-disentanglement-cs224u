@@ -34,10 +34,17 @@ conversation. In particular, we discuss the problem of \textit{conversation
 reconstruction}, where machine-learning is employed to recover a lost
 relationship between messages.
 
-We concentrate on modern internet forums such as 
+Previous work on conversation disentanglement has been conducted on online
+forums and chats rooms, where the conversation is displayed to the user as a
+linear sequence of messages. These supervised models usually test by analyzing
+such a flat conversation and identifying discussion threads.
+
+By contrast, our work is done on modern internet forums such as
 \textit{Hacker News}\footnote{\url{http://news.ycombinator.com}} 
-and \textit{Reddit}\footnote{\url{http://www.reddit.com}}. 
-On these forums, users are able to seed a conversation tree by posting a 
+and \textit{Reddit}\footnote{\url{http://www.reddit.com}}, where conversations
+are represented and displayed in the user interface as trees, where multiple
+replies can be made to the same message, and discussions are usually sorted by
+``karma'', the sum of votes of approval or disapproval from other users. In such forums, users are able to seed a conversation tree by posting a 
 \textit{root message}, and participants reply and to begin sub-discussions 
 underneath this root. The forums are characterised by a complex 
 discussion tree that emerges as conversations drift and sub-discussions form.
@@ -312,20 +319,23 @@ Section \ref{sec:classifier}.
 
 \subsection{Evaluating classification accuracy}
 \label{sec:evaluation}
-Since the basis of our model is a binary decision for every pair of messages,
-identifying whether they are in a parent-child relationship, the most natural
-metric for the problem is the F1 score. We compute precision and recall based
-on how many of our guessed $(parent,child)$ conversation edges match the gold
-tree. We consider two versions of F1: one were precision and recall is
-calculated pairwise across all messages in all conversations, and another
-where F1 is calculated per-conversation, and the scores are averaged in the
-end. The first metric is calculated at the level the classifier operates on,
-and is thus intended to provide an insight into classifiction accuracy.
-However, since a large conversation yields many possible trees (with
-potentially small probability differences between them), the accuracy for
-large trees is expectd to be small. The second metric, which averages the F1
-across conversations, was chosen in order to compensate for the low scores
-assigned to particularly large trees in the dataset.
+In evaluating how closely our system reconstructs the original tree, no single
+known metric seems to describe the quality of results completely. For this reason,
+we use multiple scoring methods in our presentation of results.
+
+Since the task of our system is to guess the parent of each message, a natural
+measure of accuracy is F1, computing the precision and recall on the count of
+correctly guessed $(parent,child)$ conversation edges against the gold tree. We
+present two versions of F1, ``tree F1'', where precision and recall are calculated
+based on counts over all messages, and ``average F1'', where individual F1 scores
+are calculated for each conversation tree, then averaged to find the final F1.
+
+Qualitatively speaking, tree F1 reflects how accurately the system
+makes individual guesses, while average F1 describes how accurate the predicted
+trees are. Since the difficulty of the problem scales with the size of the
+conversation, Average F1 will be more forgiving depending on the variance of
+conversation sizes in the dataset. With no variation in size, the measures would
+be exactly the same.
 
 \subsubsection{Evaluating subconversation clustering accuracy}
 While the ability of the classifier to completely reconstruct a conversation
@@ -506,8 +516,12 @@ We should put something here.
 Throughout our work, we have tried to address the fundamental question of
 \textit{how does discussion evolve in an online setting?}. As a way of answering
 this question, we proposed the task of \textit{thread reconstruction} on modern
-online forums such as Hacker News and Reddit. MORE HERE
-%Needs more, how about something 
+online forums such as Hacker News and Reddit. Disentanglement has a number of
+user-facing applications. One might imagine a system that induces tree structure
+out of flat conversations to make email chains and chat rooms more readable.
+Building an effective model for this problem is interesting also because we can
+compare performance with various sets of features to gain insight into how 
+tree-structured online discourse evolves.
 
 In our feature engineering experiments listed in Section \ref{sec:features} we
 found an interesting divide between features that primarily benefit high-depth

@@ -1,7 +1,7 @@
 \documentclass{article}
 \usepackage{acl2012}
 \usepackage{times}
-\usepackage[margin=1.1in]{geometry}
+\usepackage[margin=1.05in]{geometry}
 \usepackage{tabularx}
 \usepackage{latexsym}
 \usepackage{amsmath}
@@ -529,7 +529,7 @@ systems: one that guesses all messages are made in reply tor the root
 message (Linear-reply). 
 
 \begin{table}[h]\footnotesize
- \begin{tabular}{| l | l | l | l | l | l | c |} 
+ \begin{tabular}{| c | l | l | l | l | l | c |} 
    \hline
    \textbf{Test} & \multirow{2}{*}{\shortstack{Tree\\F1}} 
    & \multirow{2}{*}{\shortstack{Avg.\\F1}} 
@@ -538,18 +538,26 @@ message (Linear-reply).
    \hline
    All-Reply & 0.48 & 0.49 & 0.64 & & & \\
         Linear-Reply & 0.09 & 0.11 & 0.21 & 0.18 & 0.14 & 0.13 \\
-  \textbf{Our Model} & \textbf{0.49} & \textbf{0.51} & \textbf{0.65} & 0.06 &
+  \multirow{2}{*}{\shortstack{Our Model \\ {\em(F1 Optimized)}}} & \textbf{0.49} & \textbf{0.51} & \textbf{0.65} & 0.06 &
                 0.09 & 0.11 \\
+                                                                      & & & & & & \\
+   \multirow{2}{*}{\shortstack{Our Model \\ {\em($B^3$ Optimized)}}} & 0.34 & 0.36 & 0.44 & \textbf{0.50} &
+                                                          \textbf{0.44} & \textbf{0.41} \\
+                                                                      & & & & & & \\
    \hline
   \end{tabular}
   \caption{Test set scores our system as compared to two trivial baselines}
   \label{table:results}
 \end{table}
 
-Our model was able to beat our baselines slightly. With different parameter
-tunings, we are able to optimize for either higher $B^3$ scores at larger 
+With different parameter tunings, our model was able to beat our baselines in all measurements
+We are able to optimize for either higher $B^3$ scores at larger 
 depths, or higher F1 scores overall (indicating we are better at attaching to 
-the root node).
+the root node) by changing the decision threshold explained in Section~\ref{sec:approach}.
+There seems to be a tradeoff between our system performing well at the root
+of the discussion, and it performing well deep in the tree. We suspect that this
+is an artifact of our features having the same tradeoff - we discuss extensions
+to improve overall performance in Section~\ref{sec:next_steps}.
 
 We utilized the popular Weka \cite{Weka2009} machine learning software to drive our
 $(parent,child)$ binary classifier and MALLET \cite{McCallum2002Mallet} for our LDA 
@@ -562,12 +570,19 @@ linear SVMs and random forests. For our hyperparameters, we performed an
 informal grid search over possible choices. Our best results for the F1 metric
 are reported using $\theta=0.9$, $n=5$ and logistic regression, although this
 is probably an artifact of Weka having built-in regularization for logistic
-regression. This choice of $n$, creates a training set of over 300,000
+regression. Likewise, our best performance for the deep $B^3$ were with
+$\theta=0$, $n=5$. This choice of $n$, creates a training set of over 300,000
 examples. In the future we would also like to try kernelized SVMs as an
 option, but did not investigate them for this report (due to requirements of
 more extensive validation).
 
 \section{Error Analysis}
+Despite beating the baselines there appears to be a pattern to many of the
+errors that the system makes. Below, we discuss some of the typical errors.
+For these experiments, we lowered our value of to $theta=0.3$ to balance 
+between root performance and depth performance, and wrote a tree visualizer
+that compares the guess and gold trees side by side.
+
 In one Ask Hacker News discussion where the model achieved a Tree F1 of 78.95\%,
 a user asks a question about how to automatically crawl for high-quality, 
 personalized RSS feeds. The thread contains approximately 15 messages, 5 of 
@@ -643,6 +658,7 @@ without approaching some of the other fundamental problems in NLP, such as
 coreference resolution and speech act labeling.
 
 \section{Conclusion and Next Steps}
+\label{sec:next_steps}
 Throughout our work, we have tried to address the fundamental question of how
 discussion evolves in an online setting. As a way of answering this question,
 we proposed the task of \textit{thread reconstruction} on modern online forums

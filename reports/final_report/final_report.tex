@@ -11,8 +11,6 @@
 \DeclareMathOperator*{\argmax}{arg\,max}
 \setlength\titlebox{6.0cm}    % Expanding the titlebox
 
-\newcommand{\titlecite}[2]{``#1''~\cite{#2}}
-
 \title{{\small CS224U Project} \\ Tree Conversation Reconstruction in Modern Online Discussions \\ \small{Final Report}}
 \author{Julius Cheng \\
   {\tt juliusc@stanford.edu}
@@ -32,9 +30,9 @@ modern online discussion forums, which are characterized by their complex
 branching structure and frequent change of topic. We present a probabilistic
 model to reconstruct message trees from a flattened representation. Using a
 set of novel evaluation metrics, we achieve above-baseline performance on a
-corpus of conversations from the popular Hacker News website. We also analyze
-the limitations of our model, and present aspects of the disentanglement task
-that could inform further research.
+new corpus of conversations from the popular Hacker News website. We also
+analyze the limitations of our model, and present aspects of the
+disentanglement task that could inform further research.
 \end{abstract}
 
 \section{Introduction}
@@ -44,28 +42,23 @@ conversation. In particular, we discuss the problem of \textit{conversation
 reconstruction}, where machine-learning is employed to recover a lost
 relationship between messages.
 
-Previous work on conversation disentanglement has been conducted on online
-forums and chats rooms, where the conversation is displayed to the user as a
-linear sequence of messages. These supervised models usually test by analyzing
-such a flat conversation and identifying discussion threads.
-
-By contrast, our work is done on modern internet forums such as
+We analyze modern internet forums such as
 \textit{Hacker News}\footnote{\url{http://news.ycombinator.com}} 
 and \textit{Reddit}\footnote{\url{http://www.reddit.com}}, where conversations
-are represented and displayed in the user interface as trees, where multiple
+are represented and displayed in the user interface as trees, multiple
 replies can be made to the same message, and discussions are usually sorted by
-``karma'', the sum of votes of approval or disapproval from other users. In
+the sum of votes of approval or disapproval from other users. In
 such forums, users are able to seed a conversation tree by posting a
-\textit{root message}, and participants reply and to begin sub-discussions
+\textit{root message}, and participants reply and begin sub-discussions
 underneath this root. The forums are characterised by a complex discussion
 tree that emerges as conversations drift and sub-discussions form.
 
-In our conversation reconstruction task, we analyse a time-ordered list of
+In our conversation reconstruction task, we analyze a time-ordered list of
 messages and construct a candidate conversation tree, presumed to be the
 structure that was lost. On a high level, we minimize the reconstruction error
 when forum conversation trees flatten into lists.
 
-Our research aims to answer three questions:
+Some of the questions our research aims to discuss include:
 \begin{itemize}
   \item To what degree does semantic knowledge allow a machine to understand the 
     flow of online forum discussions?
@@ -90,7 +83,7 @@ our exact sub-domain. There is a general divide between authors who examine
 traditional online forums, where messages are long but exhibit a linear reply
 structure, and authors who examine reconstruction in the context of internet
 chat, where messages are relatively short and directed. Approaches taken by
-authors also vary considerably: some employ rule-based systems, while others
+authors also vary considerably: some employ rule-based systems \cite{Wang2008a}, while others
 choose heavily probabilistic models such as conditional random fields. In
 certain cases, conversation reconstruction has been an explored as an
 evaluation metric for unsupervised models that discover \textit{speech acts}
@@ -166,7 +159,7 @@ related pronouns and words corresponding to a speech act beginning a forum
 post about a technical question. As we show in Section \ref{sec:dataset}, our
 results with their model were not as successful.
 
-The authors of \cite{Ritter2010a} also consider unsupervised tagging of speech
+\newcite{Ritter2010a} also consider unsupervised tagging of speech
 acts. The paper describes an unsupervised LDA-like approach to act tagging and
 utilizes Twitter \textit{conversations} for training purposes. Fittingly,
 their model was evaluated extrinsically by reconstructing the original order
@@ -174,7 +167,7 @@ of a scrambled conversations in Twitter. Their model corresponds to a
 generative story where words are filled by either the conversation topic, the
 dialog act of the tweet or from general English.
 
-Unlike other speech act papers, \cite{Kim2012} focuses on classifying
+Unlike other speech act papers, \newcite{Kim2012} focuses on classifying
 utterances in multi-party chat scenarios. The basic unit of analysis is a
 contiguous message written by an individual. The authors define several
 classes of features, then runs various classifiers on combinations of them.
@@ -247,7 +240,7 @@ News. While the AskReddit discussions tended to have a higher branching factor
 and more sub-discussions, they also had less of a topical focus, fewer words
 per message and a higher presence of trolls. Table~\ref{table:lda} shows the
 top words associated with topics on both Reddit and Hacker News gathered by
-performing latent Dirichlet allocation (LDA) on the data. Topics of Hacker
+performing latent Dirichlet allocation (LDA) \cite{Blei2003} on the data. Topics of Hacker
 News, such as business and programming, are what we would expect given that
 the site is organized around the startup community. In contrast, the Reddit
 data more closely match what we would expect in an IRC chatroom: broad topics
@@ -256,7 +249,7 @@ jokes. As Section \ref{sec:results} shows, we are more successful at finding
 attachment points when topics are more specialized. We were hoping that some
 of the topics would be correlated with \textit{speech acts} in the data but
 none of them appear to be. As an experiment, we tried running the unsupervised
-speech act model of~\cite{Paula} but found the acts fell more along the lines
+speech act model of~\newcite{Paula} but found the acts fell more along the lines
 of topics than speech acts. More investigation is needed to determine if this
 is an inherent property of our data.
 
@@ -388,7 +381,7 @@ those messages were attached at a lower depth in either the guess or gold
 partitions than the depth under consideration.
 
 With the two gold and guess partitions of messages, we calculate the B-CUBED
-precision, recall and F1 score, as described in \cite{Bagga98}. We perform
+precision, recall and F1 score, as described in \newcite{Bagga98}. We perform
 this evaluation at depths of 1, 2, 3 and 4 in order to study the change in
 clustering accuracy as we delve deeper into smaller, more localized
 conversations.
@@ -507,11 +500,13 @@ karma varies wih depth.
 
 \section{Results}
 \label{sec:results}
-However, our excitement at crossing the trivial baseline should be limited,
-since we don't currently have a visualization of the results, and it's
-possible that the SVM is still making random guesses, leading to 32\% F1 by
-simply associating all messages with the root, for example. This is something
-we still need to address by carefully visualizing the actual predicted trees.
+We used the popular software Weka \cite{Weka2009} and Mallet \cite{McCallum2002Mallet}.
+Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
+cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
+proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 \begin{table}[ht]\footnotesize
  \begin{tabular}{| l | l | l |} 

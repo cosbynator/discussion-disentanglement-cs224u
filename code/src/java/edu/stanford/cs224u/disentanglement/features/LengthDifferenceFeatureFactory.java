@@ -24,9 +24,15 @@ public class LengthDifferenceFeatureFactory extends AbstractFeatureFactory {
 
     @Override
     public Map<Integer, Double> processExample(MessagePair example) {
+        double l1 = (double) example.getFirst().getNormalizedBodyString().length();
+        double l2 = (double) example.getSecond().getNormalizedBodyString().length();
+        if(l1 == 0 || l2 == 0) {
+            return ImmutableMap.of();
+        }
+
         return ImmutableMap.of(
-                0, ((double)example.getFirst().getNormalizedBodyString().length()) / example.getSecond().getNormalizedBodyString().length(),
-                1, ((double)example.getSecond().getNormalizedBodyString().length()) / example.getFirst().getNormalizedBodyString().length()
+                0, l1 / l2,
+                1, l2 / l1
                 );
     }
 }

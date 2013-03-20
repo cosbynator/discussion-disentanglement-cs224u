@@ -71,7 +71,7 @@ public class DisentanglementPipeline {
         Benchmarker.pop();
 
         Benchmarker.push("Evaluation");
-        for(MessageTree gold : trainData.read()) {
+        for(MessageTree gold : testData.read()) {
             MessageTree guess = disentangler.predict(gold.linearize());
             for(Evaluator evaluator : evaluators) {
                 evaluator.addPrediction(gold, guess);

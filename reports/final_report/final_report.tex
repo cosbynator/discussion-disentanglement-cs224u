@@ -1,11 +1,11 @@
-\documentclass[10pt]{article}
+\documentclass{article}
 \usepackage{acl2012}
-%\usepackage[margin=0.75in]{geometry} if we are desperate for more space
 \usepackage{times}
 \usepackage{tabularx}
 \usepackage{latexsym}
 \usepackage{amsmath}
 \usepackage{multirow}
+\usepackage{graphicx}
 \usepackage{url}
 
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -34,10 +34,17 @@ conversation. In particular, we discuss the problem of \textit{conversation
 reconstruction}, where machine-learning is employed to recover a lost
 relationship between messages.
 
-We concentrate on modern internet forums such as 
+Previous work on conversation disentanglement has been conducted on online
+forums and chats rooms, where the conversation is displayed to the user as a
+linear sequence of messages. These supervised models usually test by analyzing
+such a flat conversation and identifying discussion threads.
+
+By contrast, our work is done on modern internet forums such as
 \textit{Hacker News}\footnote{\url{http://news.ycombinator.com}} 
-and \textit{Reddit}\footnote{\url{http://www.reddit.com}}. 
-On these forums, users are able to seed a conversation tree by posting a 
+and \textit{Reddit}\footnote{\url{http://www.reddit.com}}, where conversations
+are represented and displayed in the user interface as trees, where multiple
+replies can be made to the same message, and discussions are usually sorted by
+``karma'', the sum of votes of approval or disapproval from other users. In such forums, users are able to seed a conversation tree by posting a 
 \textit{root message}, and participants reply and to begin sub-discussions 
 underneath this root. The forums are characterised by a complex 
 discussion tree that emerges as conversations drift and sub-discussions form.
@@ -302,29 +309,73 @@ conduct and report all of our experiments on our development sets.
 \section{Our Model}
 \subsection{Approach}
 \label{sec:approach}
-We are approaching conversation reconstruction as a \textit{classification} problem
-between parent and children messages. We take a threaded conversations from a modern internet forum 
-(described in Section~\ref{sec:dataset}), flatten them into a time-sorted list, and them feed
-them into our reconstruction \textit{classifier} that attempts to recreate the tree
-with only message-level information. The details our reconstruction algorithm are 
-described in Section \ref{sec:classifier}.
+We approach conversation reconstruction as a \textit{classification} problem
+between parent and children messages. We take a threaded conversations from a
+modern internet forum (described in Section~\ref{section:dataset}), flatten
+them into a time-sorted list, and them feed them into our reconstruction
+\textit{classifier} that attempts to recreate the tree with only message-level
+information. The details of our reconstruction algorithm are described in
+Section \ref{sec:classifier}.
 
-\subsection{Evaluation}
+\subsection{Evaluating classification accuracy}
 \label{sec:evaluation}
-For now, we are primarily considering F1 score as our evaluation metric. We
-compute precision and recall based on how many of our guessed 
-$(parent,child)$ conversation edges match the gold tree. We are considering 
-two versions of F1: one were precision and recall is calculated pairwise 
-across all messages in all conversations, and another where F1 is calculated 
-per-conversation, and the scores are averaged in the end. We expect to have 
-very poor performance  in large conversations, so we expect the average F1
-score metric to be more forgiving. Both metrics have been implemented in our 
-code. Since our crawled dataset currently contains conversations of similar 
-size, our distinct evaluation metrics result in scores that are equal to the 
-4th decimal. We anticipate our final dataset will have more diversity.
+In evaluating how closely our system reconstructs the original tree, no single
+known metric seems to describe the quality of results completely. For this reason,
+we use multiple scoring methods in our presentation of results.
 
-Milind, Julius - can we put some more stuff here. 
-Specifically, about the $B^3$ metric.
+Since the task of our system is to guess the parent of each message, a natural
+measure of accuracy is F1, computing the precision and recall on the count of
+correctly guessed $(parent,child)$ conversation edges against the gold tree. We
+present two versions of F1, ``tree F1'', where precision and recall are calculated
+based on counts over all messages, and ``average F1'', where individual F1 scores
+are calculated for each conversation tree, then averaged to find the final F1.
+
+Qualitatively speaking, tree F1 reflects how accurately the system
+makes individual guesses, while average F1 describes how accurate the predicted
+trees are. Since the difficulty of the problem scales with the size of the
+conversation, Average F1 will be more forgiving depending on the variance of
+conversation sizes in the dataset. With no variation in size, the measures would
+be exactly the same.
+
+\subsubsection{Evaluating subconversation clustering accuracy}
+While the ability of the classifier to completely reconstruct a conversation
+tree is certainly the ideal scenario, we would also like to see its ability to
+preserve the general discourse stucture at a macroscopic level. A typical
+online conversation begins with a central message, followed by multiple
+primary replies, which then set off a series of subconversations with shorter
+and more localized responses. In general, we want to be able to detect that a
+group of messages belong to the same \emph{subconversation}, without
+particularly concerning ourselves with individual message attachments.
+
+This intuition motivates the choice of a clustering accuracy metric that
+compares the set of messages between subconversations of the gold and guess
+trees. For this paper, we use the B-CUBED clustering metric \cite{Bagga98} and
+obtain average F1 scores across subconversations.
+
+To cluster the messages, we start at a specified depth and, for each message
+at that depth, we obtain the set of its children. We do this for both the
+guess and the gold trees, and as a result, obtain two different partitions of
+the same messages. We discard any messages that belong to either the gold
+partition but not the guess partition (or vice versa), which could happen if
+those messages were attached at a lower depth in either the guess or gold
+partitions than the depth under consideration.
+
+With the two gold and guess partitions of messages, we calculate the B-CUBED
+precision, recall and F1 score, as described in \cite{Bagga98}. We perform
+this evaluation at depths of 1, 2, 3 and 4 in order to study the change in
+clustering accuracy as we delve deeper into smaller, more localized
+conversations.
+
+\subsection{Method}
+\begin{figure*}
+  \centering
+  \includegraphics[width=0.8\textwidth]{attachment.pdf}
+  \caption{The attachment approach used in our model. We define a probability threshold, 
+  $\theta$, and then calculate the attachment probability between a candidate node 
+  and all preceding nodes in the timeline from the beginning of time. Then, for the 
+  node for which we obtain maximum attachment probability, we may (a) attach the candidate if the probability exceeds the threshold, or (b) attach to root by default.}
+  \label{fig:attachment}
+\end{figure*}
 
 \subsection{Features}
 \label{sec:features}
@@ -465,8 +516,12 @@ We should put something here.
 Throughout our work, we have tried to address the fundamental question of
 \textit{how does discussion evolve in an online setting?}. As a way of answering
 this question, we proposed the task of \textit{thread reconstruction} on modern
-online forums such as Hacker News and Reddit. MORE HERE
-%Needs more, how about something 
+online forums such as Hacker News and Reddit. Disentanglement has a number of
+user-facing applications. One might imagine a system that induces tree structure
+out of flat conversations to make email chains and chat rooms more readable.
+Building an effective model for this problem is interesting also because we can
+compare performance with various sets of features to gain insight into how 
+tree-structured online discourse evolves.
 
 In our feature engineering experiments listed in Section \ref{sec:features} we
 found an interesting divide between features that primarily benefit high-depth

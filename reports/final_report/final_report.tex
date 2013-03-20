@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{acl2012}
 \usepackage{times}
+\usepackage[margin=1.1in]{geometry}
 \usepackage{tabularx}
 \usepackage{latexsym}
 \usepackage{amsmath}
@@ -83,11 +84,11 @@ our exact sub-domain. There is a general divide between authors who examine
 traditional online forums, where messages are long but exhibit a linear reply
 structure, and authors who examine reconstruction in the context of internet
 chat, where messages are relatively short and directed. Approaches taken by
-authors also vary considerably: some employ rule-based systems \cite{Wang2008a}, while others
-choose heavily probabilistic models such as conditional random fields. In
-certain cases, conversation reconstruction has been an explored as an
-evaluation metric for unsupervised models that discover \textit{speech acts}
-in conversational data.
+authors also vary considerably: some employ rule-based systems
+\cite{Wang2008a}, while others choose heavily probabilistic models such as
+conditional random fields. In certain cases, conversation reconstruction has
+been an explored as an evaluation metric for unsupervised models that discover
+\textit{speech acts} in conversational data.
 
 \newcite{Wang2011a} employ machine
 learning to aid in the task of conversation disentanglement; in particular,
@@ -136,15 +137,16 @@ where the participants are determined by all other people referred to by name
 by the author of a message.  Afterward computing their features, they perform
 clustering to identify different threads of conversation.
 
-A very different approach is seen in \newcite{Mayfield2012a}, where the authors present
-a model for chat disentanglement that annotates three types of information: 1) 
-Negotiation labels, or whether an utterance is providing or receiving 
-information, 2) sequences, or exchanges of information, and 3) threads, the 
-outcome of the standard disentanglement problem. Their algorithm performs 
-two passes over the data,  one in which negotiations and sequences are generated, 
-followed by a pass that groups sequences together to form threads. Uniquely,
-their data was hand-annotated from verbal chat meetings for a cancer support group.
-They report results that occasionally beat human annotators.
+A very different approach is seen in \newcite{Mayfield2012a}, where the
+authors present a model for chat disentanglement that annotates three types of
+information: 1) Negotiation labels, or whether an utterance is providing or
+receiving information, 2) sequences, or exchanges of information, and 3)
+threads, the outcome of the standard disentanglement problem. Their algorithm
+performs two passes over the data,  one in which negotiations and sequences
+are generated, followed by a pass that groups sequences together to form
+threads. Uniquely, their data was hand-annotated from verbal chat meetings for
+a cancer support group. They report results that occasionally beat human
+annotators.
 
 Finally, some authors consider the problem of speech disentanglement as
 traversing a finite state automaton between different \textit{speech acts},
@@ -212,23 +214,31 @@ and style domains.
    \hline
    \textbf{Hacker News} & \\
    \hline
-   Programming  & code, ?, language, web, python, data, good, time, server, work, php, java, app, programming, system, things, languages, windows, lot, make \\
+   Programming  & code, ?, language, web, python, data, good, time, server, work, php, 
+   java, app, programming, system, things, languages, windows, lot, make \\
 
-  Sites  & ?, people, site, !, email, google, page, make, good, users, idea, app, design, find, great, search, time, user, sites, post \\
+  Sites  & ?, people, site, !, email, google, page, make, good, users, idea, app, 
+  design, find, great, search, time, user, sites, post \\
 
-  Business  & ?, work, company, people, money, business, time, good, job, startup, make, pay, companies, working, lot, years, market, idea, year, find \\
+  Business  & ?, work, company, people, money, business, time, good, job, startup, make, 
+  pay, companies, working, lot, years, market, idea, year, find \\
 
-  College,  Learning  & people, time, ?, good, work, things, make, lot, find, learn, school, life, years, read, !, thing, problem, programming, college, day \\
+  College,  Learning  & people, time, ?, good, work, things, make, lot, find, learn, 
+  school, life, years, read, !, thing, problem, programming, college, day \\
    \hline
    \textbf{Reddit} & \\
    \hline
-  Americanism & people, work, ?, money, time, english, make, lot, world, job, free, language, good, things, country, american, war, reddit, white, edit \\
+  Americanism & people, work, ?, money, time, english, make, lot, world, job, free, 
+  language, good, things, country, american, war, reddit, white, edit \\
 
-  Minutia & back, time, ?, guy, !, day, car, house, room, night, home, told, friend, put, shit, door, dad, people, work, started \\
+  Minutia & back, time, ?, guy, !, day, car, house, room, night, home, told, friend, 
+  put, shit, door, dad, people, work, started \\
 
-  Family/Friends  & people, ?, time, life, years, school, good, things, love, make, day, feel, friends, thing, !, person, year, lot, family, girl \\
+  Family/Friends  & people, ?, time, life, years, school, good, things, love, make, day, 
+  feel, friends, thing, !, person, year, lot, family, girl \\
 
-  Trolls/Memes  & !, ?, http:\/\/www.youtube.com\/watch?v, edit, movie, fuck, man, good, song, deleted, love, shit, fucking, favorite, reddit, link, make, god, video, great \\
+  Trolls/Memes  & !, ?, http:\/\/www.youtube.com\/watch?v, edit, movie, fuck, man, good, 
+  song, deleted, love, shit, fucking, favorite, reddit, link, make, god, video, great \\
    \hline
   \end{tabularx}
   \caption{Top words over four topics in our datasets}
@@ -240,18 +250,18 @@ News. While the AskReddit discussions tended to have a higher branching factor
 and more sub-discussions, they also had less of a topical focus, fewer words
 per message and a higher presence of trolls. Table~\ref{table:lda} shows the
 top words associated with topics on both Reddit and Hacker News gathered by
-performing latent Dirichlet allocation (LDA) \cite{Blei2003} on the data. Topics of Hacker
-News, such as business and programming, are what we would expect given that
-the site is organized around the startup community. In contrast, the Reddit
-data more closely match what we would expect in an IRC chatroom: broad topics
-that resemble watercooler-type conversations with trolls and inappropriate
-jokes. As Section \ref{sec:results} shows, we are more successful at finding
-attachment points when topics are more specialized. We were hoping that some
-of the topics would be correlated with \textit{speech acts} in the data but
-none of them appear to be. As an experiment, we tried running the unsupervised
-speech act model of~\newcite{Paula} but found the acts fell more along the lines
-of topics than speech acts. More investigation is needed to determine if this
-is an inherent property of our data.
+performing latent Dirichlet allocation (LDA) \cite{Blei2003} on the data.
+Topics of Hacker News, such as business and programming, are what we would
+expect given that the site is organized around the startup community. In
+contrast, the Reddit data more closely match what we would expect in an IRC
+chatroom: broad topics that resemble watercooler-type conversations with
+trolls and inappropriate jokes. As Section \ref{sec:results} shows, we are
+more successful at finding attachment points when topics are more specialized.
+We were hoping that some of the topics would be correlated with \textit{speech
+acts} in the data but none of them appear to be. As an experiment, we tried
+running the unsupervised speech act model of~\newcite{Paula} but found the
+acts fell more along the lines of topics than speech acts. More investigation
+is needed to determine if this is an inherent property of our data.
 
 
 \begin{table}[ht]\footnotesize
@@ -406,7 +416,9 @@ of the main discussion.
 \begin{table}[ht]\footnotesize
  \begin{tabular}{| l | l | l | l | l | l | l |} 
    \hline
-   \textbf{Feature} & \multirow{2}{*}{\shortstack{Tree\\*F1}} & \multirow{2}{*}{\shortstack{Avg.\\*F1}} & \multicolumn{4}{c|}{$B^3$ depth} \\
+   \textbf{Feature} & \multirow{2}{*}{\shortstack{Tree\\*F1}} 
+   & \multirow{2}{*}{\shortstack{Avg.\\*F1}} 
+   & \multicolumn{4}{c|}{$B^3$ depth} \\
                       & & & 1 & 2 & 3 & 4\\
    \hline
    %All-reply-to-root Baseline & 0.476 & 0.488 & 0.641 & & & \\
@@ -414,18 +426,23 @@ of the main discussion.
       Hour Difference & 0.28 & 0.29 & 0.51 & 0.31 & 0.24 & 0.24 \\
    % I'm guessing this reflects some property of the sort algorithm they use
                TF-IDF & 0.31 & 0.32 & 0.44 & 0.48 & 0.44 & 0.41 \\ 
-   % This indicates that TF-IDF is mostly helpful in sub-discussions, which is interesting
+   % This indicates that TF-IDF is mostly helpful in sub-discussions, which is
+   % interesting
        Author Mention & 0.46 & 0.48 & 0.64 & 0.07 & 0.07 & \\
-   % This indicates author mentions are really only useful at top level, which is interesting
+   % This indicates author mentions are really only useful at top level, which
+   % is interesting
         Reply to Self & 0.48 & 0.50 & 0.63 & 0.21 & & \\
-   % Indicates people reply to themselves at the top level rarely, but sometimes lower in the tree
+   % Indicates people reply to themselves at the top level rarely, but
+   % sometimes lower in the tree
 Named Entities & 0.44 & 0.46 & 0.64 & 0.12 & 0.12 & 0.16 \\
-   % Kind of contrasts to the TF-IDF feature, people only talk about similar entities high in the tree?
+   % Kind of contrasts to the TF-IDF feature, people only talk about similar
+   % entities high in the tree?
                LDA Divergence & 0.15 & 0.16 & 0.32 & 0.39 & 0.41 & 0.39 \\
    % Sort of like similarity, starts off weak but picks up deeper into the discussion
    % Always weaker than similarity. Probably correlated.
          Flesch-Kincaid & 0.14 & 0.16 & 0.37 & 0.36 & 0.35 & 0.33 \\
-   % Pretty much a "for funzies" feature. Interesting that it predicts more in sub-discussions
+   % Pretty much a "for funzies" feature. Interesting that it predicts more in
+   % sub-discussions
             Poster Reputation & 0.15 & 0.17 & 0.36 & 0.34 & 0.36 & 0.41 \\
    % Increases as we go down in depth
                Message Length & 0.15 & 0.17 & 0.37 & 0.38 & 0.35 & 0.33 \\
@@ -514,7 +531,9 @@ message (Linear-reply).
 \begin{table}[h]\footnotesize
  \begin{tabular}{| l | l | l | l | l | l | c |} 
    \hline
-   \textbf{Test} & \multirow{2}{*}{\shortstack{Tree\\F1}} & \multirow{2}{*}{\shortstack{Avg.\\F1}} & \multicolumn{4}{c|}{$B^3$ depth} \\
+   \textbf{Test} & \multirow{2}{*}{\shortstack{Tree\\F1}} 
+   & \multirow{2}{*}{\shortstack{Avg.\\F1}} 
+   & \multicolumn{4}{c|}{$B^3$ depth} \\
                       & & & 1 & 2 & 3 & 4\\
    \hline
    All-Reply & 0.48 & 0.49 & 0.64 & & & \\
